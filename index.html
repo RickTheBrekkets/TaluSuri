@@ -8,20 +8,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+.emo{font-style:normal;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;line-height:1;display:inline-block;}
 :root{
-  --green:#1B7A4B;--green-l:#E8F5EE;--red:#CC2B2B;--red-l:#FAEAEA;
-  --gold:#C98B2A;--gold-l:#FDF3E3;--cream:#FAF8F4;--ink:#1A1916;
-  --muted:#6B6860;--border:rgba(26,25,22,0.1);--r:18px;
-  --blue:#1B5FA4;--blue-l:#E8F0FB;--card:#fff;--bg:#FAF8F4;
+  /* Surinaamse vlag - gedempte tonen */
+  --green:#3A7A4E;--green-l:#EAF3EC;
+  --red:#B23A41;--red-l:#F8ECEC;
+  --gold:#D2A33C;--gold-l:#FBF2DD;
+  --cream:#FBF9F3;--ink:#221F1A;
+  --muted:#6E6A60;--border:rgba(34,31,26,0.1);--r:18px;
+  --blue:#3E6E8E;--blue-l:#EAF1F5;--card:#fff;--bg:#FBF9F3;
 }
 html[data-theme="dark"]{
-  --green:#3DA873;--green-l:#16312A;--red:#E5645F;--red-l:#3A2020;
-  --gold:#E0A848;--gold-l:#3A2E1A;--cream:#16151A;--ink:#F0EEE8;
-  --muted:#9B988F;--border:rgba(255,255,255,0.12);
-  --blue:#5B9BE0;--blue-l:#16263A;--card:#1E1D24;--bg:#16151A;
+  --green:#5FA678;--green-l:#1A2E22;
+  --red:#D67B7F;--red-l:#33201F;
+  --gold:#DDB55C;--gold-l:#332B19;
+  --cream:#1A1814;--ink:#F1EEE6;
+  --muted:#A09C90;--border:rgba(255,255,255,0.12);
+  --blue:#6F9FBE;--blue-l:#1A2730;--card:#221F1B;--bg:#1A1814;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;transition:background .3s,color .3s;}
 .app{max-width:1020px;margin:0 auto;padding:24px 16px 64px;}
@@ -57,6 +62,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .onboard-skip{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:14px;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 
 /* TOPBAR */
+/* BETA BAR */
+.beta-bar{display:flex;align-items:center;gap:10px;background:var(--gold-l);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:18px;font-size:13px;}
+.beta-tag{background:var(--gold);color:#fff;font-weight:600;font-size:10px;letter-spacing:.08em;padding:3px 8px;border-radius:99px;flex-shrink:0;}
+.beta-text{flex:1;color:var(--ink);line-height:1.45;}
+.beta-text a{color:var(--green);font-weight:500;text-decoration:underline;cursor:pointer;}
+.beta-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 4px;flex-shrink:0;line-height:1;}
+.beta-close:hover{color:var(--ink);}
+
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
 .logo{font-family:'Fraunces',serif;font-weight:600;font-size:24px;letter-spacing:0;line-height:1;}
 .logo-sub{font-size:10px;font-weight:400;color:var(--muted);letter-spacing:.05em;margin-top:1px;}
@@ -68,7 +81,45 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .icon-btn:hover{border-color:var(--green);color:var(--green);}
 
 /* TABS */
-.tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+/* TABS — desktop: top bar; mobile: fixed bottom nav */
+.tabs{display:flex;gap:6px;margin-bottom:24px;}
+.tab .tab-label{margin-left:0;}
+.tab i{font-size:16px;vertical-align:-2px;margin-right:5px;}
+@media(min-width:721px){
+  .tabs{flex-wrap:wrap;}
+  .tab{position:relative;}
+}
+@media(max-width:720px){
+  .tabs{position:fixed;bottom:0;left:0;right:0;z-index:150;margin:0;gap:0;background:var(--card);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;box-shadow:0 -2px 16px rgba(0,0,0,.06);}
+  .tab{flex:1;flex-direction:column;gap:2px;border:none;background:none;border-radius:12px;padding:7px 2px;font-size:10px;color:var(--muted);position:relative;}
+  .tab i{font-size:21px;margin:0;vertical-align:0;}
+  .tab .tab-label{font-size:10px;font-weight:500;}
+  .tab.active{background:none;color:var(--green);}
+  .tab.active i{color:var(--green);}
+  .tab:hover:not(.active){background:none;color:var(--muted);}
+}
+
+/* MEER bottom sheet */
+.more-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.more-overlay.open{display:flex;}
+.more-sheet{background:var(--card);width:100%;max-width:520px;border-radius:24px 24px 0 0;padding:12px 20px calc(28px + env(safe-area-inset-bottom));animation:sheetUp .25s ease;}
+@media(min-width:721px){.more-sheet{border-radius:24px;margin-bottom:40px;max-width:440px;}.more-overlay{align-items:center;}}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.more-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px;}
+.more-title{font-family:'Fraunces',serif;font-weight:600;font-size:17px;margin-bottom:4px;text-align:center;}
+.more-sheet-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px;}
+.nav-dot{position:absolute;top:4px;right:calc(50% - 16px);width:7px;height:7px;border-radius:50%;background:var(--red);}
+@media(min-width:721px){.nav-dot{top:6px;right:8px;}}
+.more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:420px){.more-grid{grid-template-columns:repeat(3,1fr);}}
+.more-item{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px 6px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .15s;position:relative;color:var(--ink);}
+.more-item:hover{border-color:var(--green);background:var(--green-l);}
+.more-item-icon{font-size:24px;}
+.more-item-label{font-size:11px;font-weight:500;text-align:center;line-height:1.2;}
+.more-item-badge{position:absolute;top:6px;right:10px;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:9px;font-weight:500;}
+
+/* extra bottom padding on mobile so content clears the bottom nav */
+@media(max-width:720px){.app{padding-bottom:90px;}}
 .tab{padding:8px 15px;border-radius:99px;border:1px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--muted);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
 .tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink);}
 .tab:hover:not(.active){border-color:var(--green);color:var(--green);}
@@ -273,6 +324,49 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .feedback-text{font-size:13px;color:var(--ink);line-height:1.5;}
 .feedback-meta{font-size:11px;color:var(--muted);margin-top:5px;}
 .feedback-clear{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:16px;}
+
+
+/* ═══ CAMERA LENS ═══ */
+.lens-stage{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;min-height:300px;}
+.lens-start{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;}
+.lens-btn{background:var(--green);color:#fff;border:none;border-radius:99px;padding:13px 26px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;cursor:pointer;transition:transform .15s;}
+.lens-btn:hover{transform:scale(1.02);}
+.lens-camera{position:relative;background:#000;}
+#lens-video{width:100%;max-height:70vh;display:block;object-fit:cover;}
+.lens-overlay-frame{position:absolute;inset:12% 14%;border:2px solid rgba(255,255,255,.7);border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.25);pointer-events:none;}
+.lens-shutter{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.5);cursor:pointer;transition:transform .1s;}
+.lens-shutter:active{transform:translateX(-50%) scale(.92);}
+.lens-cancel{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:99px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.lens-result{padding:16px;}
+.lens-photo{width:100%;max-height:300px;object-fit:cover;border-radius:14px;margin-bottom:16px;}
+.lens-objects{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;max-height:240px;overflow-y:auto;margin-top:8px;}
+.lens-obj{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.lens-obj:hover{border-color:var(--green);background:var(--green-l);}
+.lens-obj-emoji{font-size:24px;}
+.lens-obj-name{font-size:12px;font-weight:500;margin-top:4px;}
+.lens-translations{padding:20px;}
+.lens-trans-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:8px;}
+.lens-trans-flag{font-size:22px;flex-shrink:0;}
+.lens-trans-info{flex:1;}
+.lens-trans-lang{font-size:11px;color:var(--muted);}
+.lens-trans-word{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--green);}
+.lens-trans-pron{font-size:11px;color:var(--muted);font-style:italic;}
+
+/* CONTACT FORM */
+.contact-section{margin-top:32px;}
+.contact-form{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;}
+.contact-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:540px){.contact-row{grid-template-columns:1fr;}}
+.contact-field{margin-bottom:14px;}
+.contact-label{display:block;font-size:12px;font-weight:500;margin-bottom:6px;color:var(--ink);}
+.contact-input{width:100%;border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s;}
+.contact-input:focus{border-color:var(--green);}
+.contact-textarea{resize:vertical;min-height:110px;line-height:1.5;}
+select.contact-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6860' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+.contact-submit{width:100%;padding:14px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;cursor:pointer;transition:transform .15s;margin-top:4px;}
+.contact-submit:hover{transform:scale(1.01);}
+.contact-thanks{display:none;text-align:center;padding:24px 16px 8px;}
+.contact-thanks.show{display:block;}
 .feedback-clear:hover{border-color:var(--red);color:var(--red);}
 
 /* MODAL */
@@ -313,6 +407,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .q-flag-form.open{display:block;}
 .q-flag-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);background:var(--card);resize:none;outline:none;height:55px;}
 .q-next{width:100%;padding:13px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;display:none;}
+.q-skip{width:100%;padding:11px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;margin-top:8px;transition:all .15s;}
+.q-skip:hover{border-color:var(--muted);color:var(--ink);}
 .q-next:hover{transform:scale(1.01);}
 .complete{text-align:center;padding:10px 0;}
 .complete-emoji{font-size:52px;margin-bottom:14px;}
@@ -405,6 +501,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .culture-banner-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:4px;}
 .culture-banner-title{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:6px;line-height:1.25;}
 .culture-banner-desc{font-size:13px;opacity:.85;line-height:1.55;}
+.cb-src{color:#fff;text-decoration:underline;font-weight:500;white-space:nowrap;opacity:.9;}
+.cb-src:hover{opacity:1;}
 .culture-banner-nav{display:flex;gap:6px;}
 .cb-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .2s;}
 .cb-dot.active{background:#fff;width:22px;border-radius:4px;}
@@ -474,6 +572,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 </div>
 
 <div class="app" id="mainApp" style="display:none;">
+  <div class="beta-bar" id="beta-bar">
+    <span class="beta-tag">BÈTA</span>
+    <span class="beta-text">TaluSuri is nog in ontwikkeling en wordt steeds verbeterd. Je feedback is van harte welkom — <a href="javascript:void(0)" onclick="goToContact()">laat het ons weten</a>.</span>
+    <button class="beta-close" onclick="dismissBeta()" aria-label="Sluiten"><span class="emo">✕</span></button>
+  </div>
   <div class="topbar">
     <div>
       <div class="logo">Talu<span class="logo-accent">Suri</span></div>
@@ -481,28 +584,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     </div>
     <div class="topbar-right">
       <div class="lang-switch" id="lang-switch">
-        <button class="lang-switch-btn" onclick="toggleLangMenu(event)"><span id="ls-flag">🌊</span> <span id="ls-name">Sranan</span> <i class="ti ti-chevron-down" style="font-size:14px;"></i></button>
+        <button class="lang-switch-btn" onclick="toggleLangMenu(event)"><span id="ls-flag">🌊</span> <span id="ls-name">Sranan</span> <span class="emo">▾</span></button>
         <div class="lang-switch-menu" id="lang-switch-menu"></div>
       </div>
-      <div class="level-pill"><i class="ti ti-star" aria-hidden="true"></i> Lvl <span id="level-num-pill">1</span></div>
-      <div class="streak-pill"><i class="ti ti-flame" aria-hidden="true"></i> <span id="streak-lbl">3</span></div>
-      <button class="icon-btn" onclick="toggleTheme()" title="Donkere modus" id="theme-btn"><i class="ti ti-moon" aria-hidden="true"></i></button>
+      <div class="level-pill"><span class="emo">⭐</span> Lvl <span id="level-num-pill">1</span></div>
+      <div class="streak-pill"><span class="emo">🔥</span> <span id="streak-lbl">3</span></div>
+      <button class="icon-btn" onclick="toggleTheme()" title="Donkere modus" id="theme-btn"><span class="emo">🌙</span></button>
     </div>
   </div>
 
-  <div class="tabs" role="tablist">
-    <button class="tab active" onclick="showView('home')">Dashboard</button>
-    <button class="tab" onclick="showView('curriculum')">Leerpad</button>
-    <button class="tab" onclick="showView('lessen')">Lessen</button>
-    <button class="tab" onclick="showView('grammatica')">Grammatica</button>
-    <button class="tab" onclick="showView('crash')">Spoedcursus</button>
-    <button class="tab" onclick="showView('mistakes')">Mijn fouten <span id="mistakes-badge" style="display:none;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:3px;">0</span></button>
-    <button class="tab" onclick="showView('woordenboek')">Woordenboek</button>
-    <button class="tab" onclick="showView('talen')">Alle Talen</button>
-    <button class="tab" onclick="showView('leaderboard')">Ranglijst</button>
-    <button class="tab" onclick="showView('badges')">Badges</button>
-    <button class="tab" onclick="showView('bronnen')">Bronnen</button>
-    <button class="tab" onclick="showView('feedback')">Community <span id="feedback-badge" style="display:none;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:3px;">0</span></button>
+  <div class="tabs" id="primary-tabs" role="tablist">
+    <button class="tab active" data-cat="home" onclick="showView('home')"><span class="emo">🏠</span><span class="tab-label">Start</span></button>
+    <button class="tab" data-cat="leren" onclick="openGroup('leren')"><span class="emo">🎓</span><span class="tab-label">Leren</span></button>
+    <button class="tab" data-cat="oefenen" onclick="openGroup('oefenen')"><span class="emo">🏋️</span><span class="tab-label">Oefenen</span><span class="nav-dot" id="dot-oefenen" style="display:none;"></span></button>
+    <button class="tab" data-cat="voortgang" onclick="openGroup('voortgang')"><span class="emo">🏆</span><span class="tab-label">Voortgang</span></button>
+    <button class="tab" data-cat="ontdek" onclick="openGroup('ontdek')"><span class="emo">🧭</span><span class="tab-label">Ontdek</span><span class="nav-dot" id="dot-ontdek" style="display:none;"></span></button>
+  </div>
+
+  <!-- GROUP SHEET (dynamisch gevuld) -->
+  <div class="more-overlay" id="more-overlay" onclick="closeMoreMenu(event)">
+    <div class="more-sheet" id="more-sheet">
+      <div class="more-handle"></div>
+      <div class="more-title" id="more-sheet-title">Onderdelen</div>
+      <div class="more-sheet-sub" id="more-sheet-sub"></div>
+      <div class="more-grid" id="more-grid"></div>
+    </div>
   </div>
 
   <!-- HOME -->
@@ -528,8 +634,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
         <div class="hero-title" id="hero-title">Sarnami</div>
         <div class="hero-sub" id="hero-sub">Verbind je met de Hindoestaanse gemeenschap.</div>
         <div class="hero-btns">
-          <button class="hero-btn" onclick="startLesson(0)"><i class="ti ti-player-play" aria-hidden="true"></i> Les starten</button>
-          <button class="hero-btn outline" onclick="startExam()"><i class="ti ti-certificate" aria-hidden="true"></i> Examen</button>
+          <button class="hero-btn" onclick="startLesson(0)"><span class="emo">▶️</span> Les starten</button>
+          <button class="hero-btn outline" onclick="startExam()"><span class="emo">📜</span> Examen</button>
         </div>
         <div class="wod">
           <div class="wod-lbl">Woord van de dag</div>
@@ -559,7 +665,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <div class="card c-search">
         <div class="card-label">Zoek door alle 10 talen</div>
         <div class="search-box">
-          <i class="ti ti-search" aria-hidden="true"></i>
+          <span class="emo">🔍</span>
           <input type="text" id="global-search" placeholder="Zoek een woord in het Nederlands of een Surinaamse taal..." oninput="globalSearch()">
         </div>
         <div class="search-results" id="search-results"></div>
@@ -656,7 +762,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <input class="dict-search" id="wb-q" style="max-width:360px;" placeholder="Zoek..." oninput="filterWB()">
     </div>
     <div class="audio-banner">
-      <i class="ti ti-volume" aria-hidden="true"></i>
+      <span class="emo">🔊</span>
       <div class="audio-banner-text"><strong>Drie uitspraak-opties</strong>🔊 Computerstem · 📖 Fonetische gids · 🎙️ Community-opnames (binnenkort). Klik het vlag-icoon om een woord te corrigeren.</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;" id="wb-grid"></div>
@@ -702,9 +808,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     </div>
     <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div style="font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Ingediende feedback <span id="feedback-count" style="font-size:13px;font-weight:400;color:var(--muted);">(0)</span></div>
-      <button class="feedback-clear" onclick="clearFeedback()"><i class="ti ti-trash" style="font-size:13px;" aria-hidden="true"></i> Alles wissen</button>
+      <button class="feedback-clear" onclick="clearFeedback()"><span class="emo">🗑️</span> Alles wissen</button>
     </div>
     <div id="feedback-list"></div>
+
+    <div class="contact-section">
+      <div class="tembe-strip" style="margin-bottom:18px;"></div>
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin-bottom:4px;">📬 Neem contact op</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5;">Wil je meehelpen als native speaker, een fout melden, of heb je een vraag of suggestie? We horen graag van je.</div>
+      <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return submitContact(event)">
+        <input type="hidden" name="form-name" value="contact">
+        <p style="display:none;"><label>Laat dit leeg: <input name="bot-field"></label></p>
+        <div class="contact-row">
+          <div class="contact-field">
+            <label class="contact-label">Naam</label>
+            <input type="text" class="contact-input" id="contact-name" name="naam" placeholder="Je naam">
+          </div>
+          <div class="contact-field">
+            <label class="contact-label">E-mail</label>
+            <input type="email" class="contact-input" id="contact-email" name="email" placeholder="jij@voorbeeld.nl">
+          </div>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label">Onderwerp</label>
+          <select class="contact-input" id="contact-subject" name="onderwerp">
+            <option value="">Kies een onderwerp...</option>
+            <option>Ik wil meehelpen als native speaker</option>
+            <option>Een fout of correctie melden</option>
+            <option>Audio-opname bijdragen</option>
+            <option>Algemene vraag of suggestie</option>
+            <option>Samenwerking of partnerschap</option>
+            <option>Anders</option>
+          </select>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label">Welke taal betreft het? <span style="color:var(--muted);font-weight:400;">(optioneel)</span></label>
+          <select class="contact-input" id="contact-lang" name="taal">
+            <option value="">Niet van toepassing</option>
+          </select>
+        </div>
+        <div class="contact-field">
+          <label class="contact-label">Bericht</label>
+          <textarea class="contact-input contact-textarea" id="contact-message" name="bericht" placeholder="Vertel ons waar we je mee kunnen helpen..."></textarea>
+        </div>
+        <button type="submit" class="contact-submit">📨 Verstuur bericht</button>
+        <div class="contact-thanks" id="contact-thanks">
+          <span style="font-size:28px;">🙏</span>
+          <div style="font-family:'Fraunces',serif;font-weight:600;font-size:16px;margin:6px 0 3px;">Bedankt voor je bericht!</div>
+          <div style="font-size:13px;color:var(--muted);">We hebben je bericht ontvangen en nemen zo snel mogelijk contact op.</div>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- CURRICULUM -->
@@ -743,6 +897,57 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
     </div>
   </div>
 
+  <!-- CAMERA LENS -->
+  <div class="view" id="view-lens">
+    <div class="card" style="margin-bottom:20px;background:var(--green);color:#fff;border:none;">
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:5px;">📷 Camera-lens</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.5;">Richt je camera op een object, maak een foto en ontdek hoe het in alle 10 talen van Suriname heet. Een leuke manier om je omgeving te leren benoemen.</div>
+    </div>
+
+    <div class="lens-stage" id="lens-stage">
+      <div class="lens-start" id="lens-start">
+        <div style="font-size:48px;margin-bottom:12px;">📸</div>
+        <div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px;margin-bottom:6px;">Begin met scannen</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:18px;text-align:center;max-width:340px;line-height:1.5;">Geef toegang tot je camera, richt op een voorwerp en maak een foto. Daarna kies je welk object het is en zie je de vertaling.</div>
+        <button class="lens-btn" onclick="startLens()">📷 Camera openen</button>
+        <div style="font-size:11px;color:var(--muted);margin-top:12px;">Werkt het beste op een telefoon · je foto blijft op je toestel</div>
+      </div>
+
+      <div class="lens-camera hidden" id="lens-camera">
+        <video id="lens-video" autoplay playsinline muted></video>
+        <div class="lens-overlay-frame"></div>
+        <button class="lens-shutter" onclick="captureLens()" aria-label="Foto maken"></button>
+        <button class="lens-cancel" onclick="stopLens()">Annuleren</button>
+      </div>
+
+      <div class="lens-result hidden" id="lens-result">
+        <canvas id="lens-canvas" style="display:none;"></canvas>
+        <img id="lens-photo" class="lens-photo" alt="Genomen foto">
+        <div class="lens-pick">
+          <div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;">Welk object zie je?</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Kies of zoek het voorwerp — dan tonen we het in alle talen.</div>
+          <input class="dict-search" id="lens-search" placeholder="Zoek een object, bijv. water, huis, boom..." oninput="renderLensObjects()">
+          <div class="lens-objects" id="lens-objects"></div>
+        </div>
+      </div>
+
+      <div class="lens-translations hidden" id="lens-translations">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div id="lens-chosen-emoji" style="font-size:40px;"></div>
+          <div id="lens-chosen-nl" style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;"></div>
+          <div style="font-size:12px;color:var(--muted);">in de 10 talen van Suriname</div>
+        </div>
+        <div id="lens-trans-list"></div>
+        <button class="lens-btn" style="width:100%;margin-top:14px;" onclick="resetLens()">📷 Nog een object scannen</button>
+      </div>
+    </div>
+
+    <div class="footnote-card" style="margin-top:16px;">
+      <div class="fn-marker" style="background:var(--blue-l);border-color:var(--border);color:var(--blue);">i</div>
+      <div><div class="fn-title">Hoe werkt dit?</div><div class="fn-text">De camera-lens helpt je je directe omgeving te leren benoemen. Je bevestigt zelf welk object je ziet uit onze woordenschat — zo leer je bewust kijken en koppelen. Automatische objectherkenning (AI) staat op de roadmap voor een volgende versie.</div></div>
+    </div>
+  </div>
+
   <!-- MY MISTAKES -->
   <div class="view" id="view-mistakes">
     <div class="card" style="margin-bottom:20px;background:var(--red);color:#fff;border:none;">
@@ -753,7 +958,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
       <div style="font-family:'Fraunces',serif;font-weight:600;font-size:16px;">Te herhalen <span id="mistakes-count" style="font-size:13px;font-weight:400;color:var(--muted);">(0)</span></div>
       <div style="display:flex;gap:8px;">
         <button class="crash-tier-btn" id="practice-mistakes-btn" onclick="practiceMistakes()" style="background:var(--green);">▶ Oefen fouten</button>
-        <button class="feedback-clear" onclick="clearMistakes()"><i class="ti ti-trash" style="font-size:13px;"></i> Wissen</button>
+        <button class="feedback-clear" onclick="clearMistakes()"><span class="emo">🗑️</span> Wissen</button>
       </div>
     </div>
     <div id="mistakes-list"></div>
@@ -767,7 +972,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 </div>
 
 <div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
-  <div class="modal"><button class="modal-close" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button><div id="modal-body"></div></div>
+  <div class="modal"><button class="modal-close" onclick="closeModal()"><span class="emo">✕</span></button><div id="modal-body"></div></div>
 </div>
 <script>
 // ═══ SOURCES ═══
@@ -885,7 +1090,7 @@ if(saved?.langId){const f=LANGS.find(l=>l.id===saved.langId);if(f)S.lang=f;}
 function applyTheme(){
   document.getElementById('htmlRoot').setAttribute('data-theme',S.theme);
   const btn=document.getElementById('theme-btn');
-  if(btn)btn.innerHTML=S.theme==='dark'?'<i class="ti ti-sun"></i>':'<i class="ti ti-moon"></i>';
+  if(btn)btn.innerHTML=S.theme==='dark'?'<span class="emo">☀️</span>':'<span class="emo">🌙</span>';
 }
 function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';applyTheme();saveState();}
 
@@ -908,11 +1113,127 @@ function speak(text,langCode){
 function getFlags(){try{return JSON.parse(localStorage.getItem('talusuri_flags')||'[]');}catch(e){return[];}}
 function saveFlag(obj){const f=getFlags();f.unshift({...obj,id:Date.now(),ts:new Date().toLocaleDateString('nl-NL')});localStorage.setItem('talusuri_flags',JSON.stringify(f.slice(0,100)));updateFeedbackBadge();unlockBadge('contributor');}
 function clearFeedback(){if(confirm('Alle feedback wissen?')){localStorage.removeItem('talusuri_flags');updateFeedbackBadge();renderFeedbackList();}}
-function updateFeedbackBadge(){const n=getFlags().length;const b=document.getElementById('feedback-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('feedback-count');if(c)c.textContent='('+n+')';}
+function updateFeedbackBadge(){const n=getFlags().length;const b=document.getElementById('more-feedback-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('feedback-count');if(c)c.textContent='('+n+')';const dot=document.getElementById('dot-ontdek');if(dot)dot.style.display=n>0?'block':'none';}
+
+// ═══ CAMERA LENS ═══
+// Concrete objects with emoji, matched to vocabulary across languages by Dutch keyword.
+const LENS_OBJECTS=[
+{emoji:'💧',nl:'water',keys:['water']},
+{emoji:'🏠',nl:'huis',keys:['huis']},
+{emoji:'🌳',nl:'boom',keys:['boom']},
+{emoji:'🔥',nl:'vuur',keys:['vuur']},
+{emoji:'🐟',nl:'vis',keys:['vis']},
+{emoji:'☀️',nl:'zon',keys:['zon']},
+{emoji:'🌙',nl:'maan',keys:['maan']},
+{emoji:'🍚',nl:'rijst',keys:['rijst']},
+{emoji:'🌊',nl:'rivier',keys:['rivier']},
+{emoji:'👤',nl:'kind',keys:['kind']},
+{emoji:'👩',nl:'moeder',keys:['moeder']},
+{emoji:'👨',nl:'vader',keys:['vader']},
+{emoji:'🌍',nl:'aarde',keys:['aarde']},
+{emoji:'🍴',nl:'eten',keys:['eten']},
+{emoji:'🙏',nl:'dank je',keys:['dank je','dank']}
+];
+let lensStream=null;
+function setLensPhase(phase){
+  ['lens-start','lens-camera','lens-result','lens-translations'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.classList.toggle('hidden',id!=='lens-'+phase);
+  });
+}
+async function startLens(){
+  try{
+    lensStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=document.getElementById('lens-video');v.srcObject=lensStream;
+    setLensPhase('camera');
+  }catch(e){
+    alert('Kon de camera niet openen. Geef toestemming voor cameratoegang in je browser, of probeer het op een telefoon. Je kunt ook zonder camera een object kiezen.');
+    // fallback: skip straight to object picker
+    document.getElementById('lens-photo').style.display='none';
+    setLensPhase('result');renderLensObjects();
+  }
+}
+function stopLens(){
+  if(lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
+  setLensPhase('start');
+}
+function captureLens(){
+  const v=document.getElementById('lens-video'),c=document.getElementById('lens-canvas');
+  if(v.videoWidth){
+    c.width=v.videoWidth;c.height=v.videoHeight;
+    c.getContext('2d').drawImage(v,0,0);
+    const img=document.getElementById('lens-photo');
+    img.src=c.toDataURL('image/jpeg',0.85);img.style.display='block';
+  }
+  if(lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
+  document.getElementById('lens-search').value='';
+  setLensPhase('result');renderLensObjects();
+}
+function renderLensObjects(){
+  const q=(document.getElementById('lens-search').value||'').toLowerCase().trim();
+  const grid=document.getElementById('lens-objects');if(!grid)return;
+  const list=q?LENS_OBJECTS.filter(o=>o.nl.includes(q)):LENS_OBJECTS;
+  if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:16px;">Geen object gevonden. Probeer een ander woord.</div>';return;}
+  grid.innerHTML=list.map((o,i)=>`<div class="lens-obj" onclick="showLensTranslations(${LENS_OBJECTS.indexOf(o)})"><div class="lens-obj-emoji">${o.emoji}</div><div class="lens-obj-name">${o.nl}</div></div>`).join('');
+}
+function findWordInLang(lang,obj){
+  // find a word whose Dutch matches one of the object's keys
+  for(const k of obj.keys){
+    const w=lang.words.find(w=>w.nl.toLowerCase()===k||w.nl.toLowerCase().includes(k));
+    if(w)return w;
+  }
+  return null;
+}
+function showLensTranslations(idx){
+  const obj=LENS_OBJECTS[idx];if(!obj)return;
+  document.getElementById('lens-chosen-emoji').textContent=obj.emoji;
+  document.getElementById('lens-chosen-nl').textContent=obj.nl;
+  const list=document.getElementById('lens-trans-list');
+  list.innerHTML=[...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(l=>{
+    const w=findWordInLang(l,obj);
+    if(!w)return '';
+    return `<div class="lens-trans-row"><span class="lens-trans-flag">${l.flag}</span><div class="lens-trans-info"><div class="lens-trans-lang">${l.name}</div><div class="lens-trans-word">${w.w}</div><div class="lens-trans-pron">/${w.p}/</div></div><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"")}','${l.speechLang}')"><span class="emo">🔊</span></button></div>`;
+  }).join('')||'<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Dit woord is nog niet in onze woordenlijsten beschikbaar.</div>';
+  setLensPhase('translations');
+}
+function resetLens(){document.getElementById('lens-photo').style.display='block';setLensPhase('start');}
+
+// ═══ BETA BAR ═══
+function dismissBeta(){const b=document.getElementById('beta-bar');if(b)b.style.display='none';try{localStorage.setItem('talusuri_beta_dismissed','1');}catch(e){}}
+function goToContact(){showView('feedback');setTimeout(()=>{const el=document.getElementById('contact-form');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}
+function initBeta(){try{if(localStorage.getItem('talusuri_beta_dismissed')){const b=document.getElementById('beta-bar');if(b)b.style.display='none';}}catch(e){}}
+
+// ═══ CONTACT FORM ═══
+function populateContactLangs(){
+  const sel=document.getElementById('contact-lang');if(!sel||sel.dataset.filled)return;
+  [...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).forEach(l=>{const o=document.createElement('option');o.textContent=l.full;sel.appendChild(o);});
+  sel.dataset.filled='1';
+}
+function getContacts(){try{return JSON.parse(localStorage.getItem('talusuri_contacts')||'[]');}catch(e){return[];}}
+function submitContact(e){
+  if(e)e.preventDefault();
+  const form=document.getElementById('contact-form');
+  const name=document.getElementById('contact-name').value.trim();
+  const email=document.getElementById('contact-email').value.trim();
+  const subject=document.getElementById('contact-subject').value;
+  const lang=document.getElementById('contact-lang').value;
+  const msg=document.getElementById('contact-message').value.trim();
+  if(!name||!email||!msg){alert('Vul je naam, e-mail en bericht in om te versturen.');return false;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){alert('Vul een geldig e-mailadres in.');return false;}
+  // keep a local copy as backup
+  try{const c=getContacts();c.unshift({name,email,subject,lang,msg,ts:new Date().toLocaleString('nl-NL')});localStorage.setItem('talusuri_contacts',JSON.stringify(c.slice(0,50)));}catch(e){}
+  // submit to Netlify Forms (works once hosted on Netlify; harmless elsewhere)
+  const data=new URLSearchParams(new FormData(form)).toString();
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:data}).catch(()=>{});
+  // show thank-you regardless, so the UX is smooth in preview and production
+  document.querySelectorAll('#contact-form .contact-field,#contact-form .contact-row,.contact-submit').forEach(el=>el.style.display='none');
+  document.getElementById('contact-thanks').classList.add('show');
+  return false;
+}
+
 function renderFeedbackList(){
   const list=document.getElementById('feedback-list');if(!list)return;
   const flags=getFlags();
-  if(!flags.length){list.innerHTML='<div class="feedback-empty"><i class="ti ti-flag" style="font-size:32px;display:block;margin-bottom:8px;opacity:.3;"></i>Nog geen feedback.<br><span style="font-size:12px;">Vlag woorden via het woordenboek of een les.</span></div>';return;}
+  if(!flags.length){list.innerHTML='<div class="feedback-empty"><span class="emo">🚩</span>Nog geen feedback.<br><span style="font-size:12px;">Vlag woorden via het woordenboek of een les.</span></div>';return;}
   list.innerHTML=flags.map(f=>`<div class="feedback-item"><div class="feedback-item-header"><div><div class="feedback-word">${f.word||'?'}</div><div class="feedback-lang">${f.lang||''}</div></div><div style="font-size:11px;color:var(--muted);">${f.ts||''}</div></div><div class="feedback-text">${f.text||'(geen toelichting)'}</div>${f.nl?`<div class="feedback-meta">NL: ${f.nl}</div>`:''}</div>`).join('');
 }
 let openFlagId=null;
@@ -979,7 +1300,7 @@ function setLang(l){
   document.getElementById('dict-lang-title').textContent='NL → '+l.name;
   document.getElementById('dict-q').value='';
   renderDict(l.words.slice(0,8));
-  document.getElementById('dict-source').innerHTML='<i class="ti ti-book-2" style="font-size:12px;margin-right:4px;"></i>Bron: '+l.sourceShort;
+  document.getElementById('dict-source').innerHTML='<span class="emo">📚</span>Bron: '+l.sourceShort;
   renderFlash();
   document.getElementById('culture-card').style.background=l.cultureBg;
   document.getElementById('cult-icon').textContent=l.cultureIcon;
@@ -1027,7 +1348,7 @@ function renderDict(words){
   words.forEach((w,i)=>{
     const id='dw'+i;
     const row=document.createElement('div');row.className='dict-row';
-    row.innerHTML=`<span class="dict-nl">${w.nl}</span><div class="dict-actions"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="Uitspreken"><i class="ti ti-volume"></i></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')" title="Bijdragen"><i class="ti ti-microphone"></i></button><button class="dict-btn flag" onclick="toggleFlag('${id}')" title="Flag"><i class="ti ti-flag"></i></button></div><div class="dict-word-block"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></div>`;
+    row.innerHTML=`<span class="dict-nl">${w.nl}</span><div class="dict-actions"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="Uitspreken"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')" title="Bijdragen"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')" title="Flag"><span class="emo">🚩</span></button></div><div class="dict-word-block"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></div>`;
     list.appendChild(row);
     const fw=document.createElement('div');
     fw.innerHTML=`<div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet aan "${w.w}"?</div><textarea placeholder="Bijv: verkeerde vertaling, andere uitspraak..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
@@ -1058,9 +1379,9 @@ function renderFlash(){
   S.flashRevealed=false;
   document.getElementById('fl-score').textContent=S.flashTot>0?S.flashOk+' van '+S.flashTot+' correct':'';
   const ar=document.getElementById('fl-audio-row');ar.innerHTML='';
-  if(audioMode==='tts')ar.innerHTML=`<button class="speak-btn" onclick="speak('${fc.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> Hoor uitspraak</button>`;
+  if(audioMode==='tts')ar.innerHTML=`<button class="speak-btn" onclick="speak('${fc.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> Hoor uitspraak</button>`;
   else if(audioMode==='guide')ar.innerHTML=`<span style="font-size:13px;color:var(--muted);">📖 Spreek uit: <strong style="color:var(--ink);">${fc.p}</strong></span>`;
-  else ar.innerHTML=`<button class="contrib-btn" onclick="alert('Opname-functie komt binnenkort!')"><i class="ti ti-microphone"></i> Neem op voor community</button>`;
+  else ar.innerHTML=`<button class="contrib-btn" onclick="alert('Opname-functie komt binnenkort!')"><span class="emo">🎙️</span> Neem op voor community</button>`;
 }
 function revealFlash(){if(S.flashRevealed)return;S.flashRevealed=true;document.getElementById('fl-a').classList.add('show');document.getElementById('fl-reveal').style.display='none';document.getElementById('fl-acts').style.display='flex';}
 function nextFlash(ok){S.flashTot++;if(ok){S.flashOk++;addXP(2);}S.flashIdx++;renderFlash();checkBadges();}
@@ -1077,13 +1398,13 @@ function renderProgress(){
 }
 function renderPhrases(){
   const list=document.getElementById('phrase-list');list.innerHTML='';
-  S.lang.phrases.forEach(p=>{const el=document.createElement('div');el.className='phrase-item';el.innerHTML=`<div class="phrase-nl">${p.nl}</div><div style="display:flex;align-items:center;gap:6px;"><div class="phrase-sr">${p.w}</div><button class="dict-btn" onclick="speak('${p.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" style="opacity:.6;"><i class="ti ti-volume"></i></button></div><div class="phrase-pron">${p.p}</div>`;list.appendChild(el);});
+  S.lang.phrases.forEach(p=>{const el=document.createElement('div');el.className='phrase-item';el.innerHTML=`<div class="phrase-nl">${p.nl}</div><div style="display:flex;align-items:center;gap:6px;"><div class="phrase-sr">${p.w}</div><button class="dict-btn" onclick="speak('${p.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" style="opacity:.6;"><span class="emo">🔊</span></button></div><div class="phrase-pron">${p.p}</div>`;list.appendChild(el);});
 }
 function lessonProgress(i){return S.themeProgress[S.lang.id+'-'+i]||0;}
 function renderHomeLessons(){
   S.lang.lessons.slice(0,2).forEach((l,i)=>{
     const el=document.getElementById('les'+i);if(!el)return;const pct=lessonProgress(i);
-    el.innerHTML=`${pct>=100?'<i class="ti ti-circle-check lesson-done"></i>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
+    el.innerHTML=`${pct>=100?'<span class="emo lesson-done">✅</span>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
     el.onclick=()=>startLesson(i);
   });
 }
@@ -1092,7 +1413,7 @@ function renderAllLessons(){
   S.lang.lessons.forEach((l,i)=>{
     const pct=lessonProgress(i);
     const card=document.createElement('div');card.className='card clickable';
-    card.innerHTML=`${pct>=100?'<i class="ti ti-circle-check lesson-done"></i>':''}<div style="font-size:28px;margin-bottom:8px;">${l.emoji}</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;">${l.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
+    card.innerHTML=`${pct>=100?'<span class="emo lesson-done">✅</span>':''}<div style="font-size:28px;margin-bottom:8px;">${l.emoji}</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;">${l.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
     card.onclick=()=>startLesson(i);grid.appendChild(card);
   });
   // exam card
@@ -1102,12 +1423,12 @@ function renderAllLessons(){
 }
 function renderLangGrid(){
   const grid=document.getElementById('lang-grid');grid.innerHTML='';
-  LANGS.forEach(l=>{const card=document.createElement('div');card.className='lang-card'+(l.id===S.lang.id?' active':'');card.dataset.id=l.id;card.innerHTML=`<div class="lc-flag">${l.flag}</div><div class="lc-name">${l.name}</div><div class="lc-meta">${l.speakers}<br>${l.group}</div><div><span class="lc-badge badge-${l.badgeType}">${l.badge}</span></div>`;card.onclick=()=>{setLang(l);showView('home');};grid.appendChild(card);});
+  [...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).forEach(l=>{const card=document.createElement('div');card.className='lang-card'+(l.id===S.lang.id?' active':'');card.dataset.id=l.id;card.innerHTML=`<div class="lc-flag">${l.flag}</div><div class="lc-name">${l.name}</div><div class="lc-meta">${l.speakers}<br>${l.group}</div><div><span class="lc-badge badge-${l.badgeType}">${l.badge}</span></div>`;card.onclick=()=>{setLang(l);showView('home');};grid.appendChild(card);});
 }
 function renderWB(words){
   const grid=document.getElementById('wb-grid');grid.innerHTML='';
   words.forEach((w,i)=>{const id='wb'+i;const card=document.createElement('div');card.className='card';card.style.padding='14px';
-    card.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--green);">${w.w}</div><div style="display:flex;gap:3px;"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')"><i class="ti ti-microphone"></i></button><button class="dict-btn flag" onclick="toggleFlag('${id}')"><i class="ti ti-flag"></i></button></div></div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div><div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
+    card.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--green);">${w.w}</div><div style="display:flex;gap:3px;"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')"><span class="emo">🚩</span></button></div></div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div><div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
     grid.appendChild(card);});
 }
 function filterWB(){const q=document.getElementById('wb-q').value.toLowerCase();renderWB(q?S.lang.words.filter(w=>w.nl.includes(q)||w.w.toLowerCase().includes(q)):S.lang.words);}
@@ -1133,19 +1454,61 @@ function renderLeaderboard(){
 }
 
 // ═══ VIEWS ═══
+// ═══ GROUPED NAVIGATION ═══
+const NAV_GROUPS={
+  leren:{title:'Leren',sub:'Studeer met lessen, grammatica en je leerpad',items:[
+    {v:'curriculum',icon:'🧭',label:'Leerpad'},
+    {v:'lessen',icon:'🎓',label:'Lessen'},
+    {v:'grammatica',icon:'✏️',label:'Grammatica'},
+    {v:'crash',icon:'⚡',label:'Spoedcursus'}
+  ]},
+  oefenen:{title:'Oefenen',sub:'Herhaal, zoek op en ontdek met je camera',items:[
+    {v:'lens',icon:'📷',label:'Camera-lens'},
+    {v:'mistakes',icon:'🔁',label:'Mijn fouten',badge:'more-mistakes-badge'},
+    {v:'woordenboek',icon:'📕',label:'Woordenboek'}
+  ]},
+  voortgang:{title:'Voortgang',sub:'Volg je groei en motivatie',items:[
+    {v:'leaderboard',icon:'🏆',label:'Ranglijst'},
+    {v:'badges',icon:'🎖️',label:'Badges'}
+  ]},
+  ontdek:{title:'Ontdek',sub:'Verken talen, bronnen en draag bij',items:[
+    {v:'talen',icon:'🌍',label:'Alle talen'},
+    {v:'bronnen',icon:'📖',label:'Bronnen'},
+    {v:'feedback',icon:'🤝',label:'Community',badge:'more-feedback-badge'}
+  ]}
+};
+// map each view to its parent category (for active-state highlighting)
+const VIEW_TO_CAT={home:'home'};
+Object.keys(NAV_GROUPS).forEach(cat=>NAV_GROUPS[cat].items.forEach(it=>VIEW_TO_CAT[it.v]=cat));
+
+let currentGroup=null;
+function openGroup(cat){
+  currentGroup=cat;const g=NAV_GROUPS[cat];if(!g)return;
+  document.getElementById('more-sheet-title').textContent=g.title;
+  document.getElementById('more-sheet-sub').textContent=g.sub;
+  const grid=document.getElementById('more-grid');
+  grid.innerHTML=g.items.map(it=>`<button class="more-item" onclick="showViewFromMore('${it.v}')"><div class="more-item-icon">${it.icon}</div><div class="more-item-label">${it.label}</div>${it.badge?`<span class="more-item-badge" id="${it.badge}" style="display:none;">0</span>`:''}</button>`).join('');
+  document.getElementById('more-overlay').classList.add('open');
+  updateMistakesBadge();updateFeedbackBadge();
+}
+function closeMoreMenu(e){if(!e||e.target===document.getElementById('more-overlay'))document.getElementById('more-overlay').classList.remove('open');}
+function showViewFromMore(v){document.getElementById('more-overlay').classList.remove('open');showView(v);}
+
 function showView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   const view=document.getElementById('view-'+v);if(view)view.classList.add('active');
-  // activate matching tab by its onclick target (order-independent)
-  document.querySelectorAll('.tab').forEach(t=>{const oc=t.getAttribute('onclick')||'';if(oc.indexOf("'"+v+"'")>=0)t.classList.add('active');});
-  if(v==='feedback')renderFeedbackList();
+  // highlight the parent category in the bottom nav
+  const cat=VIEW_TO_CAT[v]||null;
+  if(cat){const btn=document.querySelector('.tab[data-cat="'+cat+'"]');if(btn)btn.classList.add('active');}
+  if(v==='feedback'){renderFeedbackList();populateContactLangs();}
   if(v==='leaderboard')renderLeaderboard();
   if(v==='badges')renderBadgesGrid();
   if(v==='curriculum')renderCurriculum();
   if(v==='grammatica')renderGrammar();
   if(v==='crash')renderCrash();
   if(v==='mistakes')renderMistakes();
+  if(v==='lens'){setLensPhase('start');}else if(typeof lensStream!=='undefined'&&lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -1169,16 +1532,16 @@ function renderExercise(){
   let body=`<div class="q-counter">${ex.emoji} ${ex.title} · Vraag ${ex.cur+1} van ${ex.q.length}</div><div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div><div class="q-q">${q.q}</div>`;
   // Audio helper for listen-type and others
   if(q.kind==='listen'){
-    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.listenWord.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> 🔊 Speel woord af</button></div>`;
+    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.listenWord.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> 🔊 Speel woord af</button></div>`;
   }else if(q.speak){
-    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.speak.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> Hoor uitspraak</button></div>`;
+    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.speak.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> Hoor uitspraak</button></div>`;
   }
   if(q.kind==='mc'||q.kind==='listen'){
     body+=`<div class="q-opts" id="q-opts"></div>`;
   }else if(q.kind==='type'){
     body+=`<input class="q-input" id="q-input" placeholder="Typ hier..." autocomplete="off"><div style="font-size:11px;color:var(--muted);margin:-8px 0 14px;">💡 Hint: ${q.hint}</div><button class="q-check" id="q-check" onclick="checkType()">Controleer</button>`;
   }
-  body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><i class="ti ti-flag" style="font-size:12px;"></i> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <i class="ti ti-arrow-right"></i></button>`;
+  body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button><button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>`;
   document.getElementById('modal-body').innerHTML=body;
   if(q.kind==='mc'||q.kind==='listen'){
     const opts=document.getElementById('q-opts');
@@ -1200,6 +1563,7 @@ function afterAnswer(correct){
   fb.style.display='block';
   document.getElementById('q-flag-row').style.display='block';
   document.getElementById('q-next').style.display='block';
+  const sk=document.getElementById('q-skip');if(sk)sk.style.display='none';
 }
 function answerMC(chosen,correct,btn){
   if(S.ex.answered)return;
@@ -1225,6 +1589,7 @@ function submitQFlag(){
   document.getElementById('q-flag-row').innerHTML='<span style="font-size:12px;color:var(--green);">✓ Ingediend, dank je!</span>';
 }
 function nextEx(){S.ex.cur++;renderExercise();}
+function skipQ(){window.speechSynthesis&&window.speechSynthesis.cancel();S.ex.cur++;renderExercise();}
 function renderComplete(){
   const ex=S.ex;const pct=Math.round((ex.score/ex.q.length)*100);
   let leveledUp=false;let passedExam=false;
@@ -1244,9 +1609,9 @@ function renderComplete(){
   // detect freshly relevant badge (simple: show first lesson / exam badge)
   const rewardEmoji=pct>=80?'🏆':pct>=60?'🌟':'💪';
   const title=ex.type==='exam'?(passedExam?'Geslaagd! 🎓':'Examen voltooid'):(pct>=80?'Schitterend!':pct>=60?'Goed gedaan!':'Blijf oefenen!');
-  let body=`<div class="complete"><div class="complete-emoji">${rewardEmoji}</div><div class="complete-title">${title}</div><div class="complete-sub">${ex.score} van ${ex.q.length} goed — ${pct}%</div><div class="complete-rewards"><div class="complete-reward"><i class="ti ti-bolt"></i> +${ex.type==='exam'?Math.round(ex.xp*pct/100):ex.xp} XP</div>`;
-  if(leveledUp)body+=`<div class="complete-reward" style="background:var(--blue-l);color:var(--blue);"><i class="ti ti-arrow-up"></i> Level ${getLevel(S.xp)}!</div>`;
-  if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><i class="ti ti-certificate"></i> Certificaat 🏅</div>`;
+  let body=`<div class="complete"><div class="complete-emoji">${rewardEmoji}</div><div class="complete-title">${title}</div><div class="complete-sub">${ex.score} van ${ex.q.length} goed — ${pct}%</div><div class="complete-rewards"><div class="complete-reward"><span class="emo">⚡</span> +${ex.type==='exam'?Math.round(ex.xp*pct/100):ex.xp} XP</div>`;
+  if(leveledUp)body+=`<div class="complete-reward" style="background:var(--blue-l);color:var(--blue);"><span class="emo">⬆️</span> Level ${getLevel(S.xp)}!</div>`;
+  if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><span class="emo">📜</span> Certificaat 🏅</div>`;
   body+=`</div>`;
   if(passedExam)body+=`<div class="complete-badge-unlock show"><div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:3px;">🏅 Certificaat behaald!</div><div style="font-size:12px;color:var(--muted);">Je beheerst de basis van ${S.lang.name}. Geweldig werk!</div></div>`;
   body+=`<div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div><button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button></div>`;
@@ -1267,7 +1632,7 @@ function onboardNext(step){
 }
 function renderOnboardLangs(){
   const grid=document.getElementById('onboard-langs');grid.innerHTML='';
-  LANGS.forEach(l=>{const d=document.createElement('div');d.className='onboard-lang';d.innerHTML=`<div style="font-size:24px;">${l.flag}</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:12px;margin-top:4px;">${l.name}</div>`;d.onclick=()=>{document.querySelectorAll('.onboard-lang').forEach(x=>x.classList.remove('selected'));d.classList.add('selected');S.lang=l;document.getElementById('lang-next').disabled=false;};grid.appendChild(d);});
+  [...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).forEach(l=>{const d=document.createElement('div');d.className='onboard-lang';d.innerHTML=`<div style="font-size:24px;">${l.flag}</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:12px;margin-top:4px;">${l.name}</div>`;d.onclick=()=>{document.querySelectorAll('.onboard-lang').forEach(x=>x.classList.remove('selected'));d.classList.add('selected');S.lang=l;document.getElementById('lang-next').disabled=false;};grid.appendChild(d);});
 }
 function finishOnboard(skip){
   S.onboarded=true;if(skip&&!S.goal)S.goal='plezier';
@@ -1312,26 +1677,27 @@ function renderGrammar(){
   const el=document.getElementById('grammar-content');if(!el)return;
   document.getElementById('grammar-lang-sub').textContent='Grammatica van '+S.lang.full+' — de bouwstenen om zelf zinnen te maken.';
   const g=getGrammar();
-  el.innerHTML=g.map(les=>`<div class="grammar-card"><div class="grammar-card-head"><div class="grammar-icon">${les.icon}</div><div><div class="grammar-title">${les.title}</div><div class="grammar-sub">${les.sub}</div></div></div><div class="grammar-body">${les.body}</div>${les.examples.map(ex=>`<div class="grammar-example"><span class="ge-target">${ex.t}</span> <span class="ge-nl">— ${ex.n}</span> <button class="dict-btn" onclick="speak('${ex.t.replace(/'/g,"")}','${S.lang.speechLang}')" style="opacity:.6;"><i class="ti ti-volume"></i></button></div>`).join('')}</div>`).join('');
+  el.innerHTML=g.map(les=>`<div class="grammar-card"><div class="grammar-card-head"><div class="grammar-icon">${les.icon}</div><div><div class="grammar-title">${les.title}</div><div class="grammar-sub">${les.sub}</div></div></div><div class="grammar-body">${les.body}</div>${les.examples.map(ex=>`<div class="grammar-example"><span class="ge-target">${ex.t}</span> <span class="ge-nl">— ${ex.n}</span> <button class="dict-btn" onclick="speak('${ex.t.replace(/'/g,"")}','${S.lang.speechLang}')" style="opacity:.6;"><span class="emo">🔊</span></button></div>`).join('')}</div>`).join('');
 }
 
 // ═══ SURINAME CULTURE CONTENT ═══
 const CULTURE_FACTS=[
-{emoji:'🎭',title:'Een smeltkroes van culturen',desc:'Suriname is een van de meest diverse landen ter wereld: Hindoestanen, Creolen, Javanen, Marrons, Inheemsen, Chinezen en meer leven samen — elk met eigen taal, keuken en tradities.'},
-{emoji:'🎶',title:'Kaseko & Kawina',desc:'Kaseko is dé Surinaamse muziekstijl, ontstaan uit Afrikaanse ritmes en Europese instrumenten. Kawina-muziek met trommels begeleidt feesten en winti-rituelen.'},
-{emoji:'🍛',title:'De Surinaamse keuken',desc:'Van roti en pom tot moksi-alesi en bami: de keuken weerspiegelt alle bevolkingsgroepen. Eten verbindt de gemeenschappen aan tafel.'},
-{emoji:'🎉',title:'Feesten het hele jaar door',desc:'Holi Phagwa (kleurenfeest), Keti Koti (afschaffing slavernij), Divali, Eid en Chinees Nieuwjaar — Suriname viert de feesten van al haar volken samen.'},
-{emoji:'🌳',title:'Het groenste land ter aarde',desc:'Meer dan 90% van Suriname is bedekt met ongerept regenwoud. De Marron- en Inheemse gemeenschappen leven al eeuwen in harmonie met dit bos.'},
-{emoji:'🪘',title:'Winti & spiritualiteit',desc:'Winti is een Afro-Surinaanse religie waarin natuur, voorouders en geesten centraal staan. Het overleefde de slavernij en leeft voort in muziek en dans.'},
-{emoji:'🧵',title:'Pangi & tembe-kunst',desc:'Marrons staan bekend om hun kleurrijke pangi-doeken en houtsnijwerk (tembe), met geometrische patronen die boodschappen en identiteit dragen.'},
-{emoji:'🏵️',title:'Pagara & Owru Yari',desc:'Oudejaarsdag wordt gevierd met enorme pagara (vuurwerkkettingen) op straat — een Chinees-Surinaamse traditie die heel Paramaribo samenbrengt.'}
+{emoji:'🎭',title:'Een smeltkroes van culturen',desc:'Suriname is een van de meest diverse landen ter wereld: Hindoestanen, Creolen, Javanen, Marrons, Inheemsen, Chinezen en meer leven samen — elk met eigen taal, keuken en tradities.',src:'Wikipedia — Suriname',url:'https://nl.wikipedia.org/wiki/Suriname'},
+{emoji:'🎶',title:'Kaseko & Kawina',desc:'Kaseko is dé Surinaamse muziekstijl, ontstaan uit Afrikaanse ritmes en Europese instrumenten. Kawina-muziek met trommels begeleidt feesten en winti-rituelen.',src:'Wikipedia — Kaseko',url:'https://nl.wikipedia.org/wiki/Kaseko'},
+{emoji:'🍛',title:'De Surinaamse keuken',desc:'Van roti en pom tot moksi-alesi en bami: de keuken weerspiegelt alle bevolkingsgroepen. Eten verbindt de gemeenschappen aan tafel.',src:'Wikipedia — Surinaamse keuken',url:'https://nl.wikipedia.org/wiki/Surinaamse_keuken'},
+{emoji:'🎉',title:'Feesten het hele jaar door',desc:'Holi Phagwa (kleurenfeest), Keti Koti (afschaffing slavernij), Divali, Eid en Chinees Nieuwjaar — Suriname viert de feesten van al haar volken samen.',src:'Wikipedia — Keti Koti',url:'https://nl.wikipedia.org/wiki/Keti_Koti'},
+{emoji:'🌳',title:'Het groenste land ter aarde',desc:'Meer dan 90% van Suriname is bedekt met ongerept regenwoud. De Marron- en Inheemse gemeenschappen leven al eeuwen in harmonie met dit bos.',src:'UNESCO — Central Suriname Nature Reserve',url:'https://whc.unesco.org/en/list/1017'},
+{emoji:'🪘',title:'Winti & spiritualiteit',desc:'Winti is een Afro-Surinaanse religie waarin natuur, voorouders en geesten centraal staan. Het overleefde de slavernij en leeft voort in muziek en dans.',src:'Wikipedia — Winti',url:'https://nl.wikipedia.org/wiki/Winti'},
+{emoji:'🧵',title:'Pangi & tembe-kunst',desc:'Marrons staan bekend om hun kleurrijke pangi-doeken en houtsnijwerk (tembe), met geometrische patronen die boodschappen en identiteit dragen.',src:'Wikipedia — Marrons',url:'https://nl.wikipedia.org/wiki/Marrons'},
+{emoji:'🏵️',title:'Pagara & Owru Yari',desc:'Oudejaarsdag wordt gevierd met enorme pagara (vuurwerkkettingen) op straat — een Chinees-Surinaamse traditie die heel Paramaribo samenbrengt.',src:'UNESCO — Historisch Paramaribo',url:'https://whc.unesco.org/en/list/940'}
 ];
 let cbIdx=0,cbTimer=null;
 function renderCultureBanner(){
   const c=CULTURE_FACTS[cbIdx];
   const em=document.getElementById('cb-emoji'),ti=document.getElementById('cb-title'),de=document.getElementById('cb-desc'),nav=document.getElementById('cb-nav');
   if(!ti)return;
-  em.textContent=c.emoji;ti.textContent=c.title;de.textContent=c.desc;
+  em.textContent=c.emoji;ti.textContent=c.title;
+  de.innerHTML=c.desc+(c.url?` <a href="${c.url}" target="_blank" rel="noopener" class="cb-src">${c.src} ↗</a>`:'');
   nav.innerHTML=CULTURE_FACTS.map((_,i)=>`<div class="cb-dot ${i===cbIdx?'active':''}" onclick="setCultureBanner(${i})"></div>`).join('');
 }
 function setCultureBanner(i){cbIdx=i;renderCultureBanner();resetCbTimer();}
@@ -1386,7 +1752,7 @@ function renderCurriculum(){
     else if(s.type==='grammar')action=`onclick="showView('grammatica')"`;
     else if(s.type==='crash')action=`onclick="showView('crash')"`;
     else if(s.type==='exam')action=`onclick="startExam()"`;
-    html+=`<div class="curr-step ${cls}" ${action}><div class="curr-step-num">Stap ${stepNum} · ${s.type==='lesson'?'Woordenschat':s.type==='grammar'?'Grammatica':s.type==='crash'?'Spoedcursus':'Examen'}</div><div class="curr-step-title">${s.emoji} ${s.title} ${done?'<i class="ti ti-circle-check" style="color:var(--green);font-size:16px;"></i>':''}</div><div class="curr-step-desc">${s.desc}</div></div>`;
+    html+=`<div class="curr-step ${cls}" ${action}><div class="curr-step-num">Stap ${stepNum} · ${s.type==='lesson'?'Woordenschat':s.type==='grammar'?'Grammatica':s.type==='crash'?'Spoedcursus':'Examen'}</div><div class="curr-step-title">${s.emoji} ${s.title} ${done?'<span class="emo">✅</span>':''}</div><div class="curr-step-desc">${s.desc}</div></div>`;
   });
   html+='</div>';el.innerHTML=html;
 }
@@ -1427,12 +1793,12 @@ function addMistake(word,nl){
 }
 function removeMistake(word,lang){let m=getMistakes().filter(x=>!(x.w===word&&x.lang===lang));localStorage.setItem('talusuri_mistakes',JSON.stringify(m));updateMistakesBadge();renderMistakes();}
 function clearMistakes(){if(confirm('Alle fouten wissen?')){localStorage.removeItem('talusuri_mistakes');updateMistakesBadge();renderMistakes();}}
-function updateMistakesBadge(){const n=getMistakes().length;const b=document.getElementById('mistakes-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('mistakes-count');if(c)c.textContent='('+n+')';}
+function updateMistakesBadge(){const n=getMistakes().length;const b=document.getElementById('more-mistakes-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('mistakes-count');if(c)c.textContent='('+n+')';const dot=document.getElementById('dot-oefenen');if(dot)dot.style.display=n>0?'block':'none';}
 function renderMistakes(){
   const list=document.getElementById('mistakes-list');if(!list)return;
   const m=getMistakes();
-  if(!m.length){list.innerHTML='<div class="mistakes-empty"><i class="ti ti-confetti" style="font-size:32px;display:block;margin-bottom:8px;opacity:.3;"></i>Nog geen fouten — goed bezig! 🎉<br><span style="font-size:12px;">Fout beantwoorde woorden verschijnen hier om te herhalen.</span></div>';return;}
-  list.innerHTML=m.map(x=>`<div class="mistake-item"><div style="flex:1;"><div class="mistake-word">${x.w}</div><div class="mistake-nl">${x.nl} · ${x.langName}</div></div><span class="mistake-count">${x.count}× fout</span><button class="dict-btn" onclick="speak('${x.w.replace(/'/g,"")}','${(LANGS.find(l=>l.id===x.lang)||{}).speechLang||"nl-NL"}')"><i class="ti ti-volume"></i></button><button class="dict-btn" onclick="removeMistake('${x.w.replace(/'/g,"")}','${x.lang}')" title="Verwijderen"><i class="ti ti-check"></i></button></div>`).join('');
+  if(!m.length){list.innerHTML='<div class="mistakes-empty"><span class="emo">🎉</span>Nog geen fouten — goed bezig! 🎉<br><span style="font-size:12px;">Fout beantwoorde woorden verschijnen hier om te herhalen.</span></div>';return;}
+  list.innerHTML=m.map(x=>`<div class="mistake-item"><div style="flex:1;"><div class="mistake-word">${x.w}</div><div class="mistake-nl">${x.nl} · ${x.langName}</div></div><span class="mistake-count">${x.count}× fout</span><button class="dict-btn" onclick="speak('${x.w.replace(/'/g,"")}','${(LANGS.find(l=>l.id===x.lang)||{}).speechLang||"nl-NL"}')"><span class="emo">🔊</span></button><button class="dict-btn" onclick="removeMistake('${x.w.replace(/'/g,"")}','${x.lang}')" title="Verwijderen"><span class="emo">✓</span></button></div>`).join('');
 }
 function practiceMistakes(){
   const m=getMistakes().filter(x=>x.lang===S.lang.id);
@@ -1448,7 +1814,7 @@ function practiceMistakes(){
 // ═══ LANGUAGE SWITCHER ═══
 function renderLangSwitchMenu(){
   const menu=document.getElementById('lang-switch-menu');if(!menu)return;
-  menu.innerHTML=LANGS.map(l=>`<div class="ls-item ${l.id===S.lang.id?'active':''}" onclick="switchLang('${l.id}')"><span class="ls-item-flag">${l.flag}</span><div style="flex:1;"><div class="ls-item-name">${l.name}</div><div class="ls-item-meta">${l.speakers} sprekers</div></div>${l.id===S.lang.id?'<i class="ti ti-check" style="color:var(--green);"></i>':''}</div>`).join('');
+  menu.innerHTML=[...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(l=>`<div class="ls-item ${l.id===S.lang.id?'active':''}" onclick="switchLang('${l.id}')"><span class="ls-item-flag">${l.flag}</span><div style="flex:1;"><div class="ls-item-name">${l.name}</div><div class="ls-item-meta">${l.speakers} sprekers</div></div>${l.id===S.lang.id?'<span class="emo">✓</span>':''}</div>`).join('');
 }
 function toggleLangMenu(e){if(e)e.stopPropagation();const m=document.getElementById('lang-switch-menu');renderLangSwitchMenu();m.classList.toggle('open');}
 function switchLang(id){const l=LANGS.find(x=>x.id===id);if(l){setLang(l);showView('home');}document.getElementById('lang-switch-menu').classList.remove('open');}
@@ -1457,7 +1823,7 @@ document.addEventListener('click',e=>{const sw=document.getElementById('lang-swi
 
 // ═══ INIT ═══
 function bootApp(){
-  applyTheme();renderStats();renderLangGrid();renderSourcesGrid();renderHomeBadges();renderBadgesGrid();setLang(S.lang);renderProgress();updateFeedbackBadge();renderCultureBanner();resetCbTimer();renderDiscover();updateSwitcherLabel();updateMistakesBadge();
+  applyTheme();renderStats();renderLangGrid();renderSourcesGrid();renderHomeBadges();renderBadgesGrid();setLang(S.lang);renderProgress();updateFeedbackBadge();renderCultureBanner();resetCbTimer();renderDiscover();updateSwitcherLabel();updateMistakesBadge();initBeta();
 }
 function init(){
   applyTheme();
