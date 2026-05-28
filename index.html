@@ -1,248 +1,412 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" id="htmlRoot">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaluSuri — Talen van Suriname</title>
-  <meta name="description" content="Leer de talen van Suriname. Van Sarnami tot Sranan Tongo, van Javaans tot Arawak — verbind je met alle gemeenschappen van Suriname.">
-  <meta property="og:title" content="TaluSuri — Talen van Suriname">
-  <meta property="og:description" content="Leer de 10 talen van Suriname op een interactieve manier.">
-  <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaluSuri — Talen van Suriname</title>
+<meta name="description" content="Leer de 10 talen van Suriname. Van Sarnami tot Sranan Tongo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1B7A4B;--green-l:#E8F5EE;--red:#CC2B2B;--red-l:#FAEAEA;
+  --gold:#C98B2A;--gold-l:#FDF3E3;--cream:#FAF8F4;--ink:#1A1916;
+  --muted:#6B6860;--border:rgba(26,25,22,0.1);--r:18px;
+  --blue:#1B5FA4;--blue-l:#E8F0FB;--card:#fff;--bg:#FAF8F4;
+}
+html[data-theme="dark"]{
+  --green:#3DA873;--green-l:#16312A;--red:#E5645F;--red-l:#3A2020;
+  --gold:#E0A848;--gold-l:#3A2E1A;--cream:#16151A;--ink:#F0EEE8;
+  --muted:#9B988F;--border:rgba(255,255,255,0.12);
+  --blue:#5B9BE0;--blue-l:#16263A;--card:#1E1D24;--bg:#16151A;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;transition:background .3s,color .3s;}
+.app{max-width:1020px;margin:0 auto;padding:24px 16px 64px;}
+.hidden{display:none!important;}
 
-    :root {
-      --green: #1B7A4B;
-      --green-l: #E8F5EE;
-      --red: #CC2B2B;
-      --red-l: #FAEAEA;
-      --gold: #C98B2A;
-      --gold-l: #FDF3E3;
-      --cream: #FAF8F4;
-      --ink: #1A1916;
-      --muted: #6B6860;
-      --border: rgba(26,25,22,0.1);
-      --r: 18px;
-    }
+/* ONBOARDING */
+.onboard{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.onboard-inner{max-width:520px;width:100%;text-align:center;}
+.onboard-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px;margin-bottom:6px;}
+.onboard-logo span{color:var(--green);}
+.onboard-tag{font-size:14px;color:var(--muted);margin-bottom:32px;}
+.onboard-step{display:none;}
+.onboard-step.active{display:block;}
+.onboard-q{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:8px;}
+.onboard-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+.onboard-opts{display:grid;gap:10px;margin-bottom:24px;}
+.onboard-opt{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 20px;cursor:pointer;transition:all .15s;text-align:left;display:flex;align-items:center;gap:14px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--ink);}
+.onboard-opt:hover{border-color:var(--green);background:var(--green-l);}
+.onboard-opt.selected{border-color:var(--green);background:var(--green-l);}
+.onboard-opt-emoji{font-size:26px;}
+.onboard-opt-text{flex:1;}
+.onboard-opt-name{font-weight:500;}
+.onboard-opt-meta{font-size:12px;color:var(--muted);margin-top:1px;}
+.onboard-lang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:340px;overflow-y:auto;margin-bottom:20px;}
+.onboard-lang{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:all .15s;text-align:center;}
+.onboard-lang:hover,.onboard-lang.selected{border-color:var(--green);background:var(--green-l);}
+.onboard-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:500;font-size:15px;cursor:pointer;transition:transform .15s;}
+.onboard-btn:hover{transform:scale(1.01);}
+.onboard-btn:disabled{opacity:.4;cursor:not-allowed;}
+.onboard-progress{display:flex;gap:6px;justify-content:center;margin-bottom:28px;}
+.onboard-dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+.onboard-dot.active{background:var(--green);}
+.onboard-skip{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:14px;font-family:'DM Sans',sans-serif;text-decoration:underline;}
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--ink);
-      min-height: 100vh;
-    }
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.5px;line-height:1;}
+.logo-sub{font-size:10px;font-weight:400;color:var(--muted);letter-spacing:.05em;margin-top:1px;}
+.logo-accent{color:var(--green);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.level-pill{display:flex;align-items:center;gap:6px;background:var(--green-l);border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--green);}
+.streak-pill{display:flex;align-items:center;gap:6px;background:var(--gold-l);border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:500;color:var(--gold);}
+.icon-btn{width:36px;height:36px;border-radius:99px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:17px;transition:all .15s;}
+.icon-btn:hover{border-color:var(--green);color:var(--green);}
 
-    .app { max-width: 1020px; margin: 0 auto; padding: 24px 16px 64px; }
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+.tab{padding:8px 15px;border-radius:99px;border:1px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;background:var(--card);color:var(--muted);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+.tab:hover:not(.active){border-color:var(--green);color:var(--green);}
 
-    /* TOPBAR */
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
-    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.5px; line-height: 1; }
-    .logo-sub { font-size: 10px; font-weight: 400; color: var(--muted); letter-spacing: .05em; margin-top: 1px; }
-    .logo-accent { color: var(--green); }
-    .streak-pill { display: flex; align-items: center; gap: 6px; background: var(--gold-l); border: 1px solid rgba(201,139,42,0.25); border-radius: 99px; padding: 6px 14px; font-size: 13px; font-weight: 500; color: #7A5A1A; }
-    .streak-pill i { font-size: 16px; color: var(--gold); }
+.view{display:none;}.view.active{display:block;}
 
-    /* TABS */
-    .tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
-    .tab { padding: 8px 16px; border-radius: 99px; border: 1px solid var(--border); font-size: 13px; font-weight: 500; cursor: pointer; background: #fff; color: var(--muted); transition: all .15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; }
-    .tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .tab:hover:not(.active) { background: var(--green-l); border-color: var(--green); color: var(--green); }
+/* BENTO */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:22px;overflow:hidden;position:relative;}
+.card.clickable{cursor:pointer;transition:transform .18s,box-shadow .18s;}
+.card.clickable:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07);}
+.c-hero{grid-column:span 8;background:var(--green);color:#fff;border:none;min-height:190px;}
+.c-level{grid-column:span 4;background:var(--ink);color:var(--bg);border:none;}
+.c-lesson{grid-column:span 4;min-height:150px;}
+.c-search{grid-column:span 12;}
+.c-dict{grid-column:span 5;min-height:260px;}
+.c-flash{grid-column:span 7;min-height:260px;}
+.c-prog{grid-column:span 8;}
+.c-badges{grid-column:span 4;}
+.c-culture{grid-column:span 6;min-height:155px;}
+.c-phrase{grid-column:span 6;min-height:155px;}
+.c-footnote{grid-column:span 12;}
 
-    /* VIEWS */
-    .view { display: none; }
-    .view.active { display: block; }
+.card-label{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.card-label.lgt{color:rgba(255,255,255,.55);}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;}
 
-    /* BENTO */
-    .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-    .card { background: #fff; border-radius: var(--r); border: 1px solid var(--border); padding: 22px; overflow: hidden; position: relative; }
-    .card.clickable { cursor: pointer; transition: transform .18s, box-shadow .18s; }
-    .card.clickable:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.07); }
-    .c-hero { grid-column: span 8; background: var(--green); color: #fff; border: none; min-height: 190px; }
-    .c-streak { grid-column: span 4; background: var(--ink); color: #fff; border: none; }
-    .c-lesson { grid-column: span 4; min-height: 150px; }
-    .c-dict { grid-column: span 5; min-height: 230px; }
-    .c-flash { grid-column: span 7; min-height: 230px; }
-    .c-prog { grid-column: span 12; }
-    .c-culture { grid-column: span 6; min-height: 155px; }
-    .c-phrase { grid-column: span 6; min-height: 155px; }
-    .c-footnote { grid-column: span 12; }
+/* HERO */
+.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;line-height:1.1;letter-spacing:-1px;margin-bottom:8px;}
+.hero-sub{font-size:13px;opacity:.8;margin-bottom:18px;line-height:1.5;}
+.hero-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.hero-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--green);border:none;border-radius:99px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:transform .15s;}
+.hero-btn:hover{transform:scale(1.03);}
+.hero-btn.outline{background:rgba(255,255,255,.15);color:#fff;}
+.hero-deco{position:absolute;right:-10px;top:-10px;font-size:110px;opacity:.1;user-select:none;pointer-events:none;}
+.wod{position:absolute;bottom:18px;right:22px;text-align:right;}
+.wod-lbl{font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.08em;text-transform:uppercase;}
+.wod-w{font-family:'Syne',sans-serif;font-weight:700;font-size:19px;color:#fff;}
+.wod-nl{font-size:12px;color:rgba(255,255,255,.7);}
 
-    .card-label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .card-label.lgt { color: rgba(255,255,255,.5); }
-    .card-title { font-family: 'Syne', sans-serif; font-weight: 700; }
+/* LEVEL CARD */
+.level-num{font-family:'Syne',sans-serif;font-weight:800;font-size:46px;line-height:1;color:var(--gold);margin:6px 0 2px;}
+.level-bar{margin-top:14px;height:8px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;}
+.level-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .5s;}
+.level-meta{font-size:11px;color:rgba(255,255,255,.55);margin-top:8px;display:flex;justify-content:space-between;}
+.streak-row{display:flex;gap:5px;margin-top:14px;}
+.s-dot{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.15);}
+.s-dot.done{background:var(--gold);}
 
-    /* HERO */
-    .hero-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px; line-height: 1.1; letter-spacing: -1px; margin-bottom: 8px; }
-    .hero-sub { font-size: 13px; opacity: .75; margin-bottom: 18px; line-height: 1.5; }
-    .hero-btn { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--green); border: none; border-radius: 99px; padding: 9px 18px; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; transition: transform .15s; }
-    .hero-btn:hover { transform: scale(1.03); }
-    .hero-deco { position: absolute; right: -10px; top: -10px; font-size: 110px; opacity: .08; user-select: none; pointer-events: none; }
-    .wod { position: absolute; bottom: 20px; right: 22px; text-align: right; }
-    .wod-lbl { font-size: 10px; color: rgba(255,255,255,.5); letter-spacing: .08em; text-transform: uppercase; }
-    .wod-w { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: #fff; }
-    .wod-nl { font-size: 12px; color: rgba(255,255,255,.6); }
+/* SEARCH */
+.search-box{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:4px 4px 4px 14px;}
+.search-box i{color:var(--muted);font-size:18px;}
+.search-box input{flex:1;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;padding:10px 0;}
+.search-results{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.search-result{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .15s;}
+.search-result:hover{border-color:var(--green);}
+.sr-word{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--green);}
+.sr-nl{font-size:12px;color:var(--muted);margin-top:2px;}
+.sr-lang{font-size:10px;color:var(--muted);margin-top:4px;display:inline-block;background:var(--green-l);padding:1px 7px;border-radius:99px;}
+.search-empty{text-align:center;padding:24px;color:var(--muted);font-size:13px;}
 
-    /* STREAK */
-    .streak-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 48px; line-height: 1; color: var(--gold); margin: 6px 0 2px; }
-    .streak-bar { margin-top: 14px; display: flex; gap: 5px; }
-    .s-dot { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.12); }
-    .s-dot.done { background: var(--gold); }
-    .xp-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
-    .xp-bar { flex: 1; height: 5px; background: rgba(255,255,255,.15); border-radius: 3px; }
-    .xp-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .5s; }
-    .xp-lbl { font-size: 11px; color: rgba(255,255,255,.5); white-space: nowrap; }
+/* LANG GRID */
+.lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.lang-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:14px 12px;cursor:pointer;transition:all .15s;text-align:center;}
+.lang-card:hover,.lang-card.active{border-color:var(--green);background:var(--green-l);}
+.lang-card.active .lc-name{color:var(--green);}
+.lc-flag{font-size:26px;margin-bottom:6px;}
+.lc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--ink);}
+.lc-meta{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.3;}
+.lc-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;margin-top:5px;font-weight:500;}
+.badge-green{background:var(--green-l);color:var(--green);}
+.badge-gold{background:var(--gold-l);color:var(--gold);}
+.badge-red{background:var(--red-l);color:var(--red);}
+.badge-ink{background:var(--border);color:var(--muted);}
 
-    /* LANG GRID */
-    .lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-    .lang-card { background: var(--cream); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 12px; cursor: pointer; transition: all .15s; text-align: center; }
-    .lang-card:hover { border-color: var(--green); background: var(--green-l); }
-    .lang-card.active { border-color: var(--green); background: var(--green-l); }
-    .lang-card.active .lc-name { color: var(--green); }
-    .lc-flag { font-size: 26px; margin-bottom: 6px; }
-    .lc-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--ink); }
-    .lc-meta { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
-    .lc-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-top: 5px; font-weight: 500; }
-    .badge-green { background: var(--green-l); color: var(--green); }
-    .badge-gold { background: var(--gold-l); color: #7A5A1A; }
-    .badge-red { background: var(--red-l); color: var(--red); }
-    .badge-ink { background: #EEECEA; color: #444; }
+/* LESSON CARDS */
+.lesson-emoji{font-size:30px;margin-bottom:8px;}
+.lesson-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px;}
+.lesson-meta{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.lesson-bar{height:4px;background:var(--border);border-radius:2px;}
+.lesson-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;}
+.lesson-done{position:absolute;top:14px;right:14px;color:var(--green);font-size:18px;}
 
-    /* LESSONS */
-    .lesson-emoji { font-size: 30px; margin-bottom: 8px; }
-    .lesson-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 3px; }
-    .lesson-meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-    .lesson-bar { height: 4px; background: var(--border); border-radius: 2px; }
-    .lesson-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width .4s; }
+/* EXAM CARD */
+.exam-card{background:linear-gradient(135deg,var(--blue),#0E4578);color:#fff;border:none;}
 
-    /* DICT */
-    .dict-search { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--cream); color: var(--ink); margin-bottom: 10px; outline: none; transition: border-color .15s; }
-    .dict-search:focus { border-color: var(--green); }
-    .dict-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 9px; border-radius: 8px; font-size: 13px; transition: background .12s; }
-    .dict-row:hover { background: var(--green-l); }
-    .dict-nl { color: var(--muted); }
-    .dict-sr { font-weight: 500; }
-    .dict-pron { font-size: 11px; color: var(--green); font-style: italic; }
+/* DICT */
+.dict-search{width:100%;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--ink);margin-bottom:10px;outline:none;}
+.dict-search:focus{border-color:var(--green);}
+.dict-row{display:flex;justify-content:space-between;align-items:center;padding:6px 9px;border-radius:8px;font-size:13px;gap:8px;}
+.dict-row:hover{background:var(--green-l);}
+.dict-row:hover .dict-actions{opacity:1;}
+.dict-nl{color:var(--muted);flex:1;}
+.dict-word-block{display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
+.dict-sr{font-weight:500;}
+.dict-pron{font-size:11px;color:var(--green);font-style:italic;}
+.dict-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;}
+.dict-btn{background:none;border:none;cursor:pointer;padding:3px 5px;border-radius:6px;font-size:13px;color:var(--muted);transition:all .12s;display:flex;align-items:center;}
+.dict-btn:hover{background:var(--green-l);color:var(--green);}
+.dict-btn.flag:hover{background:var(--red-l);color:var(--red);}
+.dict-btn.mic-contrib:hover{background:var(--blue-l);color:var(--blue);}
 
-    /* FLASH */
-    .flash-card { background: var(--cream); border-radius: 12px; border: 1px solid var(--border); padding: 24px; text-align: center; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 12px; transition: transform .15s; }
-    .flash-card:hover { transform: scale(1.01); }
-    .flash-word { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 26px; color: var(--green); letter-spacing: -.5px; }
-    .flash-pron { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .flash-ans { font-size: 16px; font-weight: 500; margin-top: 5px; opacity: 0; transition: opacity .2s; }
-    .flash-ans.show { opacity: 1; }
-    .flash-acts { display: flex; gap: 9px; }
-    .flash-btn { flex: 1; padding: 9px; border-radius: 10px; border: 1px solid var(--border); font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; transition: all .15s; }
-    .flash-btn.ok { background: var(--green); color: #fff; border-color: var(--green); }
-    .flash-btn.nok { background: var(--red-l); color: var(--red); border-color: rgba(204,43,43,.2); }
-    .flash-btn:hover { transform: scale(1.02); }
+/* FLAG FORM */
+.flag-form{background:var(--red-l);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:6px;display:none;}
+.flag-form.open{display:block;}
+.flag-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);background:var(--card);resize:none;outline:none;height:60px;}
+.flag-form textarea:focus{border-color:var(--red);}
+.flag-form-actions{display:flex;gap:6px;margin-top:7px;}
+.flag-submit{background:var(--red);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;}
+.flag-cancel{background:none;border:1px solid var(--border);color:var(--red);border-radius:7px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;}
+.flag-thanks{font-size:12px;color:var(--green);display:none;padding:4px 0;}
 
-    /* PROGRESS */
-    .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-    .prog-item { text-align: center; }
-    .prog-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* AUDIO */
+.audio-tabs{display:flex;gap:6px;}
+.audio-tab{padding:5px 11px;border-radius:99px;border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:var(--card);color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif;}
+.audio-tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.audio-banner{background:var(--blue-l);border:1px solid var(--border);border-radius:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.audio-banner i{color:var(--blue);font-size:18px;margin-top:1px;flex-shrink:0;}
+.audio-banner-text{font-size:12px;color:var(--ink);line-height:1.55;}
+.audio-banner-text strong{color:var(--blue);display:block;margin-bottom:2px;font-size:13px;}
 
-    /* CULTURE */
-    .culture-icon { font-size: 32px; margin-bottom: 8px; }
-    .culture-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 5px; }
-    .culture-text { font-size: 13px; line-height: 1.55; }
+/* FLASH */
+.flash-card{background:var(--bg);border-radius:12px;border:1px solid var(--border);padding:20px 24px;text-align:center;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:12px;}
+.flash-word{font-family:'Syne',sans-serif;font-weight:700;font-size:26px;color:var(--green);letter-spacing:-.5px;}
+.flash-pron{font-size:12px;color:var(--muted);margin-top:3px;}
+.flash-nl{font-size:16px;font-weight:500;margin-top:5px;opacity:0;transition:opacity .2s;}
+.flash-nl.show{opacity:1;}
+.flash-audio-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;min-height:30px;}
+.speak-btn{display:inline-flex;align-items:center;gap:5px;background:var(--green-l);border:1px solid var(--border);color:var(--green);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.speak-btn:hover{background:var(--green);color:#fff;}
+.contrib-btn{display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);border:1px solid var(--border);color:var(--blue);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.contrib-btn:hover{background:var(--blue);color:#fff;}
+.flash-reveal-btn{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;color:var(--ink);margin-bottom:8px;}
+.flash-reveal-btn:hover{border-color:var(--green);background:var(--green-l);}
+.flash-acts{display:flex;gap:9px;}
+.flash-btn{flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all .15s;}
+.flash-btn.ok{background:var(--green);color:#fff;border-color:var(--green);}
+.flash-btn.nok{background:var(--red-l);color:var(--red);}
+.flash-btn:hover{transform:scale(1.02);}
 
-    /* PHRASE */
-    .phrase-item { padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .phrase-item:last-child { border-bottom: none; }
-    .phrase-nl { font-size: 11px; color: var(--muted); }
-    .phrase-sr { font-size: 13px; font-weight: 500; }
-    .phrase-pron { font-size: 11px; color: var(--green); font-style: italic; }
+/* PROGRESS */
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px;}
+.prog-item{text-align:center;}
+.prog-lbl{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-    /* FOOTNOTE */
-    .footnote-card { background: #fff; border-radius: var(--r); border: 1px solid var(--border); padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
-    .fn-marker { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--gold-l); border: 1px solid rgba(201,139,42,.2); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--gold); font-weight: 500; margin-top: 1px; }
-    .fn-title { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
-    .fn-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+/* BADGES */
+.badge-list{display:flex;flex-direction:column;gap:8px;}
+.badge-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;background:var(--bg);border:1px solid var(--border);}
+.badge-item.locked{opacity:.4;}
+.badge-icon{font-size:22px;width:38px;height:38px;border-radius:50%;background:var(--gold-l);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.badge-info-name{font-size:13px;font-weight:500;}
+.badge-info-desc{font-size:11px;color:var(--muted);}
 
-    /* SOURCES */
-    .sources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-    .source-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-    .source-lang { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .source-flag { font-size: 18px; }
-    .source-lang-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
-    .source-item { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.5; }
-    .source-item:last-child { border-bottom: none; }
-    .source-item strong { color: var(--ink); font-weight: 500; display: block; margin-bottom: 1px; }
-    .source-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 99px; margin-top: 3px; font-weight: 500; }
-    .tag-primary { background: var(--green-l); color: var(--green); }
-    .tag-secondary { background: #EEECEA; color: #555; }
+/* CULTURE */
+.culture-icon{font-size:32px;margin-bottom:8px;}
+.culture-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:5px;}
+.culture-text{font-size:13px;line-height:1.55;}
 
-    /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(26,25,22,.65); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    .modal { background: #fff; border-radius: 24px; width: 100%; max-width: 520px; padding: 30px; position: relative; max-height: 88vh; overflow-y: auto; }
-    .modal-close { position: absolute; top: 14px; right: 14px; background: var(--cream); border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; color: var(--muted); }
-    .q-counter { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
-    .q-q { font-size: 17px; font-weight: 500; margin-bottom: 18px; line-height: 1.4; }
-    .q-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 16px; }
-    .q-opt { padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all .15s; text-align: left; font-weight: 500; }
-    .q-opt:hover { border-color: var(--green); background: var(--green-l); }
-    .q-opt.correct { background: var(--green); color: #fff; border-color: var(--green); }
-    .q-opt.wrong { background: var(--red-l); color: var(--red); border-color: rgba(204,43,43,.3); }
-    .q-fb { font-size: 13px; padding: 9px 13px; border-radius: 10px; margin-bottom: 14px; display: none; }
-    .q-fb.good { background: var(--green-l); color: var(--green); }
-    .q-fb.bad { background: var(--red-l); color: var(--red); }
-    .q-next { width: 100%; padding: 13px; border-radius: 12px; border: none; background: var(--green); color: #fff; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; display: none; transition: transform .15s; }
-    .q-next:hover { transform: scale(1.01); }
-    .complete { text-align: center; padding: 10px 0; }
-    .complete-emoji { font-size: 52px; margin-bottom: 14px; }
-    .complete-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; margin-bottom: 6px; }
-    .complete-sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
-    .complete-xp { display: inline-flex; align-items: center; gap: 8px; background: var(--gold-l); color: #7A5A1A; border-radius: 99px; padding: 7px 16px; font-weight: 500; font-size: 13px; margin-bottom: 20px; }
-    .complete-culture { background: var(--cream); border-radius: 12px; padding: 14px; margin-bottom: 18px; font-size: 12px; color: var(--muted); line-height: 1.5; text-align: left; }
-    .complete-culture strong { font-size: 11px; color: var(--ink); display: block; margin-bottom: 4px; }
-    .complete-btn { width: 100%; padding: 13px; border-radius: 12px; border: none; background: var(--green); color: #fff; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; }
+/* PHRASE */
+.phrase-item{padding:9px 0;border-bottom:1px solid var(--border);}
+.phrase-item:last-child{border-bottom:none;}
+.phrase-nl{font-size:11px;color:var(--muted);}
+.phrase-sr{font-size:13px;font-weight:500;}
+.phrase-pron{font-size:11px;color:var(--green);font-style:italic;}
 
-    /* FOOTER */
-    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .footer-logo { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
-    .footer-logo span { color: var(--green); }
-    .footer-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+/* FOOTNOTE */
+.footnote-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:16px 20px;display:flex;gap:14px;align-items:flex-start;}
+.fn-marker{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--gold-l);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);font-weight:500;margin-top:1px;}
+.fn-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.fn-text{font-size:12px;color:var(--muted);line-height:1.6;}
 
-    /* RESPONSIVE */
-    @media (max-width: 720px) {
-      .c-hero, .c-streak, .c-lesson, .c-dict, .c-flash, .c-culture, .c-phrase { grid-column: span 12 !important; }
-      .q-opts { grid-template-columns: 1fr; }
-      .prog-grid { grid-template-columns: repeat(5, 1fr); }
-      .sources-grid { grid-template-columns: 1fr; }
-      .footer { flex-direction: column; align-items: flex-start; }
-    }
-    @media (max-width: 540px) {
-      .lang-grid { grid-template-columns: repeat(2, 1fr); }
-      .tabs { gap: 4px; }
-      .tab { padding: 7px 12px; font-size: 12px; }
-    }
-  </style>
+/* SOURCES */
+.sources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+.source-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.source-lang{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.source-flag{font-size:18px;}
+.source-lang-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+.source-item{padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.5;}
+.source-item:last-child{border-bottom:none;}
+.source-item strong{color:var(--ink);font-weight:500;display:block;margin-bottom:1px;}
+.source-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:99px;margin-top:3px;font-weight:500;}
+.tag-primary{background:var(--green-l);color:var(--green);}
+.tag-secondary{background:var(--border);color:var(--muted);}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);margin-bottom:8px;}
+.lb-row.me{border-color:var(--green);background:var(--green-l);}
+.lb-rank{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;width:32px;text-align:center;color:var(--muted);}
+.lb-rank.top{color:var(--gold);}
+.lb-avatar{width:38px;height:38px;border-radius:50%;background:var(--green-l);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:var(--green);flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-weight:500;font-size:14px;}
+.lb-detail{font-size:11px;color:var(--muted);}
+.lb-xp{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--green);}
+
+/* FEEDBACK */
+.feedback-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
+.feedback-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.feedback-item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.feedback-word{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--green);}
+.feedback-lang{font-size:11px;color:var(--muted);}
+.feedback-text{font-size:13px;color:var(--ink);line-height:1.5;}
+.feedback-meta{font-size:11px;color:var(--muted);margin-top:5px;}
+.feedback-clear{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:16px;}
+.feedback-clear:hover{border-color:var(--red);color:var(--red);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border-radius:24px;width:100%;max-width:520px;padding:30px;position:relative;max-height:88vh;overflow-y:auto;}
+.modal-close{position:absolute;top:14px;right:14px;background:var(--bg);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.q-counter{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.q-progress{height:5px;background:var(--border);border-radius:3px;margin-bottom:18px;overflow:hidden;}
+.q-progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width .3s;}
+.q-q{font-size:17px;font-weight:500;margin-bottom:16px;line-height:1.4;}
+.q-speak-row{display:flex;gap:8px;margin-bottom:14px;}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+.q-opt{padding:13px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s;text-align:left;font-weight:500;color:var(--ink);}
+.q-opt:hover{border-color:var(--green);background:var(--green-l);}
+.q-opt.correct{background:var(--green);color:#fff;border-color:var(--green);}
+.q-opt.wrong{background:var(--red-l);color:var(--red);border-color:var(--red);}
+/* TYPE-IN exercise */
+.q-input{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:15px;background:var(--bg);color:var(--ink);outline:none;margin-bottom:16px;}
+.q-input:focus{border-color:var(--green);}
+.q-input.correct{border-color:var(--green);background:var(--green-l);}
+.q-input.wrong{border-color:var(--red);background:var(--red-l);}
+.q-check{width:100%;padding:13px;border-radius:12px;border:none;background:var(--ink);color:var(--bg);font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;margin-bottom:16px;}
+/* MATCH exercise */
+.q-match{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.q-match-col{display:flex;flex-direction:column;gap:8px;}
+.q-match-item{padding:12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;text-align:center;font-size:13px;font-weight:500;transition:all .15s;color:var(--ink);}
+.q-match-item:hover{border-color:var(--green);}
+.q-match-item.selected{border-color:var(--blue);background:var(--blue-l);}
+.q-match-item.matched{border-color:var(--green);background:var(--green-l);color:var(--green);pointer-events:none;}
+.q-fb{font-size:13px;padding:9px 13px;border-radius:10px;margin-bottom:10px;display:none;}
+.q-fb.good{background:var(--green-l);color:var(--green);}
+.q-fb.bad{background:var(--red-l);color:var(--red);}
+.q-flag-row{margin-bottom:12px;display:none;}
+.q-flag-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.q-flag-btn:hover{border-color:var(--red);color:var(--red);}
+.q-flag-form{background:var(--red-l);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px;display:none;}
+.q-flag-form.open{display:block;}
+.q-flag-form textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);background:var(--card);resize:none;outline:none;height:55px;}
+.q-next{width:100%;padding:13px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;display:none;}
+.q-next:hover{transform:scale(1.01);}
+.complete{text-align:center;padding:10px 0;}
+.complete-emoji{font-size:52px;margin-bottom:14px;}
+.complete-title{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;margin-bottom:6px;}
+.complete-sub{color:var(--muted);font-size:13px;margin-bottom:18px;}
+.complete-rewards{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
+.complete-reward{display:inline-flex;align-items:center;gap:6px;background:var(--gold-l);color:var(--gold);border-radius:99px;padding:7px 14px;font-weight:500;font-size:13px;}
+.complete-badge-unlock{background:var(--green-l);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:none;}
+.complete-badge-unlock.show{display:block;}
+.complete-culture{background:var(--bg);border-radius:12px;padding:14px;margin-bottom:18px;font-size:12px;color:var(--muted);line-height:1.5;text-align:left;}
+.complete-culture strong{font-size:11px;color:var(--ink);display:block;margin-bottom:4px;}
+.complete-btn{width:100%;padding:13px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;}
+
+/* FOOTER */
+.footer{margin-top:48px;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;}
+.footer-logo span{color:var(--green);}
+.footer-text{font-size:12px;color:var(--muted);line-height:1.5;}
+
+@media(max-width:720px){
+  .c-hero,.c-level,.c-lesson,.c-dict,.c-flash,.c-culture,.c-phrase,.c-prog,.c-badges{grid-column:span 12!important;}
+  .q-opts{grid-template-columns:1fr;}
+  .prog-grid{grid-template-columns:repeat(5,1fr);}
+  .sources-grid,.search-results{grid-template-columns:1fr;}
+  .dict-actions{opacity:1;}
+  .onboard-lang-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:540px){.lang-grid{grid-template-columns:repeat(2,1fr);}.tabs{gap:4px;}.tab{padding:7px 11px;font-size:12px;}}
+</style>
 </head>
 <body>
 
-<div class="app">
+<!-- ONBOARDING -->
+<div class="onboard" id="onboard">
+  <div class="onboard-inner">
+    <div class="onboard-logo">Talu<span>Suri</span></div>
+    <div class="onboard-tag">Talen van Suriname — verbinding door taal</div>
+    <div class="onboard-progress">
+      <div class="onboard-dot active" id="od0"></div>
+      <div class="onboard-dot" id="od1"></div>
+      <div class="onboard-dot" id="od2"></div>
+    </div>
+
+    <div class="onboard-step active" id="ostep0">
+      <div class="onboard-q">Welkom! 👋</div>
+      <div class="onboard-sub">TaluSuri helpt je de talen van Suriname te leren en de verschillende gemeenschappen dichter bij elkaar te brengen. Laten we je profiel instellen.</div>
+      <button class="onboard-btn" onclick="onboardNext(1)">Laten we beginnen</button>
+    </div>
+
+    <div class="onboard-step" id="ostep1">
+      <div class="onboard-q">Wat wil je bereiken?</div>
+      <div class="onboard-sub">Dit helpt ons je ervaring af te stemmen.</div>
+      <div class="onboard-opts" id="goal-opts">
+        <div class="onboard-opt" onclick="selectGoal(this,'verbinden')"><span class="onboard-opt-emoji">🤝</span><div class="onboard-opt-text"><div class="onboard-opt-name">Verbinden met familie & gemeenschap</div><div class="onboard-opt-meta">De taal van mijn roots leren</div></div></div>
+        <div class="onboard-opt" onclick="selectGoal(this,'cultuur')"><span class="onboard-opt-emoji">🎭</span><div class="onboard-opt-text"><div class="onboard-opt-name">Cultuur ontdekken</div><div class="onboard-opt-meta">Meer leren over Suriname</div></div></div>
+        <div class="onboard-opt" onclick="selectGoal(this,'reizen')"><span class="onboard-opt-emoji">✈️</span><div class="onboard-opt-text"><div class="onboard-opt-name">Voorbereiden op een reis</div><div class="onboard-opt-meta">Basiszinnen leren</div></div></div>
+        <div class="onboard-opt" onclick="selectGoal(this,'plezier')"><span class="onboard-opt-emoji">✨</span><div class="onboard-opt-text"><div class="onboard-opt-name">Gewoon voor de lol</div><div class="onboard-opt-meta">Nieuwe talen ontdekken</div></div></div>
+      </div>
+      <button class="onboard-btn" id="goal-next" disabled onclick="onboardNext(2)">Volgende</button>
+    </div>
+
+    <div class="onboard-step" id="ostep2">
+      <div class="onboard-q">Welke taal wil je eerst leren?</div>
+      <div class="onboard-sub">Je kunt later altijd wisselen tussen alle 10 talen.</div>
+      <div class="onboard-lang-grid" id="onboard-langs"></div>
+      <button class="onboard-btn" id="lang-next" disabled onclick="finishOnboard()">Start met leren</button>
+    </div>
+
+    <button class="onboard-skip" onclick="finishOnboard(true)">Overslaan</button>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none;">
   <div class="topbar">
     <div>
       <div class="logo">Talu<span class="logo-accent">Suri</span></div>
       <div class="logo-sub">Talen van Suriname</div>
     </div>
-    <div class="streak-pill">
-      <i class="ti ti-flame" aria-hidden="true"></i>
-      <span id="streak-lbl">3 dagen streak</span>
+    <div class="topbar-right">
+      <div class="level-pill"><i class="ti ti-star" aria-hidden="true"></i> Level <span id="level-num-pill">1</span></div>
+      <div class="streak-pill"><i class="ti ti-flame" aria-hidden="true"></i> <span id="streak-lbl">3</span></div>
+      <button class="icon-btn" onclick="toggleTheme()" title="Donkere modus" id="theme-btn"><i class="ti ti-moon" aria-hidden="true"></i></button>
     </div>
   </div>
 
   <div class="tabs" role="tablist">
-    <button class="tab active" onclick="showView('home')" role="tab" aria-selected="true">Dashboard</button>
-    <button class="tab" onclick="showView('talen')" role="tab">Alle Talen</button>
-    <button class="tab" onclick="showView('lessen')" role="tab">Lessen</button>
-    <button class="tab" onclick="showView('woordenboek')" role="tab">Woordenboek</button>
-    <button class="tab" onclick="showView('bronnen')" role="tab">Bronnen</button>
+    <button class="tab active" onclick="showView('home')">Dashboard</button>
+    <button class="tab" onclick="showView('talen')">Alle Talen</button>
+    <button class="tab" onclick="showView('lessen')">Lessen</button>
+    <button class="tab" onclick="showView('woordenboek')">Woordenboek</button>
+    <button class="tab" onclick="showView('leaderboard')">Ranglijst</button>
+    <button class="tab" onclick="showView('badges')">Badges</button>
+    <button class="tab" onclick="showView('bronnen')">Bronnen</button>
+    <button class="tab" onclick="showView('feedback')">Community <span id="feedback-badge" style="display:none;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:3px;">0</span></button>
   </div>
 
   <!-- HOME -->
@@ -251,70 +415,92 @@
       <div class="card c-hero">
         <div class="hero-deco" id="hero-deco">🙏</div>
         <div class="card-label lgt">Geselecteerde taal</div>
-        <div class="hero-title" id="hero-title">Sarnami Hindoestani</div>
-        <div class="hero-sub" id="hero-sub">Verbind je met de Hindoestaanse<br>gemeenschap van Suriname.</div>
-        <button class="hero-btn" onclick="startLesson(0)">
-          <i class="ti ti-player-play" aria-hidden="true"></i> Les starten
-        </button>
+        <div class="hero-title" id="hero-title">Sarnami</div>
+        <div class="hero-sub" id="hero-sub">Verbind je met de Hindoestaanse gemeenschap.</div>
+        <div class="hero-btns">
+          <button class="hero-btn" onclick="startLesson(0)"><i class="ti ti-player-play" aria-hidden="true"></i> Les starten</button>
+          <button class="hero-btn outline" onclick="startExam()"><i class="ti ti-certificate" aria-hidden="true"></i> Examen</button>
+        </div>
         <div class="wod">
           <div class="wod-lbl">Woord van de dag</div>
           <div class="wod-w" id="wod-w">namaste</div>
-          <div class="wod-nl" id="wod-nl">hallo / goedendag</div>
+          <div class="wod-nl" id="wod-nl">hallo</div>
         </div>
       </div>
-
-      <div class="card c-streak">
-        <div class="card-label lgt">Jouw streak</div>
-        <div class="streak-num" id="s-num">3</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.65);">dagen op rij</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px;">Beloning bij 7 dagen ⚡</div>
-        <div class="streak-bar" id="s-bar"></div>
-        <div class="xp-wrap">
-          <span class="xp-lbl">XP</span>
-          <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:35%"></div></div>
-          <span class="xp-lbl" id="xp-lbl">35/100</span>
-        </div>
+      <div class="card c-level">
+        <div class="card-label lgt">Jouw level</div>
+        <div class="level-num" id="level-num">1</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.7);" id="level-title">Beginner</div>
+        <div class="level-bar"><div class="level-fill" id="level-fill" style="width:35%"></div></div>
+        <div class="level-meta"><span id="xp-current">35 XP</span><span id="xp-next">100 XP</span></div>
+        <div class="streak-row" id="s-bar"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:6px;"><span id="streak-days">3</span> dagen streak 🔥</div>
       </div>
 
       <div class="card c-lesson clickable" id="les0"></div>
       <div class="card c-lesson clickable" id="les1"></div>
-      <div class="card c-lesson clickable" id="les2"></div>
+      <div class="card c-lesson clickable exam-card" onclick="startExam()">
+        <div class="lesson-emoji">🎓</div>
+        <div class="lesson-title" style="color:#fff;">Examen</div>
+        <div class="lesson-meta" style="color:rgba(255,255,255,.7);">Test al je kennis · 10 vragen</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6);">Haal 80% voor het certificaat 🏅</div>
+      </div>
+
+      <div class="card c-search">
+        <div class="card-label">Zoek door alle 10 talen</div>
+        <div class="search-box">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input type="text" id="global-search" placeholder="Zoek een woord in het Nederlands of een Surinaamse taal..." oninput="globalSearch()">
+        </div>
+        <div class="search-results" id="search-results"></div>
+      </div>
 
       <div class="card c-dict">
-        <div class="card-label">Mini-woordenboek</div>
-        <div class="card-title" style="font-size:15px;margin-bottom:11px;" id="dict-lang-title">NL → Sarnami</div>
-        <input class="dict-search" id="dict-q" placeholder="Zoek een woord..." oninput="filterDict()" aria-label="Zoek woord">
-        <div id="dict-list" role="list"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;">
+          <div class="card-title" style="font-size:15px;" id="dict-lang-title">NL → Sarnami</div>
+        </div>
+        <input class="dict-search" id="dict-q" placeholder="Zoek een woord..." oninput="filterDict()">
+        <div id="dict-list"></div>
         <div id="dict-source" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);"></div>
       </div>
 
       <div class="card c-flash">
-        <div class="card-label">Flashcards</div>
-        <div class="card-title" style="font-size:15px;margin-bottom:12px;">Ken jij dit woord?</div>
-        <div class="flash-card" id="flash-card" onclick="revealFlash()" role="button" tabindex="0" aria-label="Klik om antwoord te zien">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div class="card-title" style="font-size:15px;">Flashcards</div>
+          <div class="audio-tabs">
+            <button class="audio-tab active" onclick="setAudioMode('tts',this)">🔊 Stem</button>
+            <button class="audio-tab" onclick="setAudioMode('guide',this)">📖 Gids</button>
+            <button class="audio-tab" onclick="setAudioMode('contrib',this)">🎙️</button>
+          </div>
+        </div>
+        <div class="flash-card" id="flash-card">
           <div class="flash-word" id="fl-w"></div>
           <div class="flash-pron" id="fl-p"></div>
-          <div class="flash-ans" id="fl-a"></div>
+          <div class="flash-nl" id="fl-a"></div>
+          <div class="flash-audio-row" id="fl-audio-row"></div>
         </div>
+        <button class="flash-reveal-btn" id="fl-reveal" onclick="revealFlash()">Klik om het antwoord te zien</button>
         <div class="flash-acts" id="fl-acts" style="display:none">
           <button class="flash-btn nok" onclick="nextFlash(false)">Nog niet</button>
           <button class="flash-btn ok" onclick="nextFlash(true)">Kende ik!</button>
         </div>
-        <div id="fl-hint" style="font-size:12px;color:var(--muted);text-align:center;margin-top:6px;">Klik om het antwoord te zien</div>
-        <div id="fl-score" style="font-size:12px;color:var(--green);text-align:center;margin-top:4px;min-height:16px;"></div>
+        <div id="fl-score" style="font-size:12px;color:var(--green);text-align:center;margin-top:6px;min-height:16px;"></div>
       </div>
 
       <div class="card c-prog">
         <div class="card-label" style="margin-bottom:14px;">Voortgang per thema</div>
-        <div class="prog-grid" id="prog-grid" role="list"></div>
+        <div class="prog-grid" id="prog-grid"></div>
+      </div>
+      <div class="card c-badges">
+        <div class="card-label" style="margin-bottom:12px;">Recente badges</div>
+        <div class="badge-list" id="home-badges"></div>
       </div>
 
-      <div class="card c-culture" id="culture-card" style="background:var(--gold-l);border-color:rgba(201,139,42,.2);">
+      <div class="card c-culture" id="culture-card" style="background:var(--gold-l);">
         <div class="culture-icon" id="cult-icon">🙏</div>
-        <div class="culture-title" id="cult-title" style="color:#7A5A1A;">Cultuurweetje</div>
-        <div class="culture-text" id="cult-text" style="color:#9A6A1A;"></div>
+        <div class="culture-title" id="cult-title" style="color:var(--gold);">Cultuurweetje</div>
+        <div class="culture-text" id="cult-text"></div>
       </div>
-
       <div class="card c-phrase">
         <div class="card-label">Handige zinnen</div>
         <div id="phrase-list"></div>
@@ -323,10 +509,7 @@
       <div class="c-footnote">
         <div class="footnote-card">
           <div class="fn-marker">¹</div>
-          <div>
-            <div class="fn-title">Over de inheemse en Marontalen in deze app</div>
-            <div class="fn-text">De talen van de inheemse volken (Arawak/Lokono, Kari'na) en de Marrongemeenschappen (Ndyuka, Saramaccaans, Matawai) zijn levend cultureel erfgoed dat voor sommige gemeenschappen onder druk staat. De woordenschat in deze app is een eerste kennismaking en geen volledige of gevalideerde bron. Voor doorontwikkeling raden wij aan sprekers en kennishouders uit die gemeenschappen te betrekken als contentvalidatoren en co-auteurs. Zie het tabblad <strong style="color:var(--ink);cursor:pointer;" onclick="showView('bronnen')">Bronnen</strong> voor alle gebruikte referenties.</div>
-          </div>
+          <div><div class="fn-title">Over de inheemse en Marontalen</div><div class="fn-text">De talen van inheemse volken (Arawak/Lokono, Kari'na) en Marrongemeenschappen (Ndyuka, Saramaccaans, Matawai) zijn levend cultureel erfgoed. Zie <strong style="color:var(--ink);cursor:pointer;" onclick="showView('bronnen')">Bronnen</strong> en draag bij via <strong style="color:var(--ink);cursor:pointer;" onclick="showView('feedback')">Community</strong>.</div></div>
         </div>
       </div>
     </div>
@@ -336,23 +519,16 @@
   <div class="view" id="view-talen">
     <div class="card" style="margin-bottom:16px;background:var(--green);color:#fff;border:none;">
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:5px;">10 talen van Suriname</div>
-      <div style="font-size:13px;opacity:.75;line-height:1.5;">Suriname is een van de meest linguistisch diverse landen ter wereld. Selecteer een taal om te starten.</div>
+      <div style="font-size:13px;opacity:.8;line-height:1.5;">Selecteer een taal om te starten.</div>
     </div>
     <div class="lang-grid" id="lang-grid"></div>
-    <div class="footnote-card" style="margin-top:16px;">
-      <div class="fn-marker">¹</div>
-      <div>
-        <div class="fn-title">Over de inheemse en Marontalen</div>
-        <div class="fn-text">De talen van inheemse volken en Marrongemeenschappen zijn levend cultureel erfgoed. De woordenschat is een eerste kennismaking. Zie <strong style="color:var(--ink);cursor:pointer;" onclick="showView('bronnen')">Bronnen</strong> voor alle referenties.</div>
-      </div>
-    </div>
   </div>
 
   <!-- LESSEN -->
   <div class="view" id="view-lessen">
     <div style="margin-bottom:16px;">
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px;" id="les-view-title">Lessen: Sarnami</div>
-      <div style="font-size:13px;color:var(--muted);">Kies een les om te beginnen</div>
+      <div style="font-size:13px;color:var(--muted);">Kies een les of doe het examen</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;" id="all-lessons"></div>
   </div>
@@ -361,371 +537,582 @@
   <div class="view" id="view-woordenboek">
     <div style="margin-bottom:16px;">
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:10px;" id="wb-title">Woordenboek: Sarnami</div>
-      <input class="dict-search" id="wb-q" style="max-width:360px;" placeholder="Zoek op Nederlands of in de doeltaal..." oninput="filterWB()" aria-label="Zoek">
+      <input class="dict-search" id="wb-q" style="max-width:360px;" placeholder="Zoek..." oninput="filterWB()">
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;" id="wb-grid"></div>
-    <div id="wb-source" style="margin-top:16px;padding:14px 18px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--muted);line-height:1.6;"></div>
+    <div class="audio-banner">
+      <i class="ti ti-volume" aria-hidden="true"></i>
+      <div class="audio-banner-text"><strong>Drie uitspraak-opties</strong>🔊 Computerstem · 📖 Fonetische gids · 🎙️ Community-opnames (binnenkort). Klik het vlag-icoon om een woord te corrigeren.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;" id="wb-grid"></div>
+    <div id="wb-source" style="margin-top:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--muted);line-height:1.6;"></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="view" id="view-leaderboard">
+    <div class="card" style="margin-bottom:20px;background:var(--gold);color:#fff;border:none;">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:5px;">🏆 Ranglijst</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.5;">Verdien XP door lessen, examens en flashcards. Klim omhoog en daag jezelf uit!</div>
+    </div>
+    <div id="leaderboard-list"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="view" id="view-badges">
+    <div class="card" style="margin-bottom:20px;background:var(--ink);color:var(--bg);border:none;">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:5px;">🎖️ Jouw badges & level</div>
+      <div style="font-size:13px;opacity:.7;line-height:1.5;">Level <span id="badge-level">1</span> · <span id="badge-xp">35</span> XP totaal · <span id="badge-count">0</span> badges verdiend</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;" id="badges-grid"></div>
   </div>
 
   <!-- BRONNEN -->
   <div class="view" id="view-bronnen">
-    <div class="card" style="margin-bottom:20px;background:var(--ink);color:#fff;border:none;">
+    <div class="card" style="margin-bottom:20px;background:var(--ink);color:var(--bg);border:none;">
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:6px;">Bronnen &amp; Referenties</div>
-      <div style="font-size:13px;opacity:.7;line-height:1.6;">De woordenschat in TaluSuri is gebaseerd op gepubliceerde academische woordenboeken en taalkundige bronnen. Hieronder vind je per taal de gebruikte referenties.</div>
+      <div style="font-size:13px;opacity:.7;line-height:1.6;">De woordenschat is gebaseerd op gepubliceerde academische woordenboeken.</div>
     </div>
     <div class="sources-grid" id="sources-grid"></div>
     <div class="footnote-card" style="margin-top:16px;">
       <div class="fn-marker">¹</div>
-      <div>
-        <div class="fn-title">Beperkingen en aanbeveling</div>
-        <div class="fn-text">Voor de inheemse talen (Arawak, Kari'na) en Marontalen (Ndyuka, Saramaccaans, Matawai) is de beschikbare academische documentatie beperkter. De woordenschat is gebaseerd op de best beschikbare bronnen, maar kan afwijken van het huidige dagelijks gebruik. Bijdragen van native speakers zijn van harte welkom.</div>
-      </div>
+      <div><div class="fn-title">Beperkingen en aanbeveling</div><div class="fn-text">Voor inheemse talen en Marontalen is de documentatie beperkter. Bijdragen van native speakers zijn welkom via <strong style="color:var(--ink);cursor:pointer;" onclick="showView('feedback')">Community</strong>.</div></div>
     </div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div class="view" id="view-feedback">
+    <div class="card" style="margin-bottom:20px;background:var(--blue);color:#fff;border:none;">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:6px;">Community Validatie</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.6;">Help ons de woordenschat te verbeteren. Flag woorden die onjuist zijn. Native speakers worden uitgenodigd als co-auteurs.</div>
+    </div>
+    <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Ingediende feedback <span id="feedback-count" style="font-size:13px;font-weight:400;color:var(--muted);">(0)</span></div>
+      <button class="feedback-clear" onclick="clearFeedback()"><i class="ti ti-trash" style="font-size:13px;" aria-hidden="true"></i> Alles wissen</button>
+    </div>
+    <div id="feedback-list"></div>
   </div>
 
   <footer class="footer">
-    <div>
-      <div class="footer-logo">Talu<span>Suri</span></div>
-      <div class="footer-text" style="margin-top:4px;">Talen van Suriname — verbinding door taal</div>
-    </div>
-    <div class="footer-text" style="text-align:right;">
-      MVP versie 1.0<br>
-      Gebouwd met ❤️ voor alle gemeenschappen van Suriname
-    </div>
+    <div><div class="footer-logo">Talu<span>Suri</span></div><div class="footer-text" style="margin-top:4px;">Talen van Suriname — verbinding door taal</div></div>
+    <div class="footer-text" style="text-align:right;">MVP versie 3.0<br>Gebouwd met ❤️ voor Suriname</div>
   </footer>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()" aria-label="Sluiten">
-      <i class="ti ti-x" aria-hidden="true"></i>
-    </button>
-    <div id="modal-body"></div>
-  </div>
+  <div class="modal"><button class="modal-close" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></button><div id="modal-body"></div></div>
 </div>
-
 <script>
-const SOURCES = [
-  { id:'sarnami', flag:'🇸🇷', name:'Sarnami Hindoestani', sources:[
-    { title:'Beknopt Nederlands-Sarnami Hindoestani Woordenboek', author:'Instituut voor Taalwetenschap Paramaribo', year:'2002', type:'primary', note:'Primaire bron voor de woordenlijst in deze app' },
-    { title:'Sarnami: A Living Language of Suriname', author:'Kishna, M. et al.', year:'1993', type:'secondary', note:'Achtergrond over grammatica en sprekers' }
-  ]},
-  { id:'sranan', flag:'🌊', name:'Sranan Tongo', sources:[
-    { title:'Sranan Tongo – Nederlands Woordenboek (5e editie)', author:'Wilner, J., Pinas, R., Donk, L. et al. / SIL International', year:'2007', type:'primary', note:'Data verzameld in Paramaribo 1981–2003' },
-    { title:'Nederlands – Sranan Tongo Woordenboek', author:'SIL International Suriname', year:'2007', type:'primary', note:'Omgekeerde richting, eveneens als bron gebruikt' }
-  ]},
-  { id:'javaans', flag:'🌺', name:'Surinaams-Javaans', sources:[
-    { title:'Surinaams-Javaans-Nederlands Woordenboek', author:'Vruggink, H. & Sarmo, J. / KITLV Press', year:'2002', type:'primary', note:'Standaardwerk; woordenschat uit de jaren \'80–\'90' },
-    { title:'Het Surinaams Javaans: een introduktie', author:'Vruggink, H.', year:'1985', type:'secondary', note:'OSO, Tijdschrift voor Surinaamse Taalkunde' }
-  ]},
-  { id:'ndyuka', flag:'🌿', name:'Ndyuka (Aukaans)', sources:[
-    { title:'Ndyuka–English Dictionary', author:'Huttar, G.L. & Huttar, M.L. / SIL International', year:'1994', type:'primary', note:'Gepubliceerd via Summer Institute of Linguistics Suriname' },
-    { title:'Atlas of the Languages of Suriname', author:'Carlin, E.B. & Arends, J. (red.) / KITLV Press', year:'2002', type:'secondary', note:'Bredere context Surinaamse talen' }
-  ]},
-  { id:'saramaccaans', flag:'🏞️', name:'Saramaccaans', sources:[
-    { title:'Saramaccan–English Dictionary', author:'Rountree, S.C. & Glock, N. / SIL International', year:'1977', type:'primary', note:'Uitgegeven via SIL Suriname, Paramaribo' },
-    { title:'Atlas of the Languages of Suriname', author:'Carlin, E.B. & Arends, J. (red.) / KITLV Press', year:'2002', type:'secondary', note:'Bredere context Surinaamse talen' }
-  ]},
-  { id:'arawak', flag:'🌄', name:'Arawak (Lokono)', sources:[
-    { title:'A Grammar Sketch and Lexicon of Arawak (Lokono Dian)', author:'Pet, W.J.A. / SIL International', year:'1987', type:'primary', note:'Fonologie, grammatica en woordenschat' },
-    { title:'Lokono Dian: The Arawak Language of Suriname', author:'Pet, W.J.A. / KITLV Press', year:'1987', type:'primary', note:'KITLV Press referentiegids' }
-  ]},
-  { id:'karib', flag:'🌊', name:"Kari'na (Karib)", sources:[
-    { title:"The Carib Language (Kari'nja)", author:'Hoff, B.J. / KITLV', year:'1968', type:'primary', note:'Fonologie, morfologie, woordenindex' },
-    { title:'Atlas of the Languages of Suriname', author:'Carlin, E.B. & Arends, J. (red.) / KITLV Press', year:'2002', type:'secondary', note:"Inclusief hoofdstuk over Kari'na taalstructuur" }
-  ]},
-  { id:'hakka', flag:'🏮', name:'Hakka Chinees', sources:[
-    { title:'The Changing Chinese Linguistic Situation in Suriname', author:'Tjon Sie Fat, P.B. / CUHK Press', year:'2009', type:'primary', note:'Chinese Overseas: Migration, Research and Documentation' },
-    { title:'Hakka community documentation Suriname', author:'Diverse Chinese gemeenschapsdocumenten', year:'–', type:'secondary', note:'Beperkte schriftelijke bronnen; aangevuld met community-kennis' }
-  ]},
-  { id:'surinaams-nl', flag:'🇳🇱', name:'Surinaams Nederlands', sources:[
-    { title:'Spreek jij Surinaams?', author:'Charry, E., Koefoed, G. & Muysken, P.', year:'1983', type:'primary', note:'Taalgebruik in de Surinaamse gemeenschap' },
-    { title:'Van Dale Surinaams-Nederlands', author:'Van Dale / Universiteit van Suriname', year:'div.', type:'secondary', note:'Woorden en uitdrukkingen uit het Surinaams dagelijks gebruik' }
-  ]},
-  { id:'matawai', flag:'🌳', name:'Matawai', sources:[
-    { title:'Comparative Maroon Language Studies', author:'Huttar, G.L. / SIL International', year:'div.', type:'primary', note:'Matawai valt onder de bredere Maroon language studies van SIL' },
-    { title:'Atlas of the Languages of Suriname', author:'Carlin, E.B. & Arends, J. (red.) / KITLV Press', year:'2002', type:'secondary', note:'Beschrijving en contextualisering Matawai' }
-  ]}
+// ═══ SOURCES ═══
+const SOURCES=[
+{id:'sarnami',flag:'🇸🇷',name:'Sarnami Hindoestani',sources:[{title:'Beknopt Nederlands-Sarnami Hindoestani Woordenboek',author:'Instituut voor Taalwetenschap Paramaribo',year:'2002',type:'primary',note:'Primaire bron'},{title:'Sarnami: A Living Language of Suriname',author:'Kishna, M. et al.',year:'1993',type:'secondary',note:'Achtergrond'}]},
+{id:'sranan',flag:'🌊',name:'Sranan Tongo',sources:[{title:'Sranan Tongo – Nederlands Woordenboek (5e ed.)',author:'Wilner, J. et al. / SIL International',year:'2007',type:'primary',note:'Data 1981–2003'},{title:'Nederlands – Sranan Tongo Woordenboek',author:'SIL International Suriname',year:'2007',type:'primary',note:'Omgekeerde richting'}]},
+{id:'javaans',flag:'🌺',name:'Surinaams-Javaans',sources:[{title:'Surinaams-Javaans-Nederlands Woordenboek',author:'Vruggink, H. & Sarmo, J. / KITLV Press',year:'2002',type:'primary',note:'Standaardwerk'},{title:'Het Surinaams Javaans: een introduktie',author:'Vruggink, H.',year:'1985',type:'secondary',note:'OSO tijdschrift'}]},
+{id:'ndyuka',flag:'🌿',name:'Ndyuka',sources:[{title:'Ndyuka–English Dictionary',author:'Huttar, G.L. & Huttar, M.L. / SIL',year:'1994',type:'primary',note:'SIL Suriname'},{title:'Atlas of the Languages of Suriname',author:'Carlin & Arends / KITLV',year:'2002',type:'secondary',note:'Context'}]},
+{id:'saramaccaans',flag:'🏞️',name:'Saramaccaans',sources:[{title:'Saramaccan–English Dictionary',author:'Rountree & Glock / SIL',year:'1977',type:'primary',note:'SIL Suriname'},{title:'Atlas of the Languages of Suriname',author:'Carlin & Arends / KITLV',year:'2002',type:'secondary',note:'Context'}]},
+{id:'arawak',flag:'🌄',name:'Arawak (Lokono)',sources:[{title:'Grammar Sketch and Lexicon of Arawak',author:'Pet, W.J.A. / SIL',year:'1987',type:'primary',note:'Woordenschat'},{title:'Lokono Dian: The Arawak Language',author:'Pet, W.J.A. / KITLV',year:'1987',type:'primary',note:'Referentie'}]},
+{id:'karib',flag:'🌊',name:"Kari'na",sources:[{title:"The Carib Language (Kari'nja)",author:'Hoff, B.J. / KITLV',year:'1968',type:'primary',note:'Woordenindex'},{title:'Atlas of the Languages of Suriname',author:'Carlin & Arends / KITLV',year:'2002',type:'secondary',note:'Context'}]},
+{id:'hakka',flag:'🏮',name:'Hakka',sources:[{title:'Changing Chinese Linguistic Situation in Suriname',author:'Tjon Sie Fat, P.B. / CUHK',year:'2009',type:'primary',note:'Migratie & taal'},{title:'Hakka community documentation',author:'Gemeenschapsdocumenten',year:'–',type:'secondary',note:'Community-kennis'}]},
+{id:'surinaams-nl',flag:'🇳🇱',name:'Surinaams NL',sources:[{title:'Spreek jij Surinaams?',author:'Charry, Koefoed & Muysken',year:'1983',type:'primary',note:'Taalgebruik'},{title:'Van Dale Surinaams-Nederlands',author:'Van Dale / Univ. van Suriname',year:'div.',type:'secondary',note:'Uitdrukkingen'}]},
+{id:'matawai',flag:'🌳',name:'Matawai',sources:[{title:'Comparative Maroon Language Studies',author:'Huttar, G.L. / SIL',year:'div.',type:'primary',note:'Maroon studies'},{title:'Atlas of the Languages of Suriname',author:'Carlin & Arends / KITLV',year:'2002',type:'secondary',note:'Context'}]}
 ];
 
-const LANGS = [
-  { id:'sarnami', name:'Sarnami', full:'Sarnami Hindoestani', flag:'🇸🇷', deco:'🙏', badge:'Erkend', badgeType:'green', speakers:'~150.000', group:'Contractarbeiders (India)', sub:'Verbind je met de Hindoestaanse<br>gemeenschap van Suriname.', culture:'In de Sarnami cultuur zijn begroetingen erg belangrijk. Hindoestanen gebruiken "Namaste" met gevouwen handen, terwijl Moslim-Hindoestanen "Salaam" gebruiken.', cultureIcon:'🙏', cultureBg:'var(--gold-l)', cultureTitle:'Hindoestaanse cultuur', sourceShort:'Inst. voor Taalwetenschap Paramaribo, 2002',
-    words:[{nl:'hallo (Hindoe)',w:'namaste',p:'na-mas-te'},{nl:'hallo (Moslim)',w:'salaam',p:'sa-laam'},{nl:'dank je',w:'dhanbaad',p:'dhan-baad'},{nl:'ja',w:'hã',p:'hã'},{nl:'nee',w:'na',p:'na'},{nl:'welkom',w:'swaagat',p:'swaa-gat'},{nl:'goed',w:'attjha',p:'at-tjha'},{nl:'moeder',w:'maai',p:'maai'},{nl:'vader',w:'baap',p:'baap'},{nl:'broer',w:'bhaai',p:'bhaai'},{nl:'familie',w:'palwaar',p:'pal-waar'},{nl:'water',w:'paanie',p:'paa-nie'},{nl:'rijst',w:'bhaat',p:'bhaat'},{nl:'roti',w:'rotie',p:'ro-tie'},{nl:'lekker',w:'miestha',p:'miest-ha'},{nl:'huis',w:'ghar',p:'ghar'},{nl:'blij',w:'khoesie',p:'khoe-sie'},{nl:'liefde',w:'pjaar',p:'pjaar'},{nl:'rood',w:'laal',p:'laal'},{nl:'één',w:'ek',p:'ek'}],
-    phrases:[{nl:'Hoe heet jij?',w:'tor ka naam hai?',p:'tor ka naam hai'},{nl:'Mijn naam is...',w:'hamaar naam ... hai',p:'ha-maar naam ... hai'},{nl:'Ik heb honger.',w:'hamke bhoekh lage hai.',p:'ham-ke bhoekh la-ge hai'},{nl:'Dank je wel.',w:'bahoet dhanbaad.',p:'ba-hoet dhan-baad'}],
-    lessons:[{emoji:'👋',title:'Begroetingen',n:5,xp:10,q:[{q:'Hoe zeg je "hallo" in Sarnami (Hindoe)?',c:'namaste',o:['namaste','salaam','dhanbaad','biedaai']},{q:'Wat betekent "attjha"?',c:'goed',o:['goed','slecht','groot','klein']},{q:'Hoe zeg je "dank je"?',c:'dhanbaad',o:['dhanbaad','maafie','namaste','hã']},{q:'Wat betekent "biedaai"?',c:'tot ziens',o:['welkom','tot ziens','goedemorgen','bedankt']},{q:'Hoe zeg je "welkom"?',c:'swaagat',o:['swaagat','attjha','biedaai','hã']}]},{emoji:'👨‍👩‍👧‍👦',title:'Familie',n:5,xp:15,q:[{q:'Hoe zeg je "moeder"?',c:'maai',o:['maai','baap','bhaai','aadjie']},{q:'Wat betekent "bhaai"?',c:'broer',o:['broer','zuster','vader','zoon']},{q:'Hoe zeg je "kind"?',c:'larka',o:['larka','battja','aadmie','aurat']},{q:'Wat betekent "palwaar"?',c:'familie',o:['familie','huis','buurt','volk']},{q:'Hoe zeg je "dochter"?',c:'betia',o:['betia','beta','bahien','bhaai']}]},{emoji:'🍛',title:'Eten & Drinken',n:5,xp:20,q:[{q:'Hoe zeg je "water"?',c:'paanie',o:['paanie','tjaah','doedh','bhaat']},{q:'Wat betekent "bhaat"?',c:'rijst (gekookt)',o:['brood','roti','rijst (gekookt)','erwten']},{q:'Hoe zeg je "lekker"?',c:'miestha',o:['miestha','kharaab','attjha','garam']},{q:'Wat is "tjaah"?',c:'thee',o:['koffie','melk','thee','water']},{q:'Hoe zeg je "honger"?',c:'bhoekh',o:['bhoekh','piaas','khaaik','niemak']}]}]
-  },
-  { id:'sranan', name:'Sranan Tongo', full:'Sranan Tongo', flag:'🌊', deco:'✊', badge:'Lingua Franca', badgeType:'ink', speakers:'~850.000', group:'Creoolse gemeenschap', sub:'De gedeelde taal van alle<br>Surinamers — spreek mee!', culture:'Sranan Tongo is het hart van Suriname. Ontstaan op de plantages als brug tussen Afrikanen, Europeanen en anderen — nu de taal die alle Surinamers verbindt.', cultureIcon:'✊', cultureBg:'#EEF0F5', cultureTitle:'Creoolse roots', sourceShort:'Wilner et al. / SIL International, 2007',
-    words:[{nl:'hallo',w:'odi',p:'o-di'},{nl:'hoe gaat het?',w:'fa yu de?',p:'fa yu de'},{nl:'goed',w:'ogri na de',p:'og-ri na de'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'iya',p:'i-ya'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'papa',p:'pa-pa'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'eten',w:'nyan',p:'nyan'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'mooi',w:'moi',p:'moi'},{nl:'liefde',w:'lobi',p:'lo-bi'},{nl:'vriend',w:'mati',p:'ma-ti'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'één',w:'wan',p:'wan'},{nl:'twee',w:'tu',p:'tu'}],
-    phrases:[{nl:'Hoe heet je?',w:'fa yu nem?',p:'fa yu nem'},{nl:'Mijn naam is...',w:'mi nem na ...',p:'mi nem na ...'},{nl:'Ik hou van jou.',w:'mi lobi yu.',p:'mi lo-bi yu'},{nl:'Tot ziens!',w:'te na baka!',p:'te na ba-ka'}],
-    lessons:[{emoji:'👋',title:'Begroetingen',n:5,xp:10,q:[{q:'Hoe zeg je "hallo"?',c:'odi',o:['odi','tangi','mati','lobi']},{q:'Wat betekent "tangi"?',c:'dank je',o:['hallo','dank je','tot ziens','sorry']},{q:'Hoe zeg je "ja"?',c:'iya',o:['iya','no','ogri','wan']},{q:'Wat betekent "fa yu de?"',c:'hoe gaat het?',o:['hoe heet je?','hoe gaat het?','waar woon je?','hoe oud ben je?']},{q:'Hoe zeg je "vriend"?',c:'mati',o:['mati','pikin','lobi','bigi']}]},{emoji:'🏠',title:'Huis & Leven',n:4,xp:15,q:[{q:'Hoe zeg je "huis"?',c:'oso',o:['oso','watra','dei','neti']},{q:'Wat betekent "pikin"?',c:'kind',o:['klein','kind','vis','boom']},{q:'Hoe zeg je "eten"?',c:'nyan',o:['nyan','watra','lobi','bigi']},{q:'Wat betekent "bigi"?',c:'groot',o:['klein','groot','mooi','snel']}]}]
-  },
-  { id:'javaans', name:'Javaans', full:'Surinaams-Javaans', flag:'🌺', deco:'🌺', badge:'Erkend', badgeType:'green', speakers:'~75.000', group:'Javaanse gemeenschap', sub:'De taal van de Javaanse<br>gemeenschap in Suriname.', culture:'De Javaanse gemeenschap bracht wayang, gamelan en batik mee — nu onderdeel van de Surinaamse cultuur.', cultureIcon:'🌺', cultureBg:'#FDF0F5', cultureTitle:'Javaanse traditie', sourceShort:'Vruggink & Sarmo / KITLV Press, 2002',
-    words:[{nl:'hallo',w:'halo',p:'ha-lo'},{nl:'goedemorgen',w:'sugeng enjing',p:'su-geng en-jing'},{nl:'dank je',w:'matur nuwun',p:'ma-tur nu-wun'},{nl:'ja',w:'nggih',p:'ngih'},{nl:'nee',w:'mboten',p:'mbo-ten'},{nl:'moeder',w:'ibu',p:'i-bu'},{nl:'vader',w:'bapak',p:'ba-pak'},{nl:'kind',w:'anak',p:'a-nak'},{nl:'eten',w:'mangan',p:'ma-ngan'},{nl:'water',w:'banyu',p:'ban-yu'},{nl:'huis',w:'omah',p:'o-mah'},{nl:'goed',w:'apik',p:'a-pik'},{nl:'mooi',w:'ayu',p:'a-yu'},{nl:'liefde',w:'tresna',p:'tres-na'},{nl:'één',w:'siji',p:'si-ji'},{nl:'twee',w:'loro',p:'lo-ro'},{nl:'rijst',w:'sego',p:'se-go'},{nl:'vriend',w:'kanca',p:'kan-ca'},{nl:'dag',w:'dina',p:'di-na'},{nl:'nacht',w:'wengi',p:'wen-gi'}],
-    phrases:[{nl:'Hoe heet je?',w:'Jenengmu sopo?',p:'je-neng-mu so-po'},{nl:'Mijn naam is...',w:'Jenengku ...',p:'je-neng-ku ...'},{nl:'Dank je wel.',w:'Matur nuwun sanget.',p:'ma-tur nu-wun san-get'},{nl:'Tot ziens.',w:'Sampun rumiyin.',p:'sam-pun ru-mi-yin'}],
-    lessons:[{emoji:'👋',title:'Begroetingen',n:5,xp:10,q:[{q:'Hoe zeg je "dank je" in Javaans?',c:'matur nuwun',o:['matur nuwun','nggih','mboten','halo']},{q:'Wat betekent "ibu"?',c:'moeder',o:['vader','moeder','kind','zuster']},{q:'Hoe zeg je "nee"?',c:'mboten',o:['nggih','mboten','apik','ayu']},{q:'Wat betekent "omah"?',c:'huis',o:['huis','eten','water','dag']},{q:'Hoe zeg je "goed"?',c:'apik',o:['apik','ayu','tresna','banyu']}]}]
-  },
-  { id:'ndyuka', name:'Ndyuka', full:'Ndyuka (Aukaans)', flag:'🌿', deco:'🌿', badge:'Marontaal ¹', badgeType:'gold', speakers:'~30.000', group:'Ndyuka Marrons', sub:'De taal van de Ndyuka-Marrons<br>uit het Surinaamse binnenland.', culture:'De Ndyuka zijn nakomelingen van tot slaaf gemaakten die ontsnapten aan de plantages. Hun taal draagt de geschiedenis van vrijheidsstrijd.', cultureIcon:'🌿', cultureBg:'#EEF5EE', cultureTitle:'Marron erfgoed', sourceShort:'Huttar & Huttar / SIL International, 1994',
-    words:[{nl:'hallo',w:'fa yu du?',p:'fa yu du'},{nl:'goed',w:'bun',p:'bun'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'ii',p:'ii'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'boom',w:'puu',p:'puu'},{nl:'rivier',w:'liba',p:'li-ba'},{nl:'vuur',w:'faya',p:'fa-ya'},{nl:'één',w:'wan',p:'wan'},{nl:'twee',w:'tu',p:'tu'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'vis',w:'fisi',p:'fi-si'},{nl:'zon',w:'son',p:'son'}],
-    phrases:[{nl:'Hoe gaat het?',w:'fa yu du?',p:'fa yu du'},{nl:'Het gaat goed.',w:'mi de bun.',p:'mi de bun'},{nl:'Tot ziens.',w:'te na baka.',p:'te na ba-ka'},{nl:'Ik ga naar huis.',w:'mi e go na oso.',p:'mi e go na o-so'}],
-    lessons:[{emoji:'🌿',title:'Eerste woorden',n:5,xp:10,q:[{q:'Hoe zeg je "hoe gaat het?" in Ndyuka?',c:'fa yu du?',o:['fa yu du?','tangi','bun','no']},{q:'Wat betekent "bun"?',c:'goed',o:['groot','slecht','goed','mooi']},{q:'Hoe zeg je "kind"?',c:'pikin',o:['pikin','mama','tata','bigi']},{q:'Wat betekent "liba"?',c:'rivier',o:['boom','rivier','vuur','zon']},{q:'Hoe zeg je "vuur"?',c:'faya',o:['faya','watra','puu','fisi']}]}]
-  },
-  { id:'saramaccaans', name:'Saramaccaans', full:'Saramaccaans', flag:'🏞️', deco:'🏞️', badge:'Marontaal ¹', badgeType:'gold', speakers:'~25.000', group:'Saramaka Marrons', sub:'Portugese, Engelse en<br>Afrikaanse roots.', culture:'Saramaccaans bevat veel Portugese woorden, een erfenis van Sefardische Joodse plantageholders in de 17e eeuw.', cultureIcon:'🏞️', cultureBg:'#F0EEF5', cultureTitle:'Saramaka erfgoed', sourceShort:'Rountree & Glock / SIL International, 1977',
-    words:[{nl:'hallo',w:'a di',p:'a di'},{nl:'goed',w:'bunu',p:'bu-nu'},{nl:'dank je',w:'i dé',p:'i dé'},{nl:'ja',w:'ii',p:'ii'},{nl:'nee',w:'a nó',p:'a nó'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'piíi',p:'pí-i'},{nl:'water',w:'wáta',p:'wá-ta'},{nl:'huis',w:'óso',p:'ó-so'},{nl:'boom',w:'páu',p:'páu'},{nl:'rivier',w:'wóyo',p:'wó-yo'},{nl:'vuur',w:'féi',p:'féi'},{nl:'zon',w:'sónu',p:'só-nu'},{nl:'één',w:'wán',p:'wán'},{nl:'vis',w:'físi',p:'fí-si'},{nl:'nacht',w:'néti',p:'né-ti'},{nl:'dag',w:'déi',p:'déi'},{nl:'groot',w:'bígi',p:'bí-gi'},{nl:'mooi',w:'mói',p:'mói'}],
-    phrases:[{nl:'Hoe gaat het?',w:'unu de bunu?',p:'u-nu de bu-nu'},{nl:'Het gaat goed.',w:'mi de bunu.',p:'mi de bu-nu'},{nl:'Tot ziens.',w:'te na baka.',p:'te na ba-ka'},{nl:'Waar ga je heen?',w:'u di u e go?',p:'u di u e go'}],
-    lessons:[{emoji:'🏞️',title:'Eerste woorden',n:5,xp:10,q:[{q:'Hoe zeg je "goed" in Saramaccaans?',c:'bunu',o:['bunu','mói','bígi','féi']},{q:'Wat betekent "wáta"?',c:'water',o:['water','boom','rivier','vuur']},{q:'Hoe zeg je "rivier"?',c:'wóyo',o:['wóyo','páu','féi','sónu']},{q:'Wat betekent "féi"?',c:'vuur',o:['zon','regen','vuur','wind']},{q:'Hoe zeg je "mooi"?',c:'mói',o:['mói','bígi','bunu','déi']}]}]
-  },
-  { id:'arawak', name:'Arawak', full:'Arawak (Lokono)', flag:'🌄', deco:'🌄', badge:'Inheems ¹', badgeType:'red', speakers:'~3.000', group:'Arawak / Lokono volk', sub:'Een van de oorspronkelijke<br>talen van Suriname.', culture:'"Suriname" zelf is afgeleid van "Surinen", de naam van een Arawak-stam. De taal wordt actief gerevitaliseerd.', cultureIcon:'🌄', cultureBg:'#F5F0EA', cultureTitle:'Inheemse roots', sourceShort:'Pet, W.J.A. / SIL International, 1987',
-    words:[{nl:'hallo',w:'kama',p:'ka-ma'},{nl:'goed',w:'lokono',p:'lo-ko-no'},{nl:'dank je',w:'biara',p:'bi-a-ra'},{nl:'ja',w:'hã',p:'hã'},{nl:'nee',w:'koro',p:'ko-ro'},{nl:'moeder',w:'hiyari',p:'hi-ya-ri'},{nl:'vader',w:'hiyaro',p:'hi-ya-ro'},{nl:'water',w:'duna',p:'du-na'},{nl:'huis',w:'kibara',p:'ki-ba-ra'},{nl:'boom',w:'hidi',p:'hi-di'},{nl:'rivier',w:'tuna',p:'tu-na'},{nl:'zon',w:'adali',p:'a-da-li'},{nl:'maan',w:'kathi',p:'ka-thi'},{nl:'vis',w:'hima',p:'hi-ma'},{nl:'één',w:'abba',p:'ab-ba'},{nl:'twee',w:'biama',p:'bi-a-ma'},{nl:'aarde',w:'wama',p:'wa-ma'},{nl:'vuur',w:'wadili',p:'wa-di-li'},{nl:'dag',w:'adali',p:'a-da-li'},{nl:'kind',w:'nakhoro',p:'na-kho-ro'}],
-    phrases:[{nl:'Goedemorgen.',w:'Shikabo adali.',p:'shi-ka-bo a-da-li'},{nl:'Hoe heet je?',w:'Ama daka?',p:'a-ma da-ka'},{nl:'Dank je.',w:'Biara.',p:'bi-a-ra'},{nl:'Ik hou van jou.',w:'Niya lokoberi khu.',p:'ni-ya lo-ko-be-ri khu'}],
-    lessons:[{emoji:'🌄',title:'Eerste woorden',n:5,xp:10,q:[{q:'Hoe zeg je "water" in Arawak?',c:'duna',o:['duna','hidi','tuna','kathi']},{q:'Wat betekent "tuna"?',c:'rivier',o:['water','boom','rivier','maan']},{q:'Hoe zeg je "zon"?',c:'adali',o:['adali','kathi','hima','wama']},{q:'Wat betekent "hima"?',c:'vis',o:['boom','water','vis','vuur']},{q:'Hoe zeg je "huis"?',c:'kibara',o:['kibara','tuna','hidi','duna']}]}]
-  },
-  { id:'karib', name:"Kari'na", full:"Kari'na (Karib)", flag:'🌊', deco:'🌊', badge:'Inheems ¹', badgeType:'red', speakers:'~3.000', group:"Kari'na volk", sub:"Taal van de Kari'na aan<br>de noordkust van Suriname.", culture:"'Caribisch' en 'Paramaribo' zijn beide afgeleid van Kari'na woorden.", cultureIcon:'🌊', cultureBg:'#EAF2F8', cultureTitle:"Kari'na erfgoed", sourceShort:'Hoff, B.J. / KITLV, 1968',
-    words:[{nl:'hallo',w:'topu',p:'to-pu'},{nl:'goed',w:'marima',p:'ma-ri-ma'},{nl:'dank je',w:'kuriyano',p:'ku-ri-ya-no'},{nl:'ja',w:'au',p:'au'},{nl:'nee',w:'ewe',p:'e-we'},{nl:'moeder',w:'yaya',p:'ya-ya'},{nl:'vader',w:'papa',p:'pa-pa'},{nl:'water',w:'tuna',p:'tu-na'},{nl:'huis',w:'pata',p:'pa-ta'},{nl:'boom',w:'wewe',p:'we-we'},{nl:'zon',w:'weyú',p:'we-yú'},{nl:'vis',w:'waikeru',p:'wai-ke-ru'},{nl:'kind',w:'enu',p:'e-nu'},{nl:'één',w:'obo',p:'o-bo'},{nl:'twee',w:'oko',p:'o-ko'},{nl:'dag',w:'weyú',p:'we-yú'},{nl:'nacht',w:'poromé',p:'po-ro-mé'},{nl:'maan',w:'nuno',p:'nu-no'},{nl:'aarde',w:'yumali',p:'yu-ma-li'},{nl:'rivier',w:'tuna',p:'tu-na'}],
-    phrases:[{nl:'Goedemorgen.',w:'Marima weyú.',p:'ma-ri-ma we-yú'},{nl:'Hoe heet je?',w:'Amochi nito?',p:'a-mo-chi ni-to'},{nl:'Dank je wel.',w:'Kuriyano.',p:'ku-ri-ya-no'},{nl:'Tot ziens.',w:'Moro.',p:'mo-ro'}],
-    lessons:[{emoji:'🌊',title:'Eerste woorden',n:5,xp:10,q:[{q:"Hoe zeg je 'water' in Kari'na?",c:'tuna',o:['tuna','wewe','pata','nuno']},{q:'Wat betekent "weyú"?',c:'zon / dag',o:['maan','nacht','zon / dag','regen']},{q:'Hoe zeg je "huis"?',c:'pata',o:['pata','wewe','tuna','nuno']},{q:'Wat betekent "nuno"?',c:'maan',o:['zon','maan','ster','wolk']},{q:'Hoe zeg je "ja"?',c:'au',o:['au','ewe','topu','obo']}]}]
-  },
-  { id:'hakka', name:'Hakka', full:'Hakka Chinees', flag:'🏮', deco:'🏮', badge:'Gemeenschapstaal', badgeType:'ink', speakers:'~17.500', group:'Chinees-Surinaamse gemeenschap', sub:'De Chinese taal van Suriname,<br>meegebracht in de 19e eeuw.', culture:'De Hakka-Chinezen stichtten winkels door heel Suriname. De "Chinese winkeltje" is een icoon van het Surinaamse dagelijkse leven.', cultureIcon:'🏮', cultureBg:'#FDF0EA', cultureTitle:'Chinees-Surinaamse cultuur', sourceShort:'Tjon Sie Fat, P.B. / CUHK Press, 2009',
-    words:[{nl:'hallo',w:'nǐ hǎo',p:'ni hao'},{nl:'dank je',w:'m̀h-gōi',p:'mm-goi'},{nl:'ja',w:'hái',p:'hái'},{nl:'nee',w:'mò yû',p:'mo yu'},{nl:'goed',w:'hó',p:'hó'},{nl:'moeder',w:'a-mâ',p:'a-mà'},{nl:'vader',w:'a-pâ',p:'a-pà'},{nl:'eten',w:'sik-fan',p:'sik-fan'},{nl:'water',w:'súi',p:'súi'},{nl:'huis',w:'ûk',p:'ûk'},{nl:'één',w:'yit',p:'yit'},{nl:'twee',w:'ngi',p:'ngi'},{nl:'drie',w:'sâm',p:'sâm'},{nl:'kind',w:'sai-mân-jai',p:'sai-man-jai'},{nl:'groot',w:'thai',p:'thai'},{nl:'klein',w:'sai',p:'sai'},{nl:'vis',w:'ǹg',p:'ng'},{nl:'dag',w:'ngit-thèu',p:'ngit-thèu'},{nl:'nacht',w:'yâ',p:'yâ'},{nl:'eten (ww)',w:'sik',p:'sik'}],
-    phrases:[{nl:'Hoe gaat het?',w:'Nǐ hǎo ma?',p:'ni hao ma'},{nl:'Dank je wel.',w:'M̀h-gōi saai.',p:'mm-goi saai'},{nl:'Tot ziens.',w:'Zàijiàn.',p:'zai-jian'},{nl:'Hoe heet je?',w:'Nǐ jiào shénme míngzì?',p:'ni jiao shenme mingzi'}],
-    lessons:[{emoji:'🏮',title:'Eerste woorden',n:5,xp:10,q:[{q:'Hoe zeg je "hallo" in Hakka?',c:'nǐ hǎo',o:['nǐ hǎo','m̀h-gōi','hái','hó']},{q:'Wat betekent "m̀h-gōi"?',c:'dank je',o:['hallo','dank je','ja','goed']},{q:'Hoe zeg je "water"?',c:'súi',o:['súi','sik-fan','ûk','yit']},{q:'Wat betekent "sai"?',c:'klein',o:['groot','klein','snel','oud']},{q:'Hoe zeg je "één" in Hakka?',c:'yit',o:['yit','ngi','sâm','hái']}]}]
-  },
-  { id:'surinaams-nl', name:'Surinaams NL', full:'Surinaams Nederlands', flag:'🇳🇱', deco:'🌸', badge:'Officieel', badgeType:'ink', speakers:'~612.000', group:'Alle gemeenschappen', sub:'Het officiële Nederlands met<br>een Surinaams tintje.', culture:'Surinaams Nederlands heeft unieke woorden als "switi", "brada" en "pom" — een levend bewijs van Surinames diversiteit.', cultureIcon:'🌸', cultureBg:'#EEF0F5', cultureTitle:'Surinaams taalgebruik', sourceShort:'Charry, Koefoed & Muysken, 1983',
-    words:[{nl:'gezellig / lekker',w:'switi',p:'swi-ti'},{nl:'broer / vriend',w:'brada',p:'bra-da'},{nl:'zus / vriendin',w:'sisa',p:'si-sa'},{nl:'brutaal',w:'brafoe',p:'bra-foe'},{nl:'heel erg',w:'furu',p:'fu-ru'},{nl:'dat klopt',w:'troe',p:'troe'},{nl:'geld',w:'moni',p:'mo-ni'},{nl:'maniok',w:'kasaba',p:'ka-sa-ba'},{nl:'gerecht (pom)',w:'pom',p:'pom'},{nl:'jongen / kerel',w:'boi',p:'boi'},{nl:'heb je zin?',w:'joe wani?',p:'joe wa-ni'},{nl:'mooi / fijn',w:'swit',p:'swit'},{nl:'vreemd / raar',w:'ogri',p:'og-ri'},{nl:'snel / meteen',w:'proenkroe',p:'proen-kroe'},{nl:'helemaal',w:'ogentoe',p:'o-gen-toe'},{nl:'feestmaal',w:'njam',p:'njam'},{nl:'met',w:'nanga',p:'na-nga'},{nl:'marktvrouw',w:'feni feni',p:'fe-ni fe-ni'},{nl:'broek',w:'brooki',p:'broo-ki'},{nl:'echt / waar',w:'troe',p:'troe'}],
-    phrases:[{nl:'"Heel erg lekker!"',w:'"A switi furu!"',p:'a swi-ti fu-ru'},{nl:'"Ga je mee?"',w:'"Joe e go?"',p:'joe e go'},{nl:'"Mijn broer."',w:'"Mi brada."',p:'mi bra-da'},{nl:'"Dat klopt echt."',w:'"A troe, efu."',p:'a troe e-fu'}],
-    lessons:[{emoji:'🌸',title:'Surinaamse woorden',n:5,xp:10,q:[{q:'Wat betekent "switi"?',c:'gezellig / lekker',o:['gezellig / lekker','brutaal','snel','geld']},{q:'Wat is "brada"?',c:'broer / vriend',o:['broer / vriend','zus','markt','huis']},{q:'Wat betekent "brafoe"?',c:'brutaal',o:['brutaal','mooi','lief','slim']},{q:'Wat is "moni"?',c:'geld',o:['geld','eten','feest','straat']},{q:'Wat betekent "troe"?',c:'dat klopt / echt',o:['dat klopt / echt','nee','misschien','snel']}]}]
-  },
-  { id:'matawai', name:'Matawai', full:'Matawai', flag:'🌳', deco:'🌳', badge:'Marontaal ¹', badgeType:'gold', speakers:'~5.000', group:'Matawai Marrons', sub:'De taal van de Matawai-Marrons<br>in Midden-Suriname.', culture:'De Matawai sloten in 1762 als een van de eersten een vredesverdrag met de Nederlandse koloniale overheid.', cultureIcon:'🌳', cultureBg:'#EDF5ED', cultureTitle:'Matawai geschiedenis', sourceShort:'Huttar, G.L. / SIL International',
-    words:[{nl:'hallo',w:'fa yu du?',p:'fa yu du'},{nl:'goed',w:'bun',p:'bun'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'ee',p:'ee'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'boom',w:'puu',p:'puu'},{nl:'rivier',w:'liba',p:'li-ba'},{nl:'vuur',w:'faya',p:'fa-ya'},{nl:'zon',w:'son',p:'son'},{nl:'één',w:'wan',p:'wan'},{nl:'vis',w:'fisi',p:'fi-si'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'mooi',w:'moi',p:'moi'}],
-    phrases:[{nl:'Hoe gaat het?',w:'fa yu du?',p:'fa yu du'},{nl:'Het gaat goed.',w:'mi de bun.',p:'mi de bun'},{nl:'Ik ga naar huis.',w:'mi go na oso.',p:'mi go na o-so'},{nl:'Dank je.',w:'tangi.',p:'tan-gi'}],
-    lessons:[{emoji:'🌳',title:'Eerste woorden',n:5,xp:10,q:[{q:'Hoe zeg je "goed" in Matawai?',c:'bun',o:['bun','no','tangi','bigi']},{q:'Wat betekent "puu"?',c:'boom',o:['boom','rivier','vuur','vis']},{q:'Hoe zeg je "rivier"?',c:'liba',o:['liba','faya','son','puu']},{q:'Wat betekent "faya"?',c:'vuur',o:['water','boom','vuur','dag']},{q:'Hoe zeg je "vis"?',c:'fisi',o:['fisi','son','puu','watra']}]}]
-  }
+// ═══ BADGES ═══
+const BADGES=[
+{id:'first_lesson',icon:'🌱',name:'Eerste stap',desc:'Voltooi je eerste les'},
+{id:'streak_3',icon:'🔥',name:'Op dreef',desc:'3 dagen streak'},
+{id:'streak_7',icon:'⚡',name:'Week-strijder',desc:'7 dagen streak'},
+{id:'flash_10',icon:'🃏',name:'Kaartenkoning',desc:'10 flashcards goed'},
+{id:'perfect',icon:'💯',name:'Perfectie',desc:'100% op een les'},
+{id:'exam_pass',icon:'🏅',name:'Geslaagd',desc:'Haal een examen'},
+{id:'polyglot',icon:'🌍',name:'Polyglot',desc:'Leer in 3 talen'},
+{id:'level_5',icon:'⭐',name:'Gevorderd',desc:'Bereik level 5'},
+{id:'contributor',icon:'🤝',name:'Bijdrager',desc:'Dien feedback in'},
+{id:'explorer',icon:'🧭',name:'Ontdekker',desc:'Bekijk alle 10 talen'}
 ];
 
-let S = { lang: LANGS[0], xp: 35, streak: 3, flashIdx: 0, flashRevealed: false, flashOk: 0, flashTot: 0, lessonQ: 0, lessonScore: 0, lessonIdx: 0, answered: false, themeProgress: [20,0,0,0,0,0,0,0] };
+const LEVEL_TITLES=['Beginner','Leerling','Spreker','Gevorderd','Kenner','Meester','Expert','Ambassadeur'];
 
-function setLang(l) {
-  S.lang = l; S.flashIdx = 0; S.flashRevealed = false; S.flashOk = 0; S.flashTot = 0;
-  document.getElementById('hero-title').textContent = l.full;
-  document.getElementById('hero-sub').innerHTML = l.sub;
-  document.getElementById('hero-deco').textContent = l.deco;
-  const w = l.words[new Date().getDay() % l.words.length];
-  document.getElementById('wod-w').textContent = w.w;
-  document.getElementById('wod-nl').textContent = w.nl;
-  document.getElementById('dict-lang-title').textContent = 'NL → ' + l.name;
-  document.getElementById('dict-q').value = '';
-  renderDict(l.words.slice(0, 8));
-  document.getElementById('dict-source').innerHTML = '<i class="ti ti-book-2" style="font-size:12px;vertical-align:-1px;margin-right:4px;" aria-hidden="true"></i>Bron: ' + l.sourceShort;
-  renderFlash();
-  document.getElementById('culture-card').style.background = l.cultureBg;
-  document.getElementById('cult-icon').textContent = l.cultureIcon;
-  document.getElementById('cult-title').textContent = l.cultureTitle;
-  document.getElementById('cult-text').textContent = l.culture;
-  renderPhrases(); renderHomeLessons();
-  document.querySelectorAll('.lang-card').forEach(c => c.classList.toggle('active', c.dataset.id === l.id));
-  document.getElementById('les-view-title').textContent = 'Lessen: ' + l.full;
-  renderAllLessons();
-  document.getElementById('wb-title').textContent = 'Woordenboek: ' + l.name;
-  renderWB(l.words);
-  const src = SOURCES.find(s => s.id === l.id);
-  document.getElementById('wb-source').innerHTML = '<strong style="color:var(--ink);font-size:12px;display:block;margin-bottom:6px;">Bronnen voor deze woordenlijst</strong>' +
-    (src ? src.sources.map(s => `<span style="display:block;margin-top:4px;"><strong style="font-weight:500;color:var(--ink);">${s.title}</strong> — ${s.author} (${s.year})</span>`).join('') : '');
-  showView('home');
+// ═══ FAKE LEADERBOARD ═══
+const LEADERBOARD=[
+{name:'Priya R.',xp:2840,langs:'Sarnami, Sranan',avatar:'PR'},
+{name:'Marlon K.',xp:2510,langs:'Sranan, Ndyuka',avatar:'MK'},
+{name:'Indra S.',xp:2190,langs:'Javaans',avatar:'IS'},
+{name:'Astrid W.',xp:1870,langs:'Sranan, Saramaccaans',avatar:'AW'},
+{name:'Rony D.',xp:1640,langs:'Kari\'na, Arawak',avatar:'RD'},
+{name:'Soemita P.',xp:1320,langs:'Sarnami, Hakka',avatar:'SP'},
+{name:'Glenn T.',xp:980,langs:'Sranan',avatar:'GT'},
+{name:'Lisa M.',xp:720,langs:'Matawai, Sranan',avatar:'LM'}
+];
+
+// ═══ LANGUAGE DATA ═══
+const LANGS=[
+{id:'sarnami',name:'Sarnami',full:'Sarnami Hindoestani',flag:'🇸🇷',deco:'🙏',badge:'Erkend',badgeType:'green',speakers:'~150.000',group:'Contractarbeiders (India)',sub:'Verbind je met de Hindoestaanse gemeenschap.',culture:'In de Sarnami cultuur zijn begroetingen erg belangrijk. Hindoestanen gebruiken "Namaste" met gevouwen handen, Moslim-Hindoestanen "Salaam".',cultureIcon:'🙏',cultureBg:'var(--gold-l)',cultureTitle:'Hindoestaanse cultuur',sourceShort:'Inst. Taalwetenschap Paramaribo, 2002',speechLang:'hi-IN',
+words:[{nl:'hallo (Hindoe)',w:'namaste',p:'na-mas-te'},{nl:'hallo (Moslim)',w:'salaam',p:'sa-laam'},{nl:'dank je',w:'dhanbaad',p:'dhan-baad'},{nl:'ja',w:'hã',p:'hã'},{nl:'nee',w:'na',p:'na'},{nl:'welkom',w:'swaagat',p:'swaa-gat'},{nl:'goed',w:'attjha',p:'at-tjha'},{nl:'moeder',w:'maai',p:'maai'},{nl:'vader',w:'baap',p:'baap'},{nl:'broer',w:'bhaai',p:'bhaai'},{nl:'zuster',w:'bahien',p:'ba-hien'},{nl:'familie',w:'palwaar',p:'pal-waar'},{nl:'water',w:'paanie',p:'paa-nie'},{nl:'rijst',w:'bhaat',p:'bhaat'},{nl:'roti',w:'rotie',p:'ro-tie'},{nl:'lekker',w:'miestha',p:'miest-ha'},{nl:'huis',w:'ghar',p:'ghar'},{nl:'blij',w:'khoesie',p:'khoe-sie'},{nl:'liefde',w:'pjaar',p:'pjaar'},{nl:'rood',w:'laal',p:'laal'},{nl:'groen',w:'hariar',p:'ha-riar'},{nl:'geel',w:'piejar',p:'pie-jar'},{nl:'wit',w:'oeddjar',p:'oed-djar'},{nl:'zwart',w:'karia',p:'ka-ria'},{nl:'één',w:'ek',p:'ek'},{nl:'twee',w:'doei',p:'doei'},{nl:'drie',w:'tien',p:'tien'},{nl:'vier',w:'tjaar',p:'tjaar'},{nl:'vijf',w:'pãatj',p:'pãatj'},{nl:'hoofd',w:'moedie',p:'moe-die'},{nl:'hand',w:'hãath',p:'hãath'},{nl:'oog',w:'ãakhie',p:'ãak-hie'},{nl:'dag',w:'dien',p:'dien'},{nl:'nacht',w:'raat',p:'raat'},{nl:'zon',w:'soeriedj',p:'soe-riedj'},{nl:'maan',w:'tjand',p:'tjand'},{nl:'boom',w:'perdh',p:'perdh'},{nl:'rivier',w:'nadie',p:'na-die'},{nl:'kind',w:'larka',p:'lar-ka'},{nl:'school',w:'skoel',p:'skoel'}],
+phrases:[{nl:'Hoe heet jij?',w:'tor ka naam hai?',p:'tor ka naam hai'},{nl:'Mijn naam is...',w:'hamaar naam ... hai',p:'ha-maar naam hai'},{nl:'Ik heb honger.',w:'hamke bhoekh lage hai.',p:'ham-ke bhoekh la-ge hai'},{nl:'Dank je wel.',w:'bahoet dhanbaad.',p:'ba-hoet dhan-baad'}],
+lessons:[
+{emoji:'👋',title:'Begroetingen',xp:10},{emoji:'👨‍👩‍👧‍👦',title:'Familie',xp:15},{emoji:'🍛',title:'Eten & Drinken',xp:15},{emoji:'🌈',title:'Kleuren',xp:10},{emoji:'🔢',title:'Cijfers',xp:10},{emoji:'🧍',title:'Lichaam',xp:15},{emoji:'🏠',title:'Huis & Omgeving',xp:15},{emoji:'❤️',title:'Gevoelens',xp:15}
+]},
+{id:'sranan',name:'Sranan Tongo',full:'Sranan Tongo',flag:'🌊',deco:'✊',badge:'Lingua Franca',badgeType:'ink',speakers:'~850.000',group:'Creoolse gemeenschap',sub:'De gedeelde taal van alle Surinamers.',culture:'Sranan Tongo is het hart van Suriname. Ontstaan op de plantages als brug tussen Afrikanen, Europeanen en anderen.',cultureIcon:'✊',cultureBg:'var(--blue-l)',cultureTitle:'Creoolse roots',sourceShort:'Wilner et al. / SIL, 2007',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'odi',p:'o-di'},{nl:'hoe gaat het?',w:'fa yu de?',p:'fa yu de'},{nl:'goed',w:'bun',p:'bun'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'iya',p:'i-ya'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'papa',p:'pa-pa'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'eten',w:'nyan',p:'nyan'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'mooi',w:'moi',p:'moi'},{nl:'liefde',w:'lobi',p:'lo-bi'},{nl:'vriend',w:'mati',p:'ma-ti'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'één',w:'wan',p:'wan'},{nl:'twee',w:'tu',p:'tu'},{nl:'drie',w:'tri',p:'tri'},{nl:'vier',w:'fo',p:'fo'},{nl:'vijf',w:'feyfi',p:'fey-fi'},{nl:'boom',w:'bon',p:'bon'},{nl:'rivier',w:'liba',p:'li-ba'},{nl:'vis',w:'fisi',p:'fi-si'},{nl:'vuur',w:'faya',p:'fa-ya'},{nl:'zon',w:'son',p:'son'},{nl:'broer',w:'brada',p:'bra-da'},{nl:'zuster',w:'sisa',p:'si-sa'}],
+phrases:[{nl:'Hoe heet je?',w:'fa yu nem?',p:'fa yu nem'},{nl:'Mijn naam is...',w:'mi nem na ...',p:'mi nem na'},{nl:'Ik hou van jou.',w:'mi lobi yu.',p:'mi lo-bi yu'},{nl:'Tot ziens!',w:'te na baka!',p:'te na ba-ka'}],
+lessons:[{emoji:'👋',title:'Begroetingen',xp:10},{emoji:'🏠',title:'Huis & Leven',xp:15},{emoji:'❤️',title:'Gevoelens',xp:15},{emoji:'🌿',title:'Natuur',xp:10},{emoji:'🔢',title:'Cijfers',xp:10}]},
+{id:'javaans',name:'Javaans',full:'Surinaams-Javaans',flag:'🌺',deco:'🌺',badge:'Erkend',badgeType:'green',speakers:'~75.000',group:'Javaanse gemeenschap',sub:'De taal van de Javaanse gemeenschap.',culture:'De Javaanse gemeenschap bracht wayang, gamelan en batik mee — nu onderdeel van de Surinaamse cultuur.',cultureIcon:'🌺',cultureBg:'var(--red-l)',cultureTitle:'Javaanse traditie',sourceShort:'Vruggink & Sarmo / KITLV, 2002',speechLang:'jv-ID',
+words:[{nl:'hallo',w:'halo',p:'ha-lo'},{nl:'goedemorgen',w:'sugeng enjing',p:'su-geng en-jing'},{nl:'dank je',w:'matur nuwun',p:'ma-tur nu-wun'},{nl:'ja',w:'nggih',p:'ngih'},{nl:'nee',w:'mboten',p:'mbo-ten'},{nl:'moeder',w:'ibu',p:'i-bu'},{nl:'vader',w:'bapak',p:'ba-pak'},{nl:'kind',w:'anak',p:'a-nak'},{nl:'eten',w:'mangan',p:'ma-ngan'},{nl:'water',w:'banyu',p:'ban-yu'},{nl:'huis',w:'omah',p:'o-mah'},{nl:'goed',w:'apik',p:'a-pik'},{nl:'mooi',w:'ayu',p:'a-yu'},{nl:'liefde',w:'tresna',p:'tres-na'},{nl:'één',w:'siji',p:'si-ji'},{nl:'twee',w:'loro',p:'lo-ro'},{nl:'drie',w:'telu',p:'te-lu'},{nl:'rijst',w:'sego',p:'se-go'},{nl:'vriend',w:'kanca',p:'kan-ca'},{nl:'dag',w:'dina',p:'di-na'},{nl:'nacht',w:'wengi',p:'wen-gi'},{nl:'broer',w:'mas',p:'mas'},{nl:'zuster',w:'mbak',p:'mbak'},{nl:'boom',w:'wit',p:'wit'},{nl:'rivier',w:'kali',p:'ka-li'}],
+phrases:[{nl:'Hoe heet je?',w:'Jenengmu sopo?',p:'je-neng-mu so-po'},{nl:'Mijn naam is...',w:'Jenengku ...',p:'je-neng-ku'},{nl:'Dank je wel.',w:'Matur nuwun sanget.',p:'ma-tur nu-wun san-get'},{nl:'Tot ziens.',w:'Sampun rumiyin.',p:'sam-pun ru-mi-yin'}],
+lessons:[{emoji:'👋',title:'Begroetingen',xp:10},{emoji:'🍚',title:'Eten & Huis',xp:15},{emoji:'👨‍👩‍👧‍👦',title:'Familie',xp:15},{emoji:'🌿',title:'Natuur',xp:10}]},
+{id:'ndyuka',name:'Ndyuka',full:'Ndyuka (Aukaans)',flag:'🌿',deco:'🌿',badge:'Marontaal ¹',badgeType:'gold',speakers:'~30.000',group:'Ndyuka Marrons',sub:'De taal van de Ndyuka-Marrons.',culture:'De Ndyuka zijn nakomelingen van tot slaaf gemaakten die ontsnapten aan de plantages. Hun taal draagt de geschiedenis van vrijheidsstrijd.',cultureIcon:'🌿',cultureBg:'var(--green-l)',cultureTitle:'Marron erfgoed',sourceShort:'Huttar & Huttar / SIL, 1994',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'fa yu du?',p:'fa yu du'},{nl:'goed',w:'bun',p:'bun'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'ii',p:'ii'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'boom',w:'puu',p:'puu'},{nl:'rivier',w:'liba',p:'li-ba'},{nl:'vuur',w:'faya',p:'fa-ya'},{nl:'één',w:'wan',p:'wan'},{nl:'twee',w:'tu',p:'tu'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'vis',w:'fisi',p:'fi-si'},{nl:'zon',w:'son',p:'son'}],
+phrases:[{nl:'Hoe gaat het?',w:'fa yu du?',p:'fa yu du'},{nl:'Het gaat goed.',w:'mi de bun.',p:'mi de bun'},{nl:'Tot ziens.',w:'te na baka.',p:'te na ba-ka'},{nl:'Ik ga naar huis.',w:'mi e go na oso.',p:'mi e go na o-so'}],
+lessons:[{emoji:'🌿',title:'Eerste woorden',xp:10},{emoji:'🌊',title:'Natuur',xp:15},{emoji:'👨‍👩‍👧‍👦',title:'Familie',xp:10}]},
+{id:'saramaccaans',name:'Saramaccaans',full:'Saramaccaans',flag:'🏞️',deco:'🏞️',badge:'Marontaal ¹',badgeType:'gold',speakers:'~25.000',group:'Saramaka Marrons',sub:'Portugese, Engelse en Afrikaanse roots.',culture:'Saramaccaans bevat veel Portugese woorden, een erfenis van Sefardische Joodse plantageholders in de 17e eeuw.',cultureIcon:'🏞️',cultureBg:'var(--blue-l)',cultureTitle:'Saramaka erfgoed',sourceShort:'Rountree & Glock / SIL, 1977',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'a di',p:'a di'},{nl:'goed',w:'bunu',p:'bu-nu'},{nl:'dank je',w:'i dé',p:'i dé'},{nl:'ja',w:'ii',p:'ii'},{nl:'nee',w:'a nó',p:'a nó'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'piíi',p:'pí-i'},{nl:'water',w:'wáta',p:'wá-ta'},{nl:'huis',w:'óso',p:'ó-so'},{nl:'boom',w:'páu',p:'páu'},{nl:'rivier',w:'wóyo',p:'wó-yo'},{nl:'vuur',w:'féi',p:'féi'},{nl:'zon',w:'sónu',p:'só-nu'},{nl:'één',w:'wán',p:'wán'},{nl:'vis',w:'físi',p:'fí-si'},{nl:'nacht',w:'néti',p:'né-ti'},{nl:'dag',w:'déi',p:'déi'},{nl:'groot',w:'bígi',p:'bí-gi'},{nl:'mooi',w:'mói',p:'mói'}],
+phrases:[{nl:'Hoe gaat het?',w:'unu de bunu?',p:'u-nu de bu-nu'},{nl:'Het gaat goed.',w:'mi de bunu.',p:'mi de bu-nu'},{nl:'Tot ziens.',w:'te na baka.',p:'te na ba-ka'},{nl:'Waar ga je heen?',w:'u di u e go?',p:'u di u e go'}],
+lessons:[{emoji:'🏞️',title:'Eerste woorden',xp:10},{emoji:'🌿',title:'Natuur & Leven',xp:15}]},
+{id:'arawak',name:'Arawak',full:'Arawak (Lokono)',flag:'🌄',deco:'🌄',badge:'Inheems ¹',badgeType:'red',speakers:'~3.000',group:'Arawak / Lokono volk',sub:'Een van de oorspronkelijke talen van Suriname.',culture:'"Suriname" zelf is afgeleid van "Surinen", een Arawak-stam. De taal wordt actief gerevitaliseerd.',cultureIcon:'🌄',cultureBg:'var(--gold-l)',cultureTitle:'Inheemse roots',sourceShort:'Pet, W.J.A. / SIL, 1987',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'kama',p:'ka-ma'},{nl:'goed',w:'lokono',p:'lo-ko-no'},{nl:'dank je',w:'biara',p:'bi-a-ra'},{nl:'ja',w:'hã',p:'hã'},{nl:'nee',w:'koro',p:'ko-ro'},{nl:'moeder',w:'hiyari',p:'hi-ya-ri'},{nl:'vader',w:'hiyaro',p:'hi-ya-ro'},{nl:'water',w:'duna',p:'du-na'},{nl:'huis',w:'kibara',p:'ki-ba-ra'},{nl:'boom',w:'hidi',p:'hi-di'},{nl:'rivier',w:'tuna',p:'tu-na'},{nl:'zon',w:'adali',p:'a-da-li'},{nl:'maan',w:'kathi',p:'ka-thi'},{nl:'vis',w:'hima',p:'hi-ma'},{nl:'één',w:'abba',p:'ab-ba'},{nl:'twee',w:'biama',p:'bi-a-ma'},{nl:'aarde',w:'wama',p:'wa-ma'},{nl:'vuur',w:'wadili',p:'wa-di-li'},{nl:'kind',w:'nakhoro',p:'na-kho-ro'}],
+phrases:[{nl:'Goedemorgen.',w:'Shikabo adali.',p:'shi-ka-bo a-da-li'},{nl:'Hoe heet je?',w:'Ama daka?',p:'a-ma da-ka'},{nl:'Dank je.',w:'Biara.',p:'bi-a-ra'},{nl:'Ik hou van jou.',w:'Niya lokoberi khu.',p:'ni-ya lo-ko-be-ri'}],
+lessons:[{emoji:'🌄',title:'Eerste woorden',xp:10},{emoji:'🌿',title:'Natuur',xp:15}]},
+{id:'karib',name:"Kari'na",full:"Kari'na (Karib)",flag:'🌊',deco:'🌊',badge:'Inheems ¹',badgeType:'red',speakers:'~3.000',group:"Kari'na volk",sub:"Taal van de Kari'na aan de noordkust.",culture:"'Caribisch' en 'Paramaribo' zijn beide afgeleid van Kari'na woorden.",cultureIcon:'🌊',cultureBg:'var(--blue-l)',cultureTitle:"Kari'na erfgoed",sourceShort:'Hoff, B.J. / KITLV, 1968',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'topu',p:'to-pu'},{nl:'goed',w:'marima',p:'ma-ri-ma'},{nl:'dank je',w:'kuriyano',p:'ku-ri-ya-no'},{nl:'ja',w:'au',p:'au'},{nl:'nee',w:'ewe',p:'e-we'},{nl:'moeder',w:'yaya',p:'ya-ya'},{nl:'vader',w:'papa',p:'pa-pa'},{nl:'water',w:'tuna',p:'tu-na'},{nl:'huis',w:'pata',p:'pa-ta'},{nl:'boom',w:'wewe',p:'we-we'},{nl:'zon',w:'weyú',p:'we-yú'},{nl:'vis',w:'waikeru',p:'wai-ke-ru'},{nl:'kind',w:'enu',p:'e-nu'},{nl:'één',w:'obo',p:'o-bo'},{nl:'twee',w:'oko',p:'o-ko'},{nl:'nacht',w:'poromé',p:'po-ro-mé'},{nl:'maan',w:'nuno',p:'nu-no'},{nl:'aarde',w:'yumali',p:'yu-ma-li'}],
+phrases:[{nl:'Goedemorgen.',w:'Marima weyú.',p:'ma-ri-ma we-yú'},{nl:'Hoe heet je?',w:'Amochi nito?',p:'a-mo-chi ni-to'},{nl:'Dank je wel.',w:'Kuriyano.',p:'ku-ri-ya-no'},{nl:'Tot ziens.',w:'Moro.',p:'mo-ro'}],
+lessons:[{emoji:'🌊',title:'Eerste woorden',xp:10},{emoji:'🌿',title:'Natuur',xp:15}]},
+{id:'hakka',name:'Hakka',full:'Hakka Chinees',flag:'🏮',deco:'🏮',badge:'Gemeenschapstaal',badgeType:'ink',speakers:'~17.500',group:'Chinees-Surinaamse gemeenschap',sub:'De Chinese taal van Suriname.',culture:'De Hakka-Chinezen stichtten winkels door heel Suriname. De "Chinese winkeltje" is een icoon van het dagelijks leven.',cultureIcon:'🏮',cultureBg:'var(--red-l)',cultureTitle:'Chinees-Surinaamse cultuur',sourceShort:'Tjon Sie Fat / CUHK, 2009',speechLang:'zh-TW',
+words:[{nl:'hallo',w:'nǐ hǎo',p:'ni hao'},{nl:'dank je',w:'m̀h-gōi',p:'mm-goi'},{nl:'ja',w:'hái',p:'hái'},{nl:'nee',w:'mò yû',p:'mo yu'},{nl:'goed',w:'hó',p:'hó'},{nl:'moeder',w:'a-mâ',p:'a-mà'},{nl:'vader',w:'a-pâ',p:'a-pà'},{nl:'eten',w:'sik-fan',p:'sik-fan'},{nl:'water',w:'súi',p:'súi'},{nl:'huis',w:'ûk',p:'ûk'},{nl:'één',w:'yit',p:'yit'},{nl:'twee',w:'ngi',p:'ngi'},{nl:'drie',w:'sâm',p:'sâm'},{nl:'vier',w:'si',p:'si'},{nl:'vijf',w:'ńg',p:'ng'},{nl:'kind',w:'sai-mân-jai',p:'sai-man-jai'},{nl:'groot',w:'thai',p:'thai'},{nl:'klein',w:'sai',p:'sai'},{nl:'vis',w:'ǹg',p:'ng'},{nl:'dag',w:'ngit-thèu',p:'ngit-thèu'}],
+phrases:[{nl:'Hoe gaat het?',w:'Nǐ hǎo ma?',p:'ni hao ma'},{nl:'Dank je wel.',w:'M̀h-gōi saai.',p:'mm-goi saai'},{nl:'Tot ziens.',w:'Zàijiàn.',p:'zai-jian'},{nl:'Hoe heet je?',w:'Nǐ jiào shénme?',p:'ni jiao shenme'}],
+lessons:[{emoji:'🏮',title:'Eerste woorden',xp:10},{emoji:'🔢',title:'Cijfers',xp:10}]},
+{id:'surinaams-nl',name:'Surinaams NL',full:'Surinaams Nederlands',flag:'🇳🇱',deco:'🌸',badge:'Officieel',badgeType:'ink',speakers:'~612.000',group:'Alle gemeenschappen',sub:'Het officiële Nederlands met een Surinaams tintje.',culture:'Surinaams Nederlands heeft unieke woorden als "switi", "brada" en "pom" — een levend bewijs van Surinames diversiteit.',cultureIcon:'🌸',cultureBg:'var(--blue-l)',cultureTitle:'Surinaams taalgebruik',sourceShort:'Charry, Koefoed & Muysken, 1983',speechLang:'nl-NL',
+words:[{nl:'gezellig / lekker',w:'switi',p:'swi-ti'},{nl:'broer / vriend',w:'brada',p:'bra-da'},{nl:'zus / vriendin',w:'sisa',p:'si-sa'},{nl:'brutaal',w:'brafoe',p:'bra-foe'},{nl:'heel erg',w:'furu',p:'fu-ru'},{nl:'dat klopt',w:'troe',p:'troe'},{nl:'geld',w:'moni',p:'mo-ni'},{nl:'maniok',w:'kasaba',p:'ka-sa-ba'},{nl:'gerecht (pom)',w:'pom',p:'pom'},{nl:'jongen / kerel',w:'boi',p:'boi'},{nl:'heb je zin?',w:'joe wani?',p:'joe wa-ni'},{nl:'mooi / fijn',w:'swit',p:'swit'},{nl:'vreemd / raar',w:'ogri',p:'og-ri'},{nl:'snel / meteen',w:'proenkroe',p:'proen-kroe'},{nl:'helemaal',w:'ogentoe',p:'o-gen-toe'},{nl:'feestmaal',w:'njam',p:'njam'},{nl:'met',w:'nanga',p:'na-nga'},{nl:'broek',w:'brooki',p:'broo-ki'}],
+phrases:[{nl:'"Heel erg lekker!"',w:'"A switi furu!"',p:'a swi-ti fu-ru'},{nl:'"Ga je mee?"',w:'"Joe e go?"',p:'joe e go'},{nl:'"Mijn broer."',w:'"Mi brada."',p:'mi bra-da'},{nl:'"Dat klopt echt."',w:'"A troe, efu."',p:'a troe e-fu'}],
+lessons:[{emoji:'🌸',title:'Surinaamse woorden',xp:10},{emoji:'🗣️',title:'Straattaal',xp:10}]},
+{id:'matawai',name:'Matawai',full:'Matawai',flag:'🌳',deco:'🌳',badge:'Marontaal ¹',badgeType:'gold',speakers:'~5.000',group:'Matawai Marrons',sub:'De taal van de Matawai-Marrons.',culture:'De Matawai sloten in 1762 als een van de eersten een vredesverdrag met de Nederlandse koloniale overheid.',cultureIcon:'🌳',cultureBg:'var(--green-l)',cultureTitle:'Matawai geschiedenis',sourceShort:'Huttar, G.L. / SIL',speechLang:'nl-NL',
+words:[{nl:'hallo',w:'fa yu du?',p:'fa yu du'},{nl:'goed',w:'bun',p:'bun'},{nl:'dank je',w:'tangi',p:'tan-gi'},{nl:'ja',w:'ee',p:'ee'},{nl:'nee',w:'no',p:'no'},{nl:'moeder',w:'mama',p:'ma-ma'},{nl:'vader',w:'tata',p:'ta-ta'},{nl:'kind',w:'pikin',p:'pi-kin'},{nl:'water',w:'watra',p:'wat-ra'},{nl:'huis',w:'oso',p:'o-so'},{nl:'boom',w:'puu',p:'puu'},{nl:'rivier',w:'liba',p:'li-ba'},{nl:'vuur',w:'faya',p:'fa-ya'},{nl:'zon',w:'son',p:'son'},{nl:'één',w:'wan',p:'wan'},{nl:'vis',w:'fisi',p:'fi-si'},{nl:'dag',w:'dei',p:'dei'},{nl:'nacht',w:'neti',p:'ne-ti'},{nl:'groot',w:'bigi',p:'bi-gi'},{nl:'mooi',w:'moi',p:'moi'}],
+phrases:[{nl:'Hoe gaat het?',w:'fa yu du?',p:'fa yu du'},{nl:'Het gaat goed.',w:'mi de bun.',p:'mi de bun'},{nl:'Ik ga naar huis.',w:'mi go na oso.',p:'mi go na o-so'},{nl:'Dank je.',w:'tangi.',p:'tan-gi'}],
+lessons:[{emoji:'🌳',title:'Eerste woorden',xp:10},{emoji:'🌿',title:'Natuur & Omgeving',xp:15}]}
+];
+
+// ═══ STATE & PERSISTENCE ═══
+function loadState(){
+  try{const s=JSON.parse(localStorage.getItem('talusuri_state'));if(s)return s;}catch(e){}
+  return null;
+}
+function saveState(){
+  try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded}));}catch(e){}
+}
+let saved=loadState();
+let S={
+  lang:LANGS[0],xp:saved?.xp||0,streak:saved?.streak||1,
+  flashIdx:0,flashRevealed:false,flashOk:0,flashTot:0,
+  ex:null, // active exercise session
+  themeProgress:saved?.themeProgress||{},
+  badges:saved?.badges||[],
+  seenLangs:saved?.seenLangs||['sarnami'],
+  goal:saved?.goal||null,
+  theme:saved?.theme||'light',
+  onboarded:saved?.onboarded||false
+};
+if(saved?.langId){const f=LANGS.find(l=>l.id===saved.langId);if(f)S.lang=f;}
+
+// ═══ THEME ═══
+function applyTheme(){
+  document.getElementById('htmlRoot').setAttribute('data-theme',S.theme);
+  const btn=document.getElementById('theme-btn');
+  if(btn)btn.innerHTML=S.theme==='dark'?'<i class="ti ti-sun"></i>':'<i class="ti ti-moon"></i>';
+}
+function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';applyTheme();saveState();}
+
+// ═══ LEVEL SYSTEM ═══
+function getLevel(xp){return Math.floor(xp/100)+1;}
+function getLevelTitle(lvl){return LEVEL_TITLES[Math.min(lvl-1,LEVEL_TITLES.length-1)];}
+function xpInLevel(xp){return xp%100;}
+
+// ═══ AUDIO ═══
+let audioMode='tts';
+function setAudioMode(mode,btn){audioMode=mode;document.querySelectorAll('.audio-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderFlash();}
+function speak(text,langCode){
+  if(!('speechSynthesis'in window)){alert('Je browser ondersteunt geen spraak. Probeer Chrome of Edge.');return;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=langCode||'nl-NL';u.rate=0.85;
+  window.speechSynthesis.speak(u);
 }
 
-function renderStreakDots() {
-  const bar = document.getElementById('s-bar'); bar.innerHTML = '';
-  for (let i = 0; i < 7; i++) { const d = document.createElement('div'); d.className = 's-dot' + (i < S.streak ? ' done' : ''); bar.appendChild(d); }
-  document.getElementById('s-num').textContent = S.streak;
-  document.getElementById('streak-lbl').textContent = S.streak + ' dagen streak';
-  document.getElementById('xp-fill').style.width = S.xp + '%';
-  document.getElementById('xp-lbl').textContent = S.xp + '/100';
+// ═══ FLAGS / FEEDBACK ═══
+function getFlags(){try{return JSON.parse(localStorage.getItem('talusuri_flags')||'[]');}catch(e){return[];}}
+function saveFlag(obj){const f=getFlags();f.unshift({...obj,id:Date.now(),ts:new Date().toLocaleDateString('nl-NL')});localStorage.setItem('talusuri_flags',JSON.stringify(f.slice(0,100)));updateFeedbackBadge();unlockBadge('contributor');}
+function clearFeedback(){if(confirm('Alle feedback wissen?')){localStorage.removeItem('talusuri_flags');updateFeedbackBadge();renderFeedbackList();}}
+function updateFeedbackBadge(){const n=getFlags().length;const b=document.getElementById('feedback-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('feedback-count');if(c)c.textContent='('+n+')';}
+function renderFeedbackList(){
+  const list=document.getElementById('feedback-list');if(!list)return;
+  const flags=getFlags();
+  if(!flags.length){list.innerHTML='<div class="feedback-empty"><i class="ti ti-flag" style="font-size:32px;display:block;margin-bottom:8px;opacity:.3;"></i>Nog geen feedback.<br><span style="font-size:12px;">Vlag woorden via het woordenboek of een les.</span></div>';return;}
+  list.innerHTML=flags.map(f=>`<div class="feedback-item"><div class="feedback-item-header"><div><div class="feedback-word">${f.word||'?'}</div><div class="feedback-lang">${f.lang||''}</div></div><div style="font-size:11px;color:var(--muted);">${f.ts||''}</div></div><div class="feedback-text">${f.text||'(geen toelichting)'}</div>${f.nl?`<div class="feedback-meta">NL: ${f.nl}</div>`:''}</div>`).join('');
+}
+let openFlagId=null;
+function toggleFlag(id){
+  if(openFlagId===id){document.getElementById('flag-form-'+id)?.classList.remove('open');openFlagId=null;return;}
+  if(openFlagId)document.getElementById('flag-form-'+openFlagId)?.classList.remove('open');
+  openFlagId=id;const form=document.getElementById('flag-form-'+id);if(form){form.classList.add('open');form.querySelector('textarea')?.focus();}
+}
+function submitFlag(id,word,nl,lang){
+  const form=document.getElementById('flag-form-'+id);const text=form?.querySelector('textarea')?.value?.trim();
+  saveFlag({word,nl,lang,text});form.classList.remove('open');openFlagId=null;
+  const t=document.getElementById('flag-thanks-'+id);if(t){t.style.display='block';setTimeout(()=>{t.style.display='none';},2500);}
+  if(document.getElementById('view-feedback').classList.contains('active'))renderFeedbackList();
 }
 
-function renderDict(words) {
-  const list = document.getElementById('dict-list'); list.innerHTML = '';
-  words.forEach(w => {
-    const r = document.createElement('div'); r.className = 'dict-row'; r.setAttribute('role', 'listitem');
-    r.innerHTML = `<span class="dict-nl">${w.nl}</span><span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></span>`;
-    list.appendChild(r);
+// ═══ BADGES ═══
+function unlockBadge(id){
+  if(S.badges.includes(id))return false;
+  S.badges.push(id);saveState();renderHomeBadges();renderBadgesGrid();
+  return true;
+}
+function checkBadges(){
+  if(S.streak>=3)unlockBadge('streak_3');
+  if(S.streak>=7)unlockBadge('streak_7');
+  if(S.flashOk>=10)unlockBadge('flash_10');
+  if(getLevel(S.xp)>=5)unlockBadge('level_5');
+  if(S.seenLangs.length>=3)unlockBadge('polyglot');
+  if(S.seenLangs.length>=10)unlockBadge('explorer');
+}
+
+// ═══ EXERCISE GENERATION (varied types) ═══
+function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+function pickDistractors(correct,pool,n,key){
+  const opts=shuffle(pool.filter(w=>w[key]!==correct[key])).slice(0,n).map(w=>w[key]);
+  return shuffle([correct[key],...opts]);
+}
+// Generate questions for a lesson theme by sampling words
+function genLessonQuestions(words,count){
+  const sample=shuffle(words).slice(0,count);
+  return sample.map((wd,i)=>{
+    const type=i%4; // cycle through 4 types
+    if(type===0){ // NL->target multiple choice
+      return{kind:'mc',q:`Hoe zeg je "${wd.nl}" in ${S.lang.name}?`,c:wd.w,o:pickDistractors(wd,words,3,'w'),speak:wd.w};
+    }else if(type===1){ // target->NL multiple choice
+      return{kind:'mc',q:`Wat betekent "${wd.w}"?`,c:wd.nl,o:pickDistractors(wd,words,3,'nl'),speak:wd.w};
+    }else if(type===2){ // type-in
+      return{kind:'type',q:`Typ de vertaling van "${wd.nl}" in ${S.lang.name}:`,c:wd.w,hint:wd.p,speak:wd.w};
+    }else{ // listen & choose (uses TTS)
+      return{kind:'listen',q:`Luister en kies de juiste vertaling:`,c:wd.nl,o:pickDistractors(wd,words,3,'nl'),speak:wd.w,listenWord:wd.w};
+    }
   });
 }
 
-function filterDict() {
-  const q = document.getElementById('dict-q').value.toLowerCase();
-  renderDict((q ? S.lang.words.filter(w => w.nl.includes(q) || w.w.toLowerCase().includes(q)) : S.lang.words).slice(0, 8));
+// ═══ RENDER: SET LANGUAGE ═══
+function setLang(l){
+  S.lang=l;S.flashIdx=0;S.flashRevealed=false;S.flashOk=0;S.flashTot=0;
+  if(!S.seenLangs.includes(l.id)){S.seenLangs.push(l.id);checkBadges();}
+  document.getElementById('hero-title').textContent=l.full;
+  document.getElementById('hero-sub').textContent=l.sub;
+  document.getElementById('hero-deco').textContent=l.deco;
+  const w=l.words[new Date().getDay()%l.words.length];
+  document.getElementById('wod-w').textContent=w.w;
+  document.getElementById('wod-nl').textContent=w.nl;
+  document.getElementById('dict-lang-title').textContent='NL → '+l.name;
+  document.getElementById('dict-q').value='';
+  renderDict(l.words.slice(0,8));
+  document.getElementById('dict-source').innerHTML='<i class="ti ti-book-2" style="font-size:12px;margin-right:4px;"></i>Bron: '+l.sourceShort;
+  renderFlash();
+  document.getElementById('culture-card').style.background=l.cultureBg;
+  document.getElementById('cult-icon').textContent=l.cultureIcon;
+  document.getElementById('cult-title').textContent=l.cultureTitle;
+  document.getElementById('cult-text').textContent=l.culture;
+  renderPhrases();renderHomeLessons();
+  document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.id===l.id));
+  document.getElementById('les-view-title').textContent='Lessen: '+l.full;
+  renderAllLessons();
+  document.getElementById('wb-title').textContent='Woordenboek: '+l.name;
+  renderWB(l.words);
+  const src=SOURCES.find(s=>s.id===l.id);
+  document.getElementById('wb-source').innerHTML='<strong style="color:var(--ink);font-size:12px;display:block;margin-bottom:6px;">Bronnen voor deze woordenlijst</strong>'+(src?src.sources.map(s=>`<span style="display:block;margin-top:4px;"><strong style="font-weight:500;color:var(--ink);">${s.title}</strong> — ${s.author} (${s.year})</span>`).join(''):'');
+  saveState();
 }
 
-function renderFlash() {
-  const fc = S.lang.words[S.flashIdx % S.lang.words.length];
-  document.getElementById('fl-w').textContent = fc.w;
-  document.getElementById('fl-p').textContent = '/' + fc.p + '/';
-  const a = document.getElementById('fl-a'); a.textContent = fc.nl; a.className = 'flash-ans';
-  document.getElementById('fl-acts').style.display = 'none';
-  document.getElementById('fl-hint').style.display = 'block';
-  S.flashRevealed = false;
-  document.getElementById('fl-score').textContent = S.flashTot > 0 ? S.flashOk + ' van ' + S.flashTot + ' correct' : '';
+// ═══ RENDER: HEADER STATS ═══
+function renderStats(){
+  const lvl=getLevel(S.xp);
+  document.getElementById('level-num').textContent=lvl;
+  document.getElementById('level-num-pill').textContent=lvl;
+  document.getElementById('level-title').textContent=getLevelTitle(lvl);
+  const inLvl=xpInLevel(S.xp);
+  document.getElementById('level-fill').style.width=inLvl+'%';
+  document.getElementById('xp-current').textContent=S.xp+' XP';
+  document.getElementById('xp-next').textContent=(lvl*100)+' XP';
+  document.getElementById('streak-lbl').textContent=S.streak;
+  document.getElementById('streak-days').textContent=S.streak;
+  const bar=document.getElementById('s-bar');bar.innerHTML='';
+  for(let i=0;i<7;i++){const d=document.createElement('div');d.className='s-dot'+(i<S.streak?' done':'');bar.appendChild(d);}
+  const bl=document.getElementById('badge-level');if(bl)bl.textContent=lvl;
+  const bx=document.getElementById('badge-xp');if(bx)bx.textContent=S.xp;
+  const bc=document.getElementById('badge-count');if(bc)bc.textContent=S.badges.length;
+}
+function addXP(n){
+  const before=getLevel(S.xp);S.xp+=n;const after=getLevel(S.xp);
+  renderStats();checkBadges();saveState();
+  return after>before; // leveled up
 }
 
-function revealFlash() {
-  if (S.flashRevealed) return; S.flashRevealed = true;
-  document.getElementById('fl-a').classList.add('show');
-  document.getElementById('fl-acts').style.display = 'flex';
-  document.getElementById('fl-hint').style.display = 'none';
+// ═══ RENDER: DICT ═══
+function renderDict(words){
+  const list=document.getElementById('dict-list');list.innerHTML='';
+  words.forEach((w,i)=>{
+    const id='dw'+i;
+    const row=document.createElement('div');row.className='dict-row';
+    row.innerHTML=`<span class="dict-nl">${w.nl}</span><div class="dict-actions"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="Uitspreken"><i class="ti ti-volume"></i></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')" title="Bijdragen"><i class="ti ti-microphone"></i></button><button class="dict-btn flag" onclick="toggleFlag('${id}')" title="Flag"><i class="ti ti-flag"></i></button></div><div class="dict-word-block"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></div>`;
+    list.appendChild(row);
+    const fw=document.createElement('div');
+    fw.innerHTML=`<div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet aan "${w.w}"?</div><textarea placeholder="Bijv: verkeerde vertaling, andere uitspraak..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
+    list.appendChild(fw);
+  });
+}
+function filterDict(){const q=document.getElementById('dict-q').value.toLowerCase();renderDict((q?S.lang.words.filter(w=>w.nl.includes(q)||w.w.toLowerCase().includes(q)):S.lang.words).slice(0,8));}
+
+// ═══ GLOBAL SEARCH ═══
+function globalSearch(){
+  const q=document.getElementById('global-search').value.toLowerCase().trim();
+  const res=document.getElementById('search-results');
+  if(!q){res.innerHTML='';return;}
+  const hits=[];
+  LANGS.forEach(l=>{l.words.forEach(w=>{if(w.nl.toLowerCase().includes(q)||w.w.toLowerCase().includes(q))hits.push({...w,langName:l.name,langId:l.id,speechLang:l.speechLang});});});
+  if(!hits.length){res.innerHTML='<div class="search-empty">Geen resultaten voor "'+q+'"</div>';return;}
+  res.innerHTML=hits.slice(0,18).map(h=>`<div class="search-result" onclick="speak('${h.w.replace(/'/g,"\\'")}','${h.speechLang}')"><div class="sr-word">${h.w}</div><div class="sr-nl">${h.nl}</div><span class="sr-lang">${h.langName}</span></div>`).join('');
 }
 
-function nextFlash(ok) {
-  S.flashTot++; if (ok) { S.flashOk++; S.xp = Math.min(100, S.xp + 2); }
-  S.flashIdx++; renderFlash(); renderStreakDots();
+// ═══ FLASHCARD ═══
+function renderFlash(){
+  const fc=S.lang.words[S.flashIdx%S.lang.words.length];
+  document.getElementById('fl-w').textContent=fc.w;
+  document.getElementById('fl-p').textContent='/'+fc.p+'/';
+  const a=document.getElementById('fl-a');a.textContent=fc.nl;a.className='flash-nl';
+  const reveal=document.getElementById('fl-reveal');if(reveal)reveal.style.display='block';
+  document.getElementById('fl-acts').style.display='none';
+  S.flashRevealed=false;
+  document.getElementById('fl-score').textContent=S.flashTot>0?S.flashOk+' van '+S.flashTot+' correct':'';
+  const ar=document.getElementById('fl-audio-row');ar.innerHTML='';
+  if(audioMode==='tts')ar.innerHTML=`<button class="speak-btn" onclick="speak('${fc.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> Hoor uitspraak</button>`;
+  else if(audioMode==='guide')ar.innerHTML=`<span style="font-size:13px;color:var(--muted);">📖 Spreek uit: <strong style="color:var(--ink);">${fc.p}</strong></span>`;
+  else ar.innerHTML=`<button class="contrib-btn" onclick="alert('Opname-functie komt binnenkort!')"><i class="ti ti-microphone"></i> Neem op voor community</button>`;
 }
+function revealFlash(){if(S.flashRevealed)return;S.flashRevealed=true;document.getElementById('fl-a').classList.add('show');document.getElementById('fl-reveal').style.display='none';document.getElementById('fl-acts').style.display='flex';}
+function nextFlash(ok){S.flashTot++;if(ok){S.flashOk++;addXP(2);}S.flashIdx++;renderFlash();checkBadges();}
 
-function renderProgress() {
-  const grid = document.getElementById('prog-grid'); grid.innerHTML = '';
-  [{e:'👋',l:'Begroetingen'},{e:'👨‍👩‍👧‍👦',l:'Familie'},{e:'🍛',l:'Eten'},{e:'🔢',l:'Cijfers'},{e:'🌈',l:'Kleuren'},{e:'🏠',l:'Huis'},{e:'📅',l:'Tijd'},{e:'❤️',l:'Gevoelens'}].forEach((t, i) => {
-    const pct = S.themeProgress[i] || 0, c = 2 * Math.PI * 14, off = c * (1 - pct / 100);
-    const el = document.createElement('div'); el.className = 'prog-item'; el.setAttribute('role', 'listitem');
-    el.innerHTML = `<svg viewBox="0 0 36 36" width="44" height="44" aria-label="${t.l}: ${pct}%"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="18" cy="18" r="14" fill="none" stroke="${pct > 0 ? 'var(--green)' : 'transparent'}" stroke-width="3" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 18 18)" stroke-linecap="round"/><text x="18" y="22" text-anchor="middle" font-size="9" fill="var(--ink)" font-family="DM Sans">${t.e}</text></svg><div class="prog-lbl">${t.l}</div>`;
+// ═══ PROGRESS, PHRASES, LESSONS ═══
+function renderProgress(){
+  const grid=document.getElementById('prog-grid');grid.innerHTML='';
+  S.lang.lessons.forEach((les,i)=>{
+    const key=S.lang.id+'-'+i;const pct=S.themeProgress[key]||0,c=2*Math.PI*14,off=c*(1-pct/100);
+    const el=document.createElement('div');el.className='prog-item';
+    el.innerHTML=`<svg viewBox="0 0 36 36" width="44" height="44"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="18" cy="18" r="14" fill="none" stroke="${pct>0?'var(--green)':'transparent'}" stroke-width="3" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 18 18)" stroke-linecap="round"/><text x="18" y="22" text-anchor="middle" font-size="13" >${les.emoji}</text></svg><div class="prog-lbl">${les.title}</div>`;
     grid.appendChild(el);
   });
 }
-
-function renderPhrases() {
-  const list = document.getElementById('phrase-list'); list.innerHTML = '';
-  S.lang.phrases.forEach(p => {
-    const el = document.createElement('div'); el.className = 'phrase-item';
-    el.innerHTML = `<div class="phrase-nl">${p.nl}</div><div class="phrase-sr">${p.w}</div><div class="phrase-pron">${p.p}</div>`;
-    list.appendChild(el);
+function renderPhrases(){
+  const list=document.getElementById('phrase-list');list.innerHTML='';
+  S.lang.phrases.forEach(p=>{const el=document.createElement('div');el.className='phrase-item';el.innerHTML=`<div class="phrase-nl">${p.nl}</div><div style="display:flex;align-items:center;gap:6px;"><div class="phrase-sr">${p.w}</div><button class="dict-btn" onclick="speak('${p.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" style="opacity:.6;"><i class="ti ti-volume"></i></button></div><div class="phrase-pron">${p.p}</div>`;list.appendChild(el);});
+}
+function lessonProgress(i){return S.themeProgress[S.lang.id+'-'+i]||0;}
+function renderHomeLessons(){
+  S.lang.lessons.slice(0,2).forEach((l,i)=>{
+    const el=document.getElementById('les'+i);if(!el)return;const pct=lessonProgress(i);
+    el.innerHTML=`${pct>=100?'<i class="ti ti-circle-check lesson-done"></i>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
+    el.onclick=()=>startLesson(i);
   });
 }
-
-function renderHomeLessons() {
-  S.lang.lessons.slice(0, 3).forEach((l, i) => {
-    const el = document.getElementById('les' + i); if (!el) return;
-    el.innerHTML = `<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · ${l.n} vragen · ${l.xp} XP</div><div style="margin-bottom:10px;"><span class="lc-badge ${i===0?'badge-green':i===1?'badge-gold':'badge-ink'}">${i===0?'Beschikbaar':i===1?'Nieuw':'Meer binnenkort'}</span></div><div class="lesson-bar"><div class="lesson-fill" style="width:0%"></div></div>`;
-    el.onclick = () => startLesson(i);
+function renderAllLessons(){
+  const grid=document.getElementById('all-lessons');grid.innerHTML='';
+  S.lang.lessons.forEach((l,i)=>{
+    const pct=lessonProgress(i);
+    const card=document.createElement('div');card.className='card clickable';
+    card.innerHTML=`${pct>=100?'<i class="ti ti-circle-check lesson-done"></i>':''}<div style="font-size:28px;margin-bottom:8px;">${l.emoji}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;">${l.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
+    card.onclick=()=>startLesson(i);grid.appendChild(card);
   });
-  for (let i = S.lang.lessons.length; i < 3; i++) {
-    const el = document.getElementById('les' + i);
-    if (el) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;display:flex;align-items:center;height:100%;justify-content:center;text-align:center;">Meer lessen<br>binnenkort</div>'; el.onclick = null; }
+  // exam card
+  const exam=document.createElement('div');exam.className='card clickable exam-card';
+  exam.innerHTML=`<div style="font-size:28px;margin-bottom:8px;">🎓</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;color:#fff;">Examen</div><div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:12px;">10 vragen · alle thema's</div><div style="font-size:11px;color:rgba(255,255,255,.6);">Haal 80% voor je certificaat 🏅</div>`;
+  exam.onclick=()=>startExam();grid.appendChild(exam);
+}
+function renderLangGrid(){
+  const grid=document.getElementById('lang-grid');grid.innerHTML='';
+  LANGS.forEach(l=>{const card=document.createElement('div');card.className='lang-card'+(l.id===S.lang.id?' active':'');card.dataset.id=l.id;card.innerHTML=`<div class="lc-flag">${l.flag}</div><div class="lc-name">${l.name}</div><div class="lc-meta">${l.speakers}<br>${l.group}</div><div><span class="lc-badge badge-${l.badgeType}">${l.badge}</span></div>`;card.onclick=()=>{setLang(l);showView('home');};grid.appendChild(card);});
+}
+function renderWB(words){
+  const grid=document.getElementById('wb-grid');grid.innerHTML='';
+  words.forEach((w,i)=>{const id='wb'+i;const card=document.createElement('div');card.className='card';card.style.padding='14px';
+    card.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--green);">${w.w}</div><div style="display:flex;gap:3px;"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i></button><button class="dict-btn mic-contrib" onclick="alert('Community opnames komen binnenkort!')"><i class="ti ti-microphone"></i></button><button class="dict-btn flag" onclick="toggleFlag('${id}')"><i class="ti ti-flag"></i></button></div></div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div><div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
+    grid.appendChild(card);});
+}
+function filterWB(){const q=document.getElementById('wb-q').value.toLowerCase();renderWB(q?S.lang.words.filter(w=>w.nl.includes(q)||w.w.toLowerCase().includes(q)):S.lang.words);}
+function renderSourcesGrid(){
+  const grid=document.getElementById('sources-grid');grid.innerHTML='';
+  SOURCES.forEach(s=>{const lang=LANGS.find(l=>l.id===s.id);const card=document.createElement('div');card.className='source-card';card.innerHTML=`<div class="source-lang"><span class="source-flag">${lang?lang.flag:'🌐'}</span><span class="source-lang-name">${s.name}</span></div>`+s.sources.map(src=>`<div class="source-item"><strong>${src.title}</strong>${src.author} (${src.year})<br><span class="source-tag ${src.type==='primary'?'tag-primary':'tag-secondary'}">${src.type==='primary'?'Primaire bron':'Aanvullende bron'}</span>${src.note?`<span style="display:block;margin-top:3px;font-size:11px;">${src.note}</span>`:''}</div>`).join('');grid.appendChild(card);});
+}
+function renderHomeBadges(){
+  const el=document.getElementById('home-badges');if(!el)return;
+  const earned=BADGES.filter(b=>S.badges.includes(b.id)).slice(0,4);
+  if(!earned.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px;">Nog geen badges. Voltooi een les om te beginnen! 🌱</div>';return;}
+  el.innerHTML=earned.map(b=>`<div class="badge-item"><div class="badge-icon">${b.icon}</div><div><div class="badge-info-name">${b.name}</div><div class="badge-info-desc">${b.desc}</div></div></div>`).join('');
+}
+function renderBadgesGrid(){
+  const grid=document.getElementById('badges-grid');if(!grid)return;
+  grid.innerHTML=BADGES.map(b=>{const earned=S.badges.includes(b.id);return `<div class="badge-item ${earned?'':'locked'}" style="padding:16px;"><div class="badge-icon" style="width:48px;height:48px;font-size:26px;">${earned?b.icon:'🔒'}</div><div><div class="badge-info-name" style="font-size:14px;">${b.name}</div><div class="badge-info-desc">${b.desc}</div></div></div>`;}).join('');
+}
+function renderLeaderboard(){
+  const list=document.getElementById('leaderboard-list');if(!list)return;
+  const me={name:'Jij',xp:S.xp,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true};
+  const all=[...LEADERBOARD,me].sort((a,b)=>b.xp-a.xp);
+  list.innerHTML=all.map((p,i)=>`<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div><div class="lb-avatar">${p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${p.langs}</div></div><div class="lb-xp">${p.xp.toLocaleString('nl-NL')} XP</div></div>`).join('');
+}
+
+// ═══ VIEWS ═══
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  const idx=['home','talen','lessen','woordenboek','leaderboard','badges','bronnen','feedback'].indexOf(v);
+  if(idx>=0)document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(v==='feedback')renderFeedbackList();
+  if(v==='leaderboard')renderLeaderboard();
+  if(v==='badges')renderBadgesGrid();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══ LESSON / EXAM ENGINE ═══
+function startLesson(idx){
+  if(idx>=S.lang.lessons.length)return;
+  const les=S.lang.lessons[idx];
+  S.ex={type:'lesson',idx,title:les.title,emoji:les.emoji,xp:les.xp,q:genLessonQuestions(S.lang.words,6),cur:0,score:0,answered:false};
+  renderExercise();document.getElementById('modal').classList.add('open');
+}
+function startExam(){
+  S.ex={type:'exam',title:'Examen '+S.lang.name,emoji:'🎓',xp:50,q:genLessonQuestions(S.lang.words,10),cur:0,score:0,answered:false};
+  renderExercise();document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');window.speechSynthesis&&window.speechSynthesis.cancel();}
+
+function renderExercise(){
+  const ex=S.ex;
+  if(ex.cur>=ex.q.length){renderComplete();return;}
+  const q=ex.q[ex.cur];const pct=Math.round((ex.cur/ex.q.length)*100);
+  let body=`<div class="q-counter">${ex.emoji} ${ex.title} · Vraag ${ex.cur+1} van ${ex.q.length}</div><div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div><div class="q-q">${q.q}</div>`;
+  // Audio helper for listen-type and others
+  if(q.kind==='listen'){
+    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.listenWord.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> 🔊 Speel woord af</button></div>`;
+  }else if(q.speak){
+    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.speak.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><i class="ti ti-volume"></i> Hoor uitspraak</button></div>`;
+  }
+  if(q.kind==='mc'||q.kind==='listen'){
+    body+=`<div class="q-opts" id="q-opts"></div>`;
+  }else if(q.kind==='type'){
+    body+=`<input class="q-input" id="q-input" placeholder="Typ hier..." autocomplete="off"><div style="font-size:11px;color:var(--muted);margin:-8px 0 14px;">💡 Hint: ${q.hint}</div><button class="q-check" id="q-check" onclick="checkType()">Controleer</button>`;
+  }
+  body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><i class="ti ti-flag" style="font-size:12px;"></i> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <i class="ti ti-arrow-right"></i></button>`;
+  document.getElementById('modal-body').innerHTML=body;
+  if(q.kind==='mc'||q.kind==='listen'){
+    const opts=document.getElementById('q-opts');
+    q.o.forEach(opt=>{const b=document.createElement('button');b.className='q-opt';b.textContent=opt;b.onclick=()=>answerMC(opt,q.c,b);opts.appendChild(b);});
+  }
+  if(q.kind==='type'){const inp=document.getElementById('q-input');inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});setTimeout(()=>inp.focus(),100);}
+  ex.answered=false;
+}
+function afterAnswer(correct){
+  S.ex.answered=true;
+  const fb=document.getElementById('q-fb');
+  if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;}
+  else{fb.className='q-fb bad';fb.textContent='Helaas, fout.';}
+  fb.style.display='block';
+  document.getElementById('q-flag-row').style.display='block';
+  document.getElementById('q-next').style.display='block';
+}
+function answerMC(chosen,correct,btn){
+  if(S.ex.answered)return;
+  document.querySelectorAll('.q-opt').forEach(b=>{if(b.textContent===correct)b.classList.add('correct');});
+  if(chosen!==correct)btn.classList.add('wrong');
+  const fb=document.getElementById('q-fb');afterAnswer(chosen===correct);
+  if(chosen!==correct)fb.textContent='Helaas. Juist is: '+correct;
+}
+function checkType(){
+  if(S.ex.answered)return;
+  const inp=document.getElementById('q-input');const q=S.ex.q[S.ex.cur];
+  const val=inp.value.trim().toLowerCase();const correct=q.c.toLowerCase();
+  const ok=val===correct||val.replace(/[^a-z]/g,'')===correct.replace(/[^a-z]/g,'');
+  inp.classList.add(ok?'correct':'wrong');inp.disabled=true;
+  document.getElementById('q-check').style.display='none';
+  const fb=document.getElementById('q-fb');afterAnswer(ok);
+  if(!ok)fb.textContent='Helaas. Juist is: '+q.c;
+}
+function submitQFlag(){
+  const text=document.getElementById('q-flag-form').querySelector('textarea').value.trim();
+  saveFlag({word:'Lesvraag',nl:S.ex.q[S.ex.cur].q.substring(0,50)+'...',lang:S.lang.name,text});
+  document.getElementById('q-flag-form').classList.remove('open');
+  document.getElementById('q-flag-row').innerHTML='<span style="font-size:12px;color:var(--green);">✓ Ingediend, dank je!</span>';
+}
+function nextEx(){S.ex.cur++;renderExercise();}
+function renderComplete(){
+  const ex=S.ex;const pct=Math.round((ex.score/ex.q.length)*100);
+  let leveledUp=false;let passedExam=false;
+  if(ex.type==='lesson'){
+    const key=S.lang.id+'-'+ex.idx;S.themeProgress[key]=Math.max(S.themeProgress[key]||0,pct);
+    leveledUp=addXP(ex.xp);
+    if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
+    unlockBadge('first_lesson');
+    if(pct===100)unlockBadge('perfect');
+  }else{ // exam
+    leveledUp=addXP(Math.round(ex.xp*pct/100));
+    if(pct>=80){passedExam=true;unlockBadge('exam_pass');}
+  }
+  checkBadges();renderProgress();renderHomeLessons();renderAllLessons();saveState();
+  const newBadges=BADGES.filter(b=>S.badges.includes(b.id));
+  let badgeHtml='';
+  // detect freshly relevant badge (simple: show first lesson / exam badge)
+  const rewardEmoji=pct>=80?'🏆':pct>=60?'🌟':'💪';
+  const title=ex.type==='exam'?(passedExam?'Geslaagd! 🎓':'Examen voltooid'):(pct>=80?'Schitterend!':pct>=60?'Goed gedaan!':'Blijf oefenen!');
+  let body=`<div class="complete"><div class="complete-emoji">${rewardEmoji}</div><div class="complete-title">${title}</div><div class="complete-sub">${ex.score} van ${ex.q.length} goed — ${pct}%</div><div class="complete-rewards"><div class="complete-reward"><i class="ti ti-bolt"></i> +${ex.type==='exam'?Math.round(ex.xp*pct/100):ex.xp} XP</div>`;
+  if(leveledUp)body+=`<div class="complete-reward" style="background:var(--blue-l);color:var(--blue);"><i class="ti ti-arrow-up"></i> Level ${getLevel(S.xp)}!</div>`;
+  if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><i class="ti ti-certificate"></i> Certificaat 🏅</div>`;
+  body+=`</div>`;
+  if(passedExam)body+=`<div class="complete-badge-unlock show"><div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:3px;">🏅 Certificaat behaald!</div><div style="font-size:12px;color:var(--muted);">Je beheerst de basis van ${S.lang.name}. Geweldig werk!</div></div>`;
+  body+=`<div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div><button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button></div>`;
+  document.getElementById('modal-body').innerHTML=body;
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+
+// ═══ ONBOARDING ═══
+let onboardStep=0;
+function selectGoal(el,goal){document.querySelectorAll('#goal-opts .onboard-opt').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');S.goal=goal;document.getElementById('goal-next').disabled=false;}
+function onboardNext(step){
+  document.getElementById('ostep'+onboardStep).classList.remove('active');
+  document.getElementById('od'+onboardStep).classList.remove('active');
+  onboardStep=step;
+  document.getElementById('ostep'+step).classList.add('active');
+  document.getElementById('od'+step).classList.add('active');
+  if(step===2)renderOnboardLangs();
+}
+function renderOnboardLangs(){
+  const grid=document.getElementById('onboard-langs');grid.innerHTML='';
+  LANGS.forEach(l=>{const d=document.createElement('div');d.className='onboard-lang';d.innerHTML=`<div style="font-size:24px;">${l.flag}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-top:4px;">${l.name}</div>`;d.onclick=()=>{document.querySelectorAll('.onboard-lang').forEach(x=>x.classList.remove('selected'));d.classList.add('selected');S.lang=l;document.getElementById('lang-next').disabled=false;};grid.appendChild(d);});
+}
+function finishOnboard(skip){
+  S.onboarded=true;if(skip&&!S.goal)S.goal='plezier';
+  saveState();
+  document.getElementById('onboard').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  bootApp();
+}
+
+// ═══ INIT ═══
+function bootApp(){
+  applyTheme();renderStats();renderLangGrid();renderSourcesGrid();renderHomeBadges();renderBadgesGrid();setLang(S.lang);renderProgress();updateFeedbackBadge();
+}
+function init(){
+  applyTheme();
+  if(S.onboarded){
+    document.getElementById('onboard').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    bootApp();
+  }else{
+    document.getElementById('onboard').style.display='flex';
+    document.getElementById('mainApp').style.display='none';
   }
 }
-
-function renderAllLessons() {
-  const grid = document.getElementById('all-lessons'); grid.innerHTML = '';
-  S.lang.lessons.forEach((l, i) => {
-    const card = document.createElement('div'); card.className = 'card clickable';
-    card.innerHTML = `<div style="font-size:28px;margin-bottom:8px;">${l.emoji}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;">${l.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">${l.n} vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:0%"></div></div>`;
-    card.onclick = () => startLesson(i);
-    grid.appendChild(card);
-  });
-}
-
-function renderLangGrid() {
-  const grid = document.getElementById('lang-grid'); grid.innerHTML = '';
-  LANGS.forEach(l => {
-    const card = document.createElement('div'); card.className = 'lang-card' + (l.id === S.lang.id ? ' active' : '');
-    card.dataset.id = l.id;
-    card.innerHTML = `<div class="lc-flag">${l.flag}</div><div class="lc-name">${l.name}</div><div class="lc-meta">${l.speakers}<br>${l.group}</div><div><span class="lc-badge badge-${l.badgeType}">${l.badge}</span></div>`;
-    card.onclick = () => setLang(l);
-    grid.appendChild(card);
-  });
-}
-
-function renderWB(words) {
-  const grid = document.getElementById('wb-grid'); grid.innerHTML = '';
-  words.forEach(w => {
-    const card = document.createElement('div'); card.className = 'card'; card.style.padding = '14px';
-    card.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--green);">${w.w}</div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div>`;
-    grid.appendChild(card);
-  });
-}
-
-function filterWB() {
-  const q = document.getElementById('wb-q').value.toLowerCase();
-  renderWB(q ? S.lang.words.filter(w => w.nl.includes(q) || w.w.toLowerCase().includes(q)) : S.lang.words);
-}
-
-function renderSourcesGrid() {
-  const grid = document.getElementById('sources-grid'); grid.innerHTML = '';
-  SOURCES.forEach(s => {
-    const lang = LANGS.find(l => l.id === s.id);
-    const card = document.createElement('div'); card.className = 'source-card';
-    card.innerHTML = `<div class="source-lang"><span class="source-flag">${lang ? lang.flag : '🌐'}</span><span class="source-lang-name">${s.name}</span></div>` +
-      s.sources.map(src => `<div class="source-item"><strong>${src.title}</strong>${src.author} (${src.year})<br><span class="source-tag ${src.type === 'primary' ? 'tag-primary' : 'tag-secondary'}">${src.type === 'primary' ? 'Primaire bron' : 'Aanvullende bron'}</span>${src.note ? `<span style="display:block;margin-top:3px;font-size:11px;">${src.note}</span>` : ''}</div>`).join('');
-    grid.appendChild(card);
-  });
-}
-
-function showView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el => { el.classList.remove('active'); el.setAttribute('aria-selected', 'false'); });
-  document.getElementById('view-' + v).classList.add('active');
-  const idx = ['home', 'talen', 'lessen', 'woordenboek', 'bronnen'].indexOf(v);
-  if (idx >= 0) { document.querySelectorAll('.tab')[idx].classList.add('active'); document.querySelectorAll('.tab')[idx].setAttribute('aria-selected', 'true'); }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function startLesson(idx) {
-  if (idx >= S.lang.lessons.length) return;
-  S.lessonIdx = idx; S.lessonQ = 0; S.lessonScore = 0; S.answered = false;
-  renderQuestion(); document.getElementById('modal').classList.add('open');
-}
-
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-
-function renderQuestion() {
-  const lesson = S.lang.lessons[S.lessonIdx];
-  if (S.lessonQ >= lesson.questions.length) { renderComplete(); return; }
-  const q = lesson.questions[S.lessonQ];
-  document.getElementById('modal-body').innerHTML = `
-    <div class="q-counter">${lesson.emoji} ${lesson.title} · Vraag ${S.lessonQ + 1} van ${lesson.questions.length}</div>
-    <div class="q-q">${q.q}</div>
-    <div class="q-opts" id="q-opts"></div>
-    <div class="q-fb" id="q-fb"></div>
-    <button class="q-next" id="q-next" onclick="nextQ()">Volgende <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
-  `;
-  const opts = document.getElementById('q-opts');
-  q.o.forEach(opt => {
-    const btn = document.createElement('button'); btn.className = 'q-opt'; btn.textContent = opt;
-    btn.onclick = () => answerQ(opt, q.c, btn);
-    opts.appendChild(btn);
-  });
-  S.answered = false;
-}
-
-function answerQ(chosen, correct, btn) {
-  if (S.answered) return; S.answered = true;
-  document.querySelectorAll('.q-opt').forEach(b => { if (b.textContent === correct) b.classList.add('correct'); });
-  const fb = document.getElementById('q-fb');
-  if (chosen === correct) { btn.classList.add('correct'); fb.className = 'q-fb good'; fb.textContent = 'Uitstekend! Dat klopt.'; S.lessonScore++; S.xp = Math.min(100, S.xp + 5); }
-  else { btn.classList.add('wrong'); fb.className = 'q-fb bad'; fb.textContent = 'Helaas. Het juiste antwoord is: ' + correct; }
-  fb.style.display = 'block'; document.getElementById('q-next').style.display = 'block';
-  renderStreakDots();
-}
-
-function nextQ() { S.lessonQ++; S.answered = false; renderQuestion(); }
-
-function renderComplete() {
-  const lesson = S.lang.lessons[S.lessonIdx];
-  const pct = Math.round((S.lessonScore / lesson.questions.length) * 100);
-  S.themeProgress[S.lessonIdx] = Math.max(S.themeProgress[S.lessonIdx] || 0, pct);
-  if (pct >= 60) S.streak = Math.min(7, S.streak + 1);
-  renderProgress(); renderStreakDots();
-  document.getElementById('modal-body').innerHTML = `
-    <div class="complete">
-      <div class="complete-emoji">${pct >= 80 ? '🏆' : pct >= 60 ? '🌟' : '💪'}</div>
-      <div class="complete-title">${pct >= 80 ? 'Schitterend!' : pct >= 60 ? 'Goed gedaan!' : 'Blijf oefenen!'}</div>
-      <div class="complete-sub">${S.lessonScore} van ${lesson.questions.length} goed — ${pct}%</div>
-      <div class="complete-xp"><i class="ti ti-bolt" aria-hidden="true"></i> +${lesson.xp} XP verdiend</div>
-      <div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div>
-      <button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button>
-    </div>
-  `;
-}
-
-document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
-
-renderStreakDots(); renderProgress(); renderLangGrid(); renderSourcesGrid(); setLang(LANGS[0]);
+init();
 </script>
 </body>
 </html>
