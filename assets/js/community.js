@@ -137,6 +137,94 @@ async function submitRecording(){
   closeRecordModal();
   await renderRecordingsList();
   refreshContribBadges();
+  // Continue flow: offer the swipe-deck so contributing leads somewhere.
+  if(confirm('Opname ingestuurd! 🎉 Wil je nu op andere uitspraken stemmen?')){
+    closeRecordings();
+    showView('feedback');
+  }
+}
+
+// ═══ SWIPE-TO-VOTE DECK (Community page) ═══
+// Tinder-style: one recording at a time, swipe/tap right = upvote, left = skip.
+let voteQueue=[], voteIdx=0;
+
+async function renderVoteDeck(){
+  const host=document.getElementById('vote-deck'); if(!host) return;
+  if(!SB){ host.innerHTML='<div style="font-size:13px;color:var(--muted);">Niet beschikbaar.</div>'; return; }
+  if(!AUTH.user){
+    host.innerHTML='<div style="text-align:center;padding:16px 8px;"><div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Log in om mee te stemmen op uitspraken.</div><button class="onboard-btn" style="width:auto;padding:8px 16px;font-size:13px;" onclick="authOpenModal()">Inloggen</button></div>';
+    return;
+  }
+  host.innerHTML='<div style="font-size:13px;color:var(--muted);">Laden…</div>';
+  await loadVoteDeck();
+  showVoteCard();
+}
+
+// Fetch recordings the user hasn't made and hasn't voted on yet.
+async function loadVoteDeck(){
+  const {data}=await SB.from('recordings').select('id,word,lang_id,display_name,audio_path,recording_votes(count)').neq('user_id',AUTH.user.id);
+  let recs=(data||[]).map(r=>({...r,votes:r.recording_votes?.[0]?.count||0}));
+  if(recs.length){
+    const {data:vs}=await SB.from('recording_votes').select('recording_id').eq('user_id',AUTH.user.id).in('recording_id',recs.map(r=>r.id));
+    const voted=new Set((vs||[]).map(v=>v.recording_id));
+    recs=recs.filter(r=>!voted.has(r.id));
+  }
+  recs.sort((a,b)=>a.votes-b.votes); // surface under-voted clips first
+  voteQueue=recs; voteIdx=0;
+}
+
+function showVoteCard(){
+  const host=document.getElementById('vote-deck'); if(!host) return;
+  if(voteIdx>=voteQueue.length){
+    host.innerHTML='<div style="text-align:center;padding:24px 8px;"><div style="font-size:32px;">🎉</div><div style="font-size:14px;color:var(--muted);margin-top:8px;">Geen opnames meer om op te stemmen. Bedankt!</div><button class="onboard-btn" style="width:auto;padding:8px 16px;margin-top:14px;font-size:13px;" onclick="renderVoteDeck()">Opnieuw laden</button></div>';
+    return;
+  }
+  const r=voteQueue[voteIdx];
+  const url=SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
+  const lang=(LANGS.find(l=>l.id===r.lang_id)||{}).name||r.lang_id;
+  host.innerHTML=`
+    <div class="swipe-wrap">
+      <div class="swipe-card" id="swipe-card">
+        <div class="swipe-hint nope">✕ overslaan</div>
+        <div class="swipe-hint like">👍 goed</div>
+        <div class="swipe-lang">${lang}</div>
+        <div class="swipe-word">${r.word}</div>
+        <button class="speak-btn" onclick="playRec('${url}')"><span class="emo">▶️</span> Beluister</button>
+        <div class="swipe-meta">door ${r.display_name||'Anoniem'} · ▲ ${r.votes}</div>
+      </div>
+    </div>
+    <div class="swipe-actions">
+      <button class="swipe-btn skip" onclick="swipeVote('left')" title="Overslaan">✕</button>
+      <button class="swipe-btn like" onclick="swipeVote('right')" title="Goede uitspraak">👍</button>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">${voteIdx+1} / ${voteQueue.length}</div>`;
+  initSwipeDrag();
+}
+
+// Record the vote (right=upvote) and advance the deck.
+async function swipeVote(dir){
+  const r=voteQueue[voteIdx];
+  if(!r) return;
+  if(dir==='right' && AUTH.user){
+    await SB.from('recording_votes').insert({recording_id:r.id,user_id:AUTH.user.id});
+    refreshContribBadges(); // the recording's owner may cross a badge threshold elsewhere; cheap to refresh ours too
+  }
+  voteIdx++;
+  showVoteCard();
+}
+
+// Pointer-drag swipe (mouse + touch). Reassigns handlers each render — no leak.
+function initSwipeDrag(){
+  const card=document.getElementById('swipe-card'); if(!card) return;
+  let startX=null,dx=0;
+  card.onpointerdown=e=>{startX=e.clientX;dx=0;card.style.transition='none';try{card.setPointerCapture(e.pointerId);}catch(_){}};
+  card.onpointermove=e=>{if(startX===null)return;dx=e.clientX-startX;card.style.transform=`translateX(${dx}px) rotate(${dx/22}deg)`;card.classList.toggle('show-like',dx>40);card.classList.toggle('show-nope',dx<-40);};
+  card.onpointerup=()=>{
+    if(startX===null)return;const moved=dx;startX=null;
+    card.style.transition='transform .28s ease';
+    if(Math.abs(moved)>90){card.style.transform=`translateX(${moved>0?700:-700}px) rotate(${moved>0?25:-25}deg)`;setTimeout(()=>swipeVote(moved>0?'right':'left'),170);}
+    else{card.style.transform='';card.classList.remove('show-like','show-nope');}
+  };
 }
 
 // ═══ CONTRIBUTOR BADGES (by total upvotes on your recordings) ═══

@@ -483,7 +483,7 @@ function showView(v){
   // highlight the parent category in the bottom nav
   const cat=VIEW_TO_CAT[v]||null;
   if(cat){const btn=document.querySelector('.tab[data-cat="'+cat+'"]');if(btn)btn.classList.add('active');}
-  if(v==='feedback'){renderFeedbackList();populateContactLangs();}
+  if(v==='feedback'){renderFeedbackList();populateContactLangs();if(typeof renderVoteDeck==='function')renderVoteDeck();}
   if(v==='leaderboard')renderLeaderboard();
   if(v==='badges')renderBadgesGrid();
   if(v==='curriculum')renderCurriculum();

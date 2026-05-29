@@ -516,3 +516,21 @@ select.contact-input{cursor:pointer;appearance:none;background-image:url("data:i
   .onboard-lang-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:540px){.lang-grid{grid-template-columns:repeat(2,1fr);}.tabs{gap:4px;}.tab{padding:7px 11px;font-size:12px;}}
+
+/* ── Swipe-to-vote deck (Community page) ── */
+.swipe-wrap{position:relative;display:flex;justify-content:center;}
+.swipe-card{position:relative;width:100%;max-width:320px;background:var(--bg);border:1.5px solid var(--border);border-radius:20px;padding:24px 20px;text-align:center;cursor:grab;touch-action:pan-y;user-select:none;will-change:transform;}
+.swipe-card:active{cursor:grabbing;}
+.swipe-lang{font-size:12px;color:var(--muted);}
+.swipe-word{font-family:'Fraunces',serif;font-weight:600;font-size:28px;color:var(--green);margin:6px 0 14px;word-break:break-word;}
+.swipe-meta{font-size:12px;color:var(--muted);margin-top:14px;}
+.swipe-hint{position:absolute;top:14px;font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;opacity:0;transition:opacity .1s;pointer-events:none;}
+.swipe-hint.like{right:14px;color:var(--green);border:2px solid var(--green);transform:rotate(12deg);}
+.swipe-hint.nope{left:14px;color:var(--red);border:2px solid var(--red);transform:rotate(-12deg);}
+.swipe-card.show-like .swipe-hint.like{opacity:1;}
+.swipe-card.show-nope .swipe-hint.nope{opacity:1;}
+.swipe-actions{display:flex;justify-content:center;gap:24px;margin-top:16px;}
+.swipe-btn{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;}
+.swipe-btn:active{transform:scale(.92);}
+.swipe-btn.like{border-color:var(--green);}
+.swipe-btn.skip{border-color:var(--red);}
