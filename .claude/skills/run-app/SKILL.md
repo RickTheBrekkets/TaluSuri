@@ -39,5 +39,16 @@ Then **Read the PNG** — a blank/garbled frame means it failed to launch. The d
 ## Notes / gotchas
 - Onboarding overlay (`#onboard`) blocks views on first load — `drive.js` pre-seeds `localStorage` (`onboarded:true`) to skip it. Don't remove that.
 - Views are toggled by `showView('<id>')` (id without the `view-` prefix); exercises start via `startCrashTier(fromRank, toRank)`.
-- Default language is `LANGS[0]` (sarnami). Sranan (`sranan`) and Sarnami have the deepest spoedcursus coverage (~600+/1000); other languages show fewer words.
+- Default language is `LANGS[0]` (sarnami). Sranan (`sranan`) and Sarnami have the deepest spoedcursus coverage (~600–780 kernwoorden, from the imported dictionaries); other languages show fewer words.
 - If the port is busy, pick another and pass it in the URL.
+
+## Regenerating the spoedcursus dictionary data
+
+The Sranan/Sarnami crash-course words in `assets/js/dict-words.js` are auto-extracted from the source dictionary PDFs in `assets/` (gitignored). To re-run or audit that import:
+
+```bash
+cd /home/richard/projects/talusuri
+node tools/build-dict.js     # needs poppler's pdftotext + the assets/*.pdf sources
+```
+
+It regenerates `dict-words.js` deterministically (pdftotext → parse → decode broken glyphs → sense-number tracking → review corrections → emit). With the same PDFs it reproduces the committed file byte-for-byte. Edit the `REVIEW` (FIX/DROP) block in `tools/build-dict.js` to correct entries, then re-run. Hand-verified words live in `EXTRA_TRANSLATIONS` in `assets/js/words.js` and always override the dictionary import.
