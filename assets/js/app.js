@@ -265,13 +265,13 @@ function setLang(l){
 function renderStats(){
   const lvl=getLevel(S.xp);
   document.getElementById('level-num').textContent=lvl;
-  document.getElementById('level-num-pill').textContent=lvl;
+  const lnp=document.getElementById('level-num-pill');if(lnp)lnp.textContent=lvl;
   document.getElementById('level-title').textContent=getLevelTitle(lvl);
   const inLvl=xpInLevel(S.xp);
   document.getElementById('level-fill').style.width=inLvl+'%';
   document.getElementById('xp-current').textContent=S.xp+' XP';
   document.getElementById('xp-next').textContent=(lvl*100)+' XP';
-  document.getElementById('streak-lbl').textContent=S.streak;
+  const slb=document.getElementById('streak-lbl');if(slb)slb.textContent=S.streak;
   document.getElementById('streak-days').textContent=S.streak;
   const bar=document.getElementById('s-bar');bar.innerHTML='';
   for(let i=0;i<7;i++){const d=document.createElement('div');d.className='s-dot'+(i<S.streak?' done':'');bar.appendChild(d);}
