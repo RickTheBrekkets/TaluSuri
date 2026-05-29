@@ -14,6 +14,8 @@ dictionaries (see the in-app *Bronnen* page and [Data & sources](#data--sources)
 > recordings and native-speaker contributions are very welcome via the in-app
 > *Community* page.
 
+![TaluSuri — home screen](assets/img/screenshot.png)
+
 ## Languages covered
 
 Sarnami Hindoestani · Sranan Tongo · Surinaams-Javaans · Ndyuka · Saramaccaans ·
