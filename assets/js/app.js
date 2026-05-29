@@ -779,28 +779,25 @@ function renderCurriculum(){
   html+='</div>';el.innerHTML=html;
 }
 
-// ═══ CRASH COURSE (Pareto 1000-woorden model) ═══
-// Render the spoedcursus: frequency bands over the 1000-word spine (see words.js / freq.js),
-// showing how many words are available (translated) per band and overall coverage toward 1000.
+// ═══ CRASH COURSE (Pareto frequency model) ═══
+// Render the spoedcursus: frequency bands over the FREQ spine (see words.js / freq.js),
+// showing how many words are available (translated) per band, most-frequent first.
 function renderCrash(){
   const track=document.getElementById('crash-track');if(!track)return;
-  const target=(typeof CRASH_TARGET!=='undefined')?CRASH_TARGET:1000;
   const coverage=(typeof langCoverage==='function')?langCoverage(S.lang.id):S.lang.words.length;
   const practiced=(S.crashProgress&&S.crashProgress[S.lang.id])||0;
   document.getElementById('crash-known').textContent=practiced;
   const cov=document.getElementById('crash-coverage');
   if(cov)cov.textContent=coverage;
   const bands=(typeof crashBandStats==='function')?crashBandStats(S.lang.id):[];
-  const pct=Math.round(coverage/target*100);
   track.innerHTML=`<div class="crash-track-head"><div class="crash-track-title">⚡ ${S.lang.name} — kernwoorden op frequentie</div></div>`+
-  `<div class="crash-cov-bar"><div class="crash-cov-fill" style="width:${Math.min(100,pct)}%;"></div></div>`+
-  `<div class="crash-cov-lbl">${coverage} van ${target} woorden beschikbaar (${pct}%)</div>`+
+  `<div class="crash-cov-lbl">${coverage} kernwoorden beschikbaar, gerangschikt op hoe vaak ze voorkomen</div>`+
   bands.map(t=>{
     const ready=t.have>0;
     const btn=ready
       ?`<button class="crash-tier-btn" onclick="startCrashTier(${t.range[0]},${t.range[1]})">Start</button>`
       :`<button class="crash-tier-btn" disabled style="opacity:.4;cursor:default;">Binnenkort</button>`;
-    return `<div class="crash-tier"><div class="crash-tier-icon">${t.icon}</div><div class="crash-tier-info"><div class="crash-tier-name">${t.name}</div><div class="crash-tier-meta">${t.have} / ${t.size} woorden · ${t.desc}</div></div>${btn}</div>`;
+    return `<div class="crash-tier"><div class="crash-tier-icon">${t.icon}</div><div class="crash-tier-info"><div class="crash-tier-name">${t.name}</div><div class="crash-tier-meta">${t.have} woorden · ${t.desc}</div></div>${btn}</div>`;
   }).join('');
 }
 // Start a crash-course tier as an exercise. Picks the available (translated) words whose
