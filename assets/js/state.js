@@ -9,13 +9,14 @@ function loadState(){
 }
 // Persist the durable parts of app state to localStorage.
 function saveState(){
-  try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded,crashProgress:S.crashProgress}));}catch(e){}
+  try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded,crashProgress:S.crashProgress,weekXP:S.weekXP,monthXP:S.monthXP,weekKey:S.weekKey,monthKey:S.monthKey}));}catch(e){}
   if(window.onStateSaved)window.onStateSaved(); // sync progress to Supabase profile when logged in (auth.js)
 }
 let saved=loadState();
 // S = the single global state object the whole app reads/writes.
 // Durable fields (xp, streak, langId, themeProgress, badges, seenLangs, goal, theme,
-// onboarded, crashProgress) are persisted by saveState(); the rest are session-only.
+// onboarded, crashProgress, weekXP/monthXP + their period keys) are persisted by
+// saveState(); the rest are session-only.
 let S={
   lang:LANGS[0],xp:saved?.xp||0,streak:saved?.streak||1,
   flashIdx:0,flashRevealed:false,flashOk:0,flashTot:0, // current flashcard position + score
@@ -26,10 +27,31 @@ let S={
   goal:saved?.goal||null,                 // onboarding goal
   theme:saved?.theme||'light',
   onboarded:saved?.onboarded||false,
-  crashProgress:saved?.crashProgress||{}  // "<langId>" -> count of crash-course words practiced
+  crashProgress:saved?.crashProgress||{}, // "<langId>" -> count of crash-course words practiced
+  // Leaderboard periods: XP earned in the current ISO week / calendar month, with the
+  // period key each counter belongs to (so a new week/month resets it — see rollPeriods).
+  weekXP:saved?.weekXP||0,monthXP:saved?.monthXP||0,
+  weekKey:saved?.weekKey||null,monthKey:saved?.monthKey||null,
+  lbTab:'week' // active leaderboard tab (session-only): 'week' | 'month' | 'all'
 };
 // Restore the last-used language by id (object reference must come from LANGS).
 if(saved?.langId){const f=LANGS.find(l=>l.id===saved.langId);if(f)S.lang=f;}
+
+// ═══ LEADERBOARD PERIODS ═══
+// Keys identifying the current week (Monday-anchored date) and month (YYYY-MM), in LOCAL time.
+function lbPeriodKeys(){
+  const d=new Date();
+  const mon=new Date(d); mon.setDate(d.getDate()-((d.getDay()+6)%7)); // back up to Monday
+  const p=n=>String(n).padStart(2,'0');
+  return {wk:mon.getFullYear()+'-'+p(mon.getMonth()+1)+'-'+p(mon.getDate()), mo:d.getFullYear()+'-'+p(d.getMonth()+1)};
+}
+// Reset the weekly/monthly XP counters when their period has rolled over. Idempotent.
+function rollPeriods(){
+  const {wk,mo}=lbPeriodKeys();
+  if(S.weekKey!==wk){S.weekKey=wk;S.weekXP=0;}
+  if(S.monthKey!==mo){S.monthKey=mo;S.monthXP=0;}
+}
+rollPeriods(); // clear stale counters on load before anything reads them
 
 // ═══ THEME ═══
 // Apply the current light/dark theme and update the toggle icon.

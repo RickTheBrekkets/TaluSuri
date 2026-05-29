@@ -98,10 +98,14 @@ async function authSubmitName(){
 // Load the user's profile after login; prompt for a name if they don't have one yet,
 // otherwise reconcile XP (keep the higher of local vs remote, then push).
 async function authLoadProfile(){
-  const {data}=await sb.from('profiles').select('id,display_name,xp,streak,langs,avatar_url').eq('id',AUTH.user.id).maybeSingle();
+  const {data}=await sb.from('profiles').select('id,display_name,xp,streak,langs,avatar_url,week_xp,week_key,month_xp,month_key').eq('id',AUTH.user.id).maybeSingle();
   if(data&&data.display_name){
     AUTH.profile=data;
     if(data.xp>S.xp){S.xp=data.xp;renderStats();saveState();}   // remote ahead → adopt
+    if(typeof rollPeriods==='function')rollPeriods();
+    const {wk,mo}=lbPeriodKeys();
+    if(data.week_key===wk&&(data.week_xp||0)>S.weekXP)S.weekXP=data.week_xp;     // adopt higher same-period totals
+    if(data.month_key===mo&&(data.month_xp||0)>S.monthXP)S.monthXP=data.month_xp;
     await authPushProfile();                                     // push (covers local-ahead case)
     if(window.communityOnLogin)window.communityOnLogin();        // contributor badges, avatar render (community.js)
   }else{
@@ -111,10 +115,12 @@ async function authLoadProfile(){
 // Upsert the current state to the profiles row (idempotent; RLS restricts to own id).
 async function authPushProfile(){
   if(!AUTH.user||!AUTH.profile)return;
+  if(typeof rollPeriods==='function')rollPeriods();   // ensure period counters are current before syncing
   await sb.from('profiles').upsert({
     id:AUTH.user.id,
     display_name:AUTH.profile.display_name,
     xp:S.xp,streak:S.streak,langs:authLangs(),
+    week_xp:S.weekXP,week_key:S.weekKey,month_xp:S.monthXP,month_key:S.monthKey,
     avatar_url:AUTH.profile.avatar_url||null,
     updated_at:new Date().toISOString()
   });
@@ -133,9 +139,9 @@ window.onStateSaved=function(){
 // renderLeaderboard() can fall back to the sample LEADERBOARD.
 window.fetchLeaderboard=async function(){
   if(!AUTH_ENABLED)return null;
-  const {data,error}=await sb.from('profiles').select('id,display_name,xp,langs,avatar_url').order('xp',{ascending:false}).limit(50);
+  const {data,error}=await sb.from('profiles').select('id,display_name,xp,langs,avatar_url,week_xp,week_key,month_xp,month_key').order('xp',{ascending:false}).limit(50);
   if(error||!data)return null;
-  return data.map(r=>({id:r.id,name:r.display_name,xp:r.xp,langs:r.langs||'',avatar:authInitials(r.display_name),avatar_url:r.avatar_url||null}));
+  return data.map(r=>({id:r.id,name:r.display_name,xp:r.xp,langs:r.langs||'',avatar:authInitials(r.display_name),avatar_url:r.avatar_url||null,week_xp:r.week_xp,week_key:r.week_key,month_xp:r.month_xp,month_key:r.month_key}));
 };
 
 // ═══ INIT ═══

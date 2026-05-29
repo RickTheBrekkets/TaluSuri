@@ -33,7 +33,13 @@ const BADGES=[
 {id:'explorer',icon:'🧭',name:'Ontdekker',desc:'Bekijk alle 10 talen'},
 {id:'rec_first',icon:'🎤',name:'Stemgever',desc:'Eerste opname ingestuurd'},
 {id:'voice_25',icon:'🌟',name:'Geliefde stem',desc:'25 upvotes op je opnames'},
-{id:'voice_100',icon:'👑',name:'Uitspraakheld',desc:'100 upvotes op je opnames'}
+{id:'voice_100',icon:'👑',name:'Uitspraakheld',desc:'100 upvotes op je opnames'},
+{id:'week_gold',icon:'🥇',name:'Goud van de week',desc:'Eindig 1e op het weekklassement'},
+{id:'week_silver',icon:'🥈',name:'Zilver van de week',desc:'Eindig 2e op het weekklassement'},
+{id:'week_bronze',icon:'🥉',name:'Brons van de week',desc:'Eindig 3e op het weekklassement'},
+{id:'month_gold',icon:'🥇',name:'Goud van de maand',desc:'Eindig 1e op het maandklassement'},
+{id:'month_silver',icon:'🥈',name:'Zilver van de maand',desc:'Eindig 2e op het maandklassement'},
+{id:'month_bronze',icon:'🥉',name:'Brons van de maand',desc:'Eindig 3e op het maandklassement'}
 ];
 
 // Title shown for each level; indexed by (level - 1), capped at the last entry.
@@ -41,15 +47,16 @@ const LEVEL_TITLES=['Beginner','Leerling','Spreker','Gevorderd','Kenner','Meeste
 
 // ═══ FAKE LEADERBOARD ═══
 // Hard-coded sample players the real user is inserted into and ranked against (see renderLeaderboard).
+// xp = all-time, wxp = this week, mxp = this month — chosen so the three boards rank differently.
 const LEADERBOARD=[
-{name:'Priya R.',xp:2840,langs:'Sarnami, Sranan',avatar:'PR'},
-{name:'Marlon K.',xp:2510,langs:'Sranan, Ndyuka',avatar:'MK'},
-{name:'Indra S.',xp:2190,langs:'Javaans',avatar:'IS'},
-{name:'Astrid W.',xp:1870,langs:'Sranan, Saramaccaans',avatar:'AW'},
-{name:'Rony D.',xp:1640,langs:'Kari\'na, Arawak',avatar:'RD'},
-{name:'Soemita P.',xp:1320,langs:'Sarnami, Hakka',avatar:'SP'},
-{name:'Glenn T.',xp:980,langs:'Sranan',avatar:'GT'},
-{name:'Lisa M.',xp:720,langs:'Matawai, Sranan',avatar:'LM'}
+{name:'Priya R.',xp:2840,wxp:320,mxp:1180,langs:'Sarnami, Sranan',avatar:'PR'},
+{name:'Marlon K.',xp:2510,wxp:410,mxp:940,langs:'Sranan, Ndyuka',avatar:'MK'},
+{name:'Indra S.',xp:2190,wxp:150,mxp:720,langs:'Javaans',avatar:'IS'},
+{name:'Astrid W.',xp:1870,wxp:280,mxp:1320,langs:'Sranan, Saramaccaans',avatar:'AW'},
+{name:'Rony D.',xp:1640,wxp:95,mxp:410,langs:'Kari\'na, Arawak',avatar:'RD'},
+{name:'Soemita P.',xp:1320,wxp:360,mxp:600,langs:'Sarnami, Hakka',avatar:'SP'},
+{name:'Glenn T.',xp:980,wxp:60,mxp:220,langs:'Sranan',avatar:'GT'},
+{name:'Lisa M.',xp:720,wxp:210,mxp:510,langs:'Matawai, Sranan',avatar:'LM'}
 ];
 
 // ═══ LANGUAGE DATA ═══

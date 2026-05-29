@@ -118,7 +118,7 @@ pronunciations:
    email"** so email+password signup logs in instantly (no emails sent → no rate limit).
 3. **Storage:** create two **public** buckets — `pronunciations` and `avatars`.
 4. **SQL Editor:** run the migrations in order — `supabase/schema.sql`,
-   `supabase/community.sql`, then `supabase/votes_value.sql`.
+   `supabase/community.sql`, `supabase/votes_value.sql`, then `supabase/leaderboards.sql`.
 5. Add admins by inserting their email into the `admins` table (seeded in `community.sql`).
 6. Put the **Project URL** and **anon/publishable key** into `assets/js/config.js`.
 

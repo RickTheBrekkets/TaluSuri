@@ -281,7 +281,8 @@ function renderStats(){
 }
 // Add XP, refresh stats/badges, and return true if the user leveled up.
 function addXP(n){
-  const before=getLevel(S.xp);S.xp+=n;const after=getLevel(S.xp);
+  if(typeof rollPeriods==='function')rollPeriods();   // reset week/month counters if the period rolled over
+  const before=getLevel(S.xp);S.xp+=n;S.weekXP+=n;S.monthXP+=n;const after=getLevel(S.xp);
   renderStats();checkBadges();saveState();
   return after>before; // leveled up
 }
@@ -410,21 +411,41 @@ function renderBadgesGrid(){
 // Render the leaderboard with the user inserted and ranked by XP.
 // Uses real accounts from Supabase (auth.js) when available, otherwise falls
 // back to the sample LEADERBOARD so the app still works anonymous/offline.
+// Switch the active leaderboard board (week / month / all) and re-render.
+function setLbTab(tab){
+  S.lbTab=tab;
+  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  renderLeaderboard();
+}
 async function renderLeaderboard(){
   const list=document.getElementById('leaderboard-list');if(!list)return;
-  const localMe=()=>({name:'Jij',xp:S.xp,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true});
+  const tab=S.lbTab||'week';
+  if(typeof rollPeriods==='function')rollPeriods();
+  const {wk,mo}=lbPeriodKeys();
+  // Effective period XP ignores counters whose stored period key is stale (an old week/month).
+  const localMe=()=>({name:'Jij',xp:S.xp,wxp:S.weekKey===wk?S.weekXP:0,mxp:S.monthKey===mo?S.monthXP:0,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true});
   let all;
   const rows=window.fetchLeaderboard?await window.fetchLeaderboard():null;
   if(rows){
-    all=rows;
+    all=rows.map(r=>({...r,wxp:r.week_key===wk?(r.week_xp||0):0,mxp:r.month_key===mo?(r.month_xp||0):0}));
     const uid=window.AUTH&&window.AUTH.user&&window.AUTH.user.id;
     if(uid)all.forEach(r=>{if(r.id===uid)r.me=true;}); // mark my own row
     else all.push(localMe());                          // not logged in → show local progress too
   }else{
     all=[...LEADERBOARD,localMe()];                     // fallback: sample players + local "Jij"
   }
-  all.sort((a,b)=>b.xp-a.xp);
-  list.innerHTML=all.map((p,i)=>`<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div><div class="lb-avatar">${p.avatar_url?`<img src="${p.avatar_url}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`:p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${p.langs}</div></div><div class="lb-xp">${p.xp.toLocaleString('nl-NL')} XP</div></div>`).join('');
+  const scoreOf=p=>tab==='week'?(p.wxp||0):tab==='month'?(p.mxp||0):(p.xp||0);
+  all.sort((a,b)=>scoreOf(b)-scoreOf(a));
+  list.innerHTML=all.map((p,i)=>{
+    const sc=scoreOf(p);
+    const rank=i<3?(i===0?'🥇':i===1?'🥈':'🥉'):'#'+(i+1);
+    return `<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${rank}</div><div class="lb-avatar">${p.avatar_url?`<img src="${p.avatar_url}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`:p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${p.langs}</div></div><div class="lb-xp">${sc.toLocaleString('nl-NL')} XP</div></div>`;
+  }).join('');
+  // Earn a placement badge for finishing top-3 on the weekly/monthly boards.
+  if(tab==='week'||tab==='month'){
+    const meIdx=all.findIndex(p=>p.me);
+    if(meIdx>=0&&meIdx<3&&scoreOf(all[meIdx])>0)unlockBadge((tab==='week'?'week_':'month_')+['gold','silver','bronze'][meIdx]);
+  }
 }
 
 // ═══ VIEWS ═══

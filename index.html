@@ -286,9 +286,14 @@
 
   <!-- LEADERBOARD -->
   <div class="view" id="view-leaderboard">
-    <div class="card" style="margin-bottom:20px;background:var(--gold);color:#fff;border:none;">
+    <div class="card" style="margin-bottom:16px;background:var(--gold);color:#fff;border:none;">
       <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:5px;">🏆 Ranglijst</div>
-      <div style="font-size:13px;opacity:.85;line-height:1.5;">Verdien XP door lessen, examens en flashcards. Klim omhoog en daag jezelf uit!</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.5;">Verdien XP door lessen, examens en flashcards. Het week- en maandklassement resetten (elke maandag / de 1e); de top 3 verdient 🥇 🥈 🥉.</div>
+    </div>
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-tab="week" onclick="setLbTab('week')">Deze week</button>
+      <button class="lb-tab" data-tab="month" onclick="setLbTab('month')">Deze maand</button>
+      <button class="lb-tab" data-tab="all" onclick="setLbTab('all')">Aller tijden</button>
     </div>
     <div id="leaderboard-list"></div>
   </div>
