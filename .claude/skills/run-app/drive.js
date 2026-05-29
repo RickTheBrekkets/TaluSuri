@@ -43,7 +43,9 @@ const [url = 'http://localhost:8137/index.html', view = 'home', lang = 'sranan',
     modalOpen: document.getElementById('modal') && document.getElementById('modal').classList.contains('open')
   }));
   console.log('lang:', info.lang, '| crash-coverage:', info.coverage, '| modal open:', info.modalOpen);
-  await p.screenshot({ path: out, fullPage: !tier });
+  // Full-page by default; set FULLPAGE=0 for a viewport-only (top-fold) shot. Modal shots are always viewport.
+  const fullPage = !tier && process.env.FULLPAGE !== '0';
+  await p.screenshot({ path: out, fullPage });
   console.log('screenshot:', out);
   console.log('console errors:', errs.length ? errs.slice(0, 5) : 'none');
   await b.close();
