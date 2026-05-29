@@ -16,7 +16,7 @@ dictionaries (see the in-app *Bronnen* page and [Data & sources](#data--sources)
 
 ![TaluSuri — home screen](assets/img/screenshot.png)
 
-![TaluSuri — spoedcursus (1000-word crash course) in Sarnami](assets/img/spoedcursus-sarnami.png)
+![TaluSuri — spoedcursus (frequency-based crash course) in Sarnami](assets/img/spoedcursus-sarnami.png)
 
 ## Languages covered
 
