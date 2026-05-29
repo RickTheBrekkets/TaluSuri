@@ -77,6 +77,23 @@ async function authPasswordSubmit(){
   }
   authCloseModal();   // onAuthStateChange handles profile load + UI refresh
 }
+// Send a password-reset email (also how old magic-link accounts set their first password).
+async function authForgot(){
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){alert('Vul eerst je e-mailadres in, dan sturen we een reset-link.');return;}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+  if(error){alert('Versturen mislukt: '+error.message);return;}
+  alert('Reset-link verstuurd naar '+email+'. Open de link in je inbox om een nieuw wachtwoord in te stellen.');
+}
+// After the user opens the reset link, Supabase starts a recovery session; set the new password.
+async function authSetNewPassword(){
+  const pw=document.getElementById('pw-reset-input').value;
+  if(pw.length<6){alert('Wachtwoord moet minstens 6 tekens zijn.');return;}
+  const {error}=await sb.auth.updateUser({password:pw});
+  if(error){alert('Opslaan mislukt: '+error.message);return;}
+  document.getElementById('pw-reset-modal').style.display='none';
+  alert('Wachtwoord ingesteld — je bent ingelogd.');
+}
 
 // ═══ DISPLAY-NAME MODAL (first login) ═══
 function authOpenNameModal(){
@@ -150,12 +167,14 @@ function authInit(){
   if(!AUTH_ENABLED){if(btn)btn.style.display='none';return;}
   if(btn)btn.style.display='';
   // Fires on initial session, login, and logout (supabase-js persists the session locally).
-  sb.auth.onAuthStateChange(async(_event,session)=>{
+  sb.auth.onAuthStateChange(async(event,session)=>{
     AUTH.user=session?.user||null;
     if(AUTH.user)await authLoadProfile();
     else AUTH.profile=null;
     updateAuthUI();
     renderLeaderboard();
+    // Arrived via a password-reset link → let them set a new password.
+    if(event==='PASSWORD_RECOVERY')document.getElementById('pw-reset-modal').style.display='flex';
   });
   updateAuthUI();
 }

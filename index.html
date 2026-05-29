@@ -67,8 +67,22 @@
         <span id="auth-toggle-text">Nog geen account?</span>
         <a href="#" onclick="authToggleMode();return false;" id="auth-toggle-link" style="color:var(--green);font-weight:500;">Account aanmaken</a>
       </div>
+      <div class="onboard-sub" style="margin-top:8px;font-size:12px;">
+        <a href="#" onclick="authForgot();return false;" style="color:var(--muted);">Wachtwoord vergeten?</a>
+      </div>
     </div>
     <button class="onboard-skip" onclick="authCloseModal()">Sluiten</button>
+  </div>
+</div>
+
+<!-- SET-NEW-PASSWORD MODAL (after a reset link) -->
+<div class="onboard" id="pw-reset-modal" style="display:none;z-index:600;">
+  <div class="onboard-inner" style="max-width:420px;">
+    <div class="onboard-logo">Talu<span>Suri</span></div>
+    <div class="onboard-q">Nieuw wachtwoord</div>
+    <div class="onboard-sub">Kies een nieuw wachtwoord voor je account.</div>
+    <input class="contact-input" id="pw-reset-input" type="password" autocomplete="new-password" placeholder="Nieuw wachtwoord (min. 6 tekens)" style="margin-bottom:12px;text-align:center;" onkeydown="if(event.key==='Enter')authSetNewPassword()">
+    <button class="onboard-btn" onclick="authSetNewPassword()">Opslaan</button>
   </div>
 </div>
 
