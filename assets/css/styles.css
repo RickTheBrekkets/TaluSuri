@@ -533,4 +533,5 @@ select.contact-input{cursor:pointer;appearance:none;background-image:url("data:i
 .swipe-btn{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;}
 .swipe-btn:active{transform:scale(.92);}
 .swipe-btn.like{border-color:var(--green);}
-.swipe-btn.skip{border-color:var(--red);}
+.swipe-btn.down{border-color:var(--red);}
+.swipe-btn.idk{border-color:var(--border);font-size:20px;width:48px;height:48px;align-self:center;}

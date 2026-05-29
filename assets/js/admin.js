@@ -22,9 +22,10 @@ async function renderAdmin(){
   if(!cont) return;
   if(!window.IS_ADMIN){ cont.innerHTML = '<div style="font-size:13px;color:var(--muted);">Geen toegang.</div>'; return; }
   cont.innerHTML = '<div style="font-size:13px;color:var(--muted);">Laden…</div>';
-  const {data, error} = await SBA.from('recordings').select('id,word_key,lang_id,word,display_name,audio_path,is_official,recording_votes(count)');
+  const {data, error} = await SBA.from('recordings').select('id,word_key,lang_id,word,display_name,audio_path,is_official');
   if(error){ cont.innerHTML = '<div style="font-size:13px;color:var(--red);">Kon opnames niet laden.</div>'; return; }
-  const recs = (data||[]).map(r=>({...r, votes: r.recording_votes?.[0]?.count || 0}));
+  const scores = await fetchScores((data||[]).map(r=>r.id));  // net score view (community.js)
+  const recs = (data||[]).map(r=>({...r, votes: scores[r.id]?.score || 0}));
   // best recording per word among those meeting the threshold
   const byWord = {};
   recs.filter(r=>r.votes>=PROMOTE_MIN).forEach(r=>{ if(!byWord[r.word_key] || r.votes>byWord[r.word_key].votes) byWord[r.word_key]=r; });

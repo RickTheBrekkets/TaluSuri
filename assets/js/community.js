@@ -34,41 +34,54 @@ async function openRecordings(langId, word){
 }
 function closeRecordings(){ document.getElementById('recordings-modal').style.display='none'; }
 
+// Net score (+ up/down tallies) per recording, from the recording_scores view.
+async function fetchScores(ids){
+  const map = {};
+  if(!ids.length) return map;
+  const {data} = await SB.from('recording_scores').select('recording_id,score,ups,downs').in('recording_id', ids);
+  (data||[]).forEach(s=>{ map[s.recording_id] = {score:s.score, ups:s.ups, downs:s.downs}; });
+  return map;
+}
+
 async function renderRecordingsList(){
   const list = document.getElementById('rec-list');
   list.innerHTML = '<div style="font-size:13px;color:var(--muted);">Laden…</div>';
   const key = wordKey(CUR.langId, CUR.word);
-  const {data, error} = await SB.from('recordings').select('id,display_name,audio_path,is_official,recording_votes(count)').eq('word_key', key);
+  const {data, error} = await SB.from('recordings').select('id,display_name,audio_path,is_official').eq('word_key', key);
   if(error){ list.innerHTML = '<div style="font-size:13px;color:var(--red);">Kon opnames niet laden.</div>'; return; }
-  let recs = (data||[]).map(r=>({...r, votes: r.recording_votes?.[0]?.count || 0}));
-  recs.sort((a,b)=>b.votes-a.votes);
+  let recs = data||[];
   if(!recs.length){ list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nog geen opnames. Wees de eerste! 🎙️</div>'; return; }
-  // which of these the current user already upvoted
-  let voted = new Set();
+  const scores = await fetchScores(recs.map(r=>r.id));
+  recs = recs.map(r=>({...r, score: scores[r.id]?.score || 0}));
+  recs.sort((a,b)=>b.score-a.score);
+  // the current user's existing vote value per recording (1 / -1)
+  let mine = {};
   if(AUTH.user){
-    const {data:vs} = await SB.from('recording_votes').select('recording_id').eq('user_id', AUTH.user.id).in('recording_id', recs.map(r=>r.id));
-    (vs||[]).forEach(v=>voted.add(v.recording_id));
+    const {data:vs} = await SB.from('recording_votes').select('recording_id,value').eq('user_id', AUTH.user.id).in('recording_id', recs.map(r=>r.id));
+    (vs||[]).forEach(v=>{ mine[v.recording_id]=v.value; });
   }
   list.innerHTML = recs.map((r,i)=>{
     const url = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
-    const mine = voted.has(r.id);
-    const best = (i===0 && r.votes>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
+    const best = (i===0 && r.score>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
     const official = r.is_official ? ' <span style="font-size:11px;">✅ officieel</span>' : '';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+    const up=mine[r.id]===1, down=mine[r.id]===-1;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
       <button class="dict-btn" onclick="playRec('${url}')" title="Afspelen"><span class="emo">▶️</span></button>
       <div style="flex:1;font-size:13px;font-weight:500;">${r.display_name||'Anoniem'}${best}${official}</div>
-      <button onclick="toggleVote('${r.id}')" style="border:1px solid var(--border);border-radius:8px;background:${mine?'var(--green-l)':'var(--card)'};color:${mine?'var(--green)':'var(--muted)'};padding:4px 11px;cursor:pointer;font-size:13px;font-weight:600;">▲ ${r.votes}</button>
+      <button onclick="vote('${r.id}',1)" title="Goed" style="border:1px solid var(--border);border-radius:8px;background:${up?'var(--green-l)':'var(--card)'};color:${up?'var(--green)':'var(--muted)'};padding:4px 9px;cursor:pointer;font-size:13px;">▲</button>
+      <span style="font-size:13px;font-weight:600;min-width:18px;text-align:center;">${r.score}</span>
+      <button onclick="vote('${r.id}',-1)" title="Niet goed" style="border:1px solid var(--border);border-radius:8px;background:${down?'rgba(220,50,50,.12)':'var(--card)'};color:${down?'var(--red)':'var(--muted)'};padding:4px 9px;cursor:pointer;font-size:13px;">▼</button>
     </div>`;
   }).join('');
 }
 
-// Toggle the current user's upvote on a recording.
-async function toggleVote(id){
+// Cast or toggle a signed vote (1 up / -1 down) on a recording.
+async function vote(id, value){
   if(!AUTH.user){ alert('Log eerst in om te stemmen.'); authOpenModal(); return; }
   const uid = AUTH.user.id;
-  const {data:ex} = await SB.from('recording_votes').select('recording_id').eq('user_id', uid).eq('recording_id', id).maybeSingle();
-  if(ex) await SB.from('recording_votes').delete().eq('user_id', uid).eq('recording_id', id);
-  else   await SB.from('recording_votes').insert({recording_id:id, user_id:uid});
+  const {data:ex} = await SB.from('recording_votes').select('value').eq('user_id', uid).eq('recording_id', id).maybeSingle();
+  if(ex && ex.value===value) await SB.from('recording_votes').delete().eq('user_id', uid).eq('recording_id', id); // tap same again = clear
+  else await SB.from('recording_votes').upsert({recording_id:id, user_id:uid, value});
   await renderRecordingsList();
 }
 
@@ -162,14 +175,16 @@ async function renderVoteDeck(){
 
 // Fetch recordings the user hasn't made and hasn't voted on yet.
 async function loadVoteDeck(){
-  const {data}=await SB.from('recordings').select('id,word,lang_id,display_name,audio_path,recording_votes(count)').neq('user_id',AUTH.user.id);
-  let recs=(data||[]).map(r=>({...r,votes:r.recording_votes?.[0]?.count||0}));
+  const {data}=await SB.from('recordings').select('id,word,lang_id,display_name,audio_path').neq('user_id',AUTH.user.id);
+  let recs=data||[];
   if(recs.length){
     const {data:vs}=await SB.from('recording_votes').select('recording_id').eq('user_id',AUTH.user.id).in('recording_id',recs.map(r=>r.id));
     const voted=new Set((vs||[]).map(v=>v.recording_id));
     recs=recs.filter(r=>!voted.has(r.id));
   }
-  recs.sort((a,b)=>a.votes-b.votes); // surface under-voted clips first
+  const scores=await fetchScores(recs.map(r=>r.id));
+  recs=recs.map(r=>({...r,score:scores[r.id]?.score||0}));
+  recs.sort((a,b)=>a.score-b.score); // surface under-voted clips first
   voteQueue=recs; voteIdx=0;
 }
 
@@ -185,35 +200,36 @@ function showVoteCard(){
   host.innerHTML=`
     <div class="swipe-wrap">
       <div class="swipe-card" id="swipe-card">
-        <div class="swipe-hint nope">✕ overslaan</div>
+        <div class="swipe-hint nope">👎 niet goed</div>
         <div class="swipe-hint like">👍 goed</div>
         <div class="swipe-lang">${lang}</div>
         <div class="swipe-word">${r.word}</div>
         <button class="speak-btn" onclick="playRec('${url}')"><span class="emo">▶️</span> Beluister</button>
-        <div class="swipe-meta">door ${r.display_name||'Anoniem'} · ▲ ${r.votes}</div>
+        <div class="swipe-meta">door ${r.display_name||'Anoniem'} · score ${r.score}</div>
       </div>
     </div>
     <div class="swipe-actions">
-      <button class="swipe-btn skip" onclick="swipeVote('left')" title="Overslaan">✕</button>
-      <button class="swipe-btn like" onclick="swipeVote('right')" title="Goede uitspraak">👍</button>
+      <button class="swipe-btn down" onclick="swipeVote('down')" title="Niet goed">👎</button>
+      <button class="swipe-btn idk" onclick="swipeVote('idk')" title="Weet ik niet">🤷</button>
+      <button class="swipe-btn like" onclick="swipeVote('up')" title="Goede uitspraak">👍</button>
     </div>
-    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">${voteIdx+1} / ${voteQueue.length}</div>`;
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">${voteIdx+1} / ${voteQueue.length} · swipe ← niet goed · → goed</div>`;
   initSwipeDrag();
 }
 
-// Record the vote (right=upvote) and advance the deck.
-async function swipeVote(dir){
+// Apply the choice (up/down = signed vote, idk = skip) and advance the deck.
+async function swipeVote(action){
   const r=voteQueue[voteIdx];
   if(!r) return;
-  if(dir==='right' && AUTH.user){
-    await SB.from('recording_votes').insert({recording_id:r.id,user_id:AUTH.user.id});
-    refreshContribBadges(); // the recording's owner may cross a badge threshold elsewhere; cheap to refresh ours too
+  if((action==='up'||action==='down') && AUTH.user){
+    await SB.from('recording_votes').upsert({recording_id:r.id,user_id:AUTH.user.id,value:action==='up'?1:-1});
+    refreshContribBadges();
   }
   voteIdx++;
   showVoteCard();
 }
 
-// Pointer-drag swipe (mouse + touch). Reassigns handlers each render — no leak.
+// Pointer-drag swipe (mouse + touch). Right = up, left = down. Reassigns handlers each render — no leak.
 function initSwipeDrag(){
   const card=document.getElementById('swipe-card'); if(!card) return;
   let startX=null,dx=0;
@@ -222,7 +238,7 @@ function initSwipeDrag(){
   card.onpointerup=()=>{
     if(startX===null)return;const moved=dx;startX=null;
     card.style.transition='transform .28s ease';
-    if(Math.abs(moved)>90){card.style.transform=`translateX(${moved>0?700:-700}px) rotate(${moved>0?25:-25}deg)`;setTimeout(()=>swipeVote(moved>0?'right':'left'),170);}
+    if(Math.abs(moved)>90){card.style.transform=`translateX(${moved>0?700:-700}px) rotate(${moved>0?25:-25}deg)`;setTimeout(()=>swipeVote(moved>0?'up':'down'),170);}
     else{card.style.transform='';card.classList.remove('show-like','show-nope');}
   };
 }
@@ -230,10 +246,11 @@ function initSwipeDrag(){
 // ═══ CONTRIBUTOR BADGES (by total upvotes on your recordings) ═══
 async function refreshContribBadges(){
   if(!SB || !AUTH.user) return;
-  const {data} = await SB.from('recordings').select('id,recording_votes(count)').eq('user_id', AUTH.user.id);
+  const {data} = await SB.from('recordings').select('id').eq('user_id', AUTH.user.id);
   const recs = data||[];
   if(recs.length) unlockBadge('rec_first');
-  const total = recs.reduce((s,r)=>s + (r.recording_votes?.[0]?.count || 0), 0);
+  const scores = await fetchScores(recs.map(r=>r.id));
+  const total = recs.reduce((s,r)=>s + (scores[r.id]?.score || 0), 0);  // net upvotes across your clips
   if(total>=25)  unlockBadge('voice_25');
   if(total>=100) unlockBadge('voice_100');
 }
