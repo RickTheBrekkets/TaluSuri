@@ -251,7 +251,7 @@ function setLang(l){
   renderPhrases();renderHomeLessons();
   document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.id===l.id));
   document.getElementById('les-view-title').textContent='Lessen: '+l.full;
-  renderAllLessons();
+  renderAllLessons();renderThemes();
   document.getElementById('wb-title').textContent='Woordenboek: '+l.name;
   renderWB(l.words);
   updateSwitcherLabel();
@@ -509,6 +509,39 @@ function startExam(){
   S.ex={type:'exam',title:'Examen '+S.lang.name,emoji:'🎓',xp:50,q:genLessonQuestions(S.lang.words,10),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
+
+// ═══ THEMES (practise by topic) ═══
+// Topical word categories (from the FREQ spine's `cat`), shown as selectable themes so
+// learners can focus on a subject. Grammatical/abstract cats are intentionally omitted.
+const THEME_META={
+  food:{label:'Eten',emoji:'🍛'},drink:{label:'Drinken',emoji:'🥤'},family:{label:'Familie',emoji:'👪'},
+  body:{label:'Lichaam',emoji:'🧍'},color:{label:'Kleuren',emoji:'🌈'},number:{label:'Cijfers',emoji:'🔢'},
+  animal:{label:'Dieren',emoji:'🐾'},nature:{label:'Natuur',emoji:'🌿'},clothing:{label:'Kleding',emoji:'👕'},
+  house:{label:'Huis',emoji:'🏠'},time:{label:'Tijd',emoji:'🕐'},travel:{label:'Reizen',emoji:'✈️'},
+  weather:{label:'Weer',emoji:'🌦️'},place:{label:'Plaatsen',emoji:'📍'},work:{label:'Werk',emoji:'💼'},
+  emotion:{label:'Gevoelens',emoji:'❤️'},person:{label:'Mensen',emoji:'🧑'},social:{label:'Sociaal',emoji:'🤝'},
+  verb:{label:'Werkwoorden',emoji:'🏃'},adjective:{label:'Bijvoeglijk',emoji:'🏷️'},object:{label:'Voorwerpen',emoji:'📦'},
+  direction:{label:'Richting',emoji:'🧭'},question:{label:'Vraagwoorden',emoji:'❓'}
+};
+// Render the theme chips for the active language (only themes with enough words to practise).
+function renderThemes(){
+  const grid=document.getElementById('theme-grid');if(!grid)return;
+  const counts={};
+  S.lang.words.forEach(w=>{if(w.cat&&THEME_META[w.cat])counts[w.cat]=(counts[w.cat]||0)+1;});
+  const cats=Object.keys(counts).filter(c=>counts[c]>=4).sort((a,b)=>counts[b]-counts[a]);
+  grid.innerHTML=cats.length
+    ? cats.map(c=>{const m=THEME_META[c];return `<button class="theme-chip" onclick="startTheme('${c}')"><span class="theme-chip-emoji">${m.emoji}</span><span class="theme-chip-label">${m.label}</span><span class="theme-chip-count">${counts[c]}</span></button>`;}).join('')
+    : '<div style="font-size:12px;color:var(--muted);">Nog te weinig woorden voor thema-oefeningen in deze taal.</div>';
+}
+// Start a practice exercise limited to one theme's words.
+function startTheme(cat){
+  const m=THEME_META[cat];if(!m)return;
+  const words=S.lang.words.filter(w=>w.cat===cat);
+  if(words.length<4)return;
+  const n=Math.min(8,words.length);
+  S.ex={type:'theme',title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,n),q:genLessonQuestions(words,n),cur:0,score:0,answered:false};
+  renderExercise();document.getElementById('modal').classList.add('open');
+}
 // Close the exercise modal and stop any speech.
 function closeModal(){document.getElementById('modal').classList.remove('open');window.speechSynthesis&&window.speechSynthesis.cancel();}
 
@@ -599,9 +632,14 @@ function renderComplete(){
     if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
     unlockBadge('first_lesson');
     if(pct===100)unlockBadge('perfect');
-  }else{ // exam
+  }else if(ex.type==='exam'){
     leveledUp=addXP(Math.round(ex.xp*pct/100));
     if(pct>=80){passedExam=true;unlockBadge('exam_pass');}
+  }else{ // practice: theme / crash — flat XP, streak, no exam certificate
+    leveledUp=addXP(ex.xp);
+    if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
+    unlockBadge('first_lesson');
+    if(pct===100)unlockBadge('perfect');
   }
   checkBadges();renderProgress();renderHomeLessons();renderAllLessons();saveState();
   const newBadges=BADGES.filter(b=>S.badges.includes(b.id));
