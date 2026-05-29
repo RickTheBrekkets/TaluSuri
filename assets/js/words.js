@@ -86,14 +86,13 @@ const EXTRA_TRANSLATIONS = {
   }
 };
 
-// Frequency bands for the spoedcursus, expressed as [fromRank, toRank) over the 1000-word spine.
+// Frequency bands for the spoedcursus, expressed as [fromRank, toRank) over the FREQ spine.
 const CRASH_BANDS = [
   {name:'Kern 1 — Allerbelangrijkste', range:[0,100],   icon:'🥇', desc:'De ~100 meest essentiële woorden'},
   {name:'Kern 2 — Kerntaal',           range:[100,300], icon:'🥈', desc:'Dagelijkse kernwoordenschat'},
   {name:'Kern 3 — Uitbreiding',        range:[300,600], icon:'🥉', desc:'Breid je woordenschat uit'},
   {name:'Kern 4 — Vloeiend',           range:[600,1000],icon:'🏆', desc:'Op weg naar vloeiend begrip'}
 ];
-const CRASH_TARGET = 1000;
 
 // Index FREQ lemma -> rank for O(1) lookup. Falls back to empty if freq.js failed to load.
 const FREQ_RANK = (typeof FREQ !== 'undefined')
@@ -165,6 +164,6 @@ seedTranslations();
 applyFrequencyOrder();
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {TRANSLATIONS, EXTRA_TRANSLATIONS, CRASH_BANDS, CRASH_TARGET,
+  module.exports = {TRANSLATIONS, EXTRA_TRANSLATIONS, CRASH_BANDS,
     buildLangWords, langCoverage, crashBandStats, crashTierWords, applyFrequencyOrder, seedTranslations};
 }
