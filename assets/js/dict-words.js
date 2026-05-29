@@ -5,6 +5,7 @@
 // Sarnami: broken font glyphs decoded — ™->t (retroflex t), º->d (retroflex d),
 //          œ->r (retroflex r) — verified against reconstructed words (e.g. daaktar=arts).
 // A spot-review fixed residual slips and dropped wrong-sense/junk entries. status 'dict'.
+// Regenerate with: node tools/build-dict.js
 const DICT_TRANSLATIONS={
   sranan:{
     "een":{w:"wan",p:"wan"},"en":{w:"nanga",p:"nanga"},"dat":{w:"dat'",p:"dat'"},"niet":{w:"no",p:"no"},

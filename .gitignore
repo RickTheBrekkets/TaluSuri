@@ -17,3 +17,7 @@ npm-debug.log*
 
 # Source dictionaries (large binaries, used to generate assets/js/dict-*.js)
 assets/*.pdf
+
+# Local Claude Code state
+.claude/scheduled_tasks.lock
+.claude/settings.local.json

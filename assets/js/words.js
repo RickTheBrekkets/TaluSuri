@@ -10,7 +10,7 @@
 //
 // Every consumer (dictionary, flashcards, lessons, exams, crash course, mistakes) reads
 // `lang.words`, so widening + reordering that array lifts the whole app at once. To grow a
-// language toward the 1000-word target, add entries to EXTRA_TRANSLATIONS — nothing else.
+// language's vocabulary, add entries to EXTRA_TRANSLATIONS — nothing else.
 
 // ═══ EXTRA TRANSLATIONS ═══
 // Keyed by langId, then by the exact Dutch lemma as it appears in FREQ (freq.js).
@@ -134,7 +134,7 @@ function buildLangWords(langId) {
   return ranked.concat(extra);
 }
 
-// Count of words that land on the frequency spine (i.e. count toward the 1000-word target).
+// Count of words that land on the frequency spine (the available kernwoorden for a language).
 function langCoverage(langId) {
   return (TRANSLATIONS[langId] ? buildLangWords(langId) : []).filter(w => w.rank !== null).length;
 }
