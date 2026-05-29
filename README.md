@@ -2,7 +2,7 @@
 
 A browser-based app for learning the **10 languages of Suriname** and bringing its
 communities closer together through language. Duolingo-style lessons, flashcards,
-a dictionary, grammar notes, a 1000-word crash course, gamification (XP, levels,
+a dictionary, grammar notes, a frequency-based crash course, gamification (XP, levels,
 streaks, badges) and a camera lens. The core app is a single static site that runs
 with **no backend**; an optional **Supabase** layer adds user accounts, a real
 leaderboard, and community-contributed pronunciations.
