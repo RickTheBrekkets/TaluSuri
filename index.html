@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -52,6 +53,34 @@
   </div>
 </div>
 
+<!-- LOGIN MODAL (magic link) -->
+<div class="onboard" id="auth-modal" style="display:none;z-index:600;">
+  <div class="onboard-inner" style="max-width:420px;">
+    <div class="onboard-logo">Talu<span>Suri</span></div>
+    <div id="auth-form">
+      <div class="onboard-q">Inloggen</div>
+      <div class="onboard-sub">Vul je e-mailadres in. We sturen je een magische inloglink — geen wachtwoord nodig.</div>
+      <input class="contact-input" id="auth-email" type="email" autocomplete="email" placeholder="jij@voorbeeld.nl" style="margin-bottom:12px;text-align:center;">
+      <button class="onboard-btn" onclick="authSubmitEmail()">Stuur magische link</button>
+    </div>
+    <div id="auth-sent" style="display:none;">
+      <div class="onboard-q">Check je inbox ✉️</div>
+      <div class="onboard-sub">We hebben je een inloglink gestuurd. Klik erop om in te loggen — je kunt dit tabblad sluiten.</div>
+    </div>
+    <button class="onboard-skip" onclick="authCloseModal()">Sluiten</button>
+  </div>
+</div>
+
+<!-- DISPLAY-NAME MODAL (first login) -->
+<div class="onboard" id="name-modal" style="display:none;z-index:600;">
+  <div class="onboard-inner" style="max-width:420px;">
+    <div class="onboard-q">Kies je weergavenaam</div>
+    <div class="onboard-sub">Zo verschijn je op de ranglijst.</div>
+    <input class="contact-input" id="name-input" type="text" maxlength="24" placeholder="Bijv. Priya R." style="margin-bottom:12px;text-align:center;">
+    <button class="onboard-btn" onclick="authSubmitName()">Opslaan</button>
+  </div>
+</div>
+
 <div class="app" id="mainApp" style="display:none;">
   <div class="beta-bar" id="beta-bar">
     <span class="beta-tag">BÈTA</span>
@@ -71,6 +100,7 @@
       <div class="level-pill"><span class="emo">⭐</span> Lvl <span id="level-num-pill">1</span></div>
       <div class="streak-pill"><span class="emo">🔥</span> <span id="streak-lbl">3</span></div>
       <button class="icon-btn" onclick="toggleTheme()" title="Donkere modus" id="theme-btn"><span class="emo">🌙</span></button>
+      <button class="icon-btn" onclick="authButtonClick()" title="Inloggen" id="auth-btn" style="width:auto;padding:0 12px;gap:6px;display:none;"><span class="emo">👤</span> <span id="auth-label">Inloggen</span></button>
     </div>
   </div>
 
@@ -455,8 +485,10 @@
 <div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
   <div class="modal"><button class="modal-close" onclick="closeModal()"><span class="emo">✕</span></button><div id="modal-body"></div></div>
 </div>
+<script src="assets/js/config.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/state.js"></script>
 <script src="assets/js/app.js"></script>
+<script src="assets/js/auth.js"></script>
 </body>
 </html>

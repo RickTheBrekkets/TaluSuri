@@ -10,6 +10,7 @@ function loadState(){
 // Persist the durable parts of app state to localStorage.
 function saveState(){
   try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded,crashProgress:S.crashProgress}));}catch(e){}
+  if(window.onStateSaved)window.onStateSaved(); // sync progress to Supabase profile when logged in (auth.js)
 }
 let saved=loadState();
 // S = the single global state object the whole app reads/writes.

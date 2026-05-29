@@ -397,10 +397,22 @@ function renderBadgesGrid(){
   grid.innerHTML=BADGES.map(b=>{const earned=S.badges.includes(b.id);return `<div class="badge-item ${earned?'':'locked'}" style="padding:16px;"><div class="badge-icon" style="width:48px;height:48px;font-size:26px;">${earned?b.icon:'🔒'}</div><div><div class="badge-info-name" style="font-size:14px;">${b.name}</div><div class="badge-info-desc">${b.desc}</div></div></div>`;}).join('');
 }
 // Render the leaderboard with the user inserted and ranked by XP.
-function renderLeaderboard(){
+// Uses real accounts from Supabase (auth.js) when available, otherwise falls
+// back to the sample LEADERBOARD so the app still works anonymous/offline.
+async function renderLeaderboard(){
   const list=document.getElementById('leaderboard-list');if(!list)return;
-  const me={name:'Jij',xp:S.xp,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true};
-  const all=[...LEADERBOARD,me].sort((a,b)=>b.xp-a.xp);
+  const localMe=()=>({name:'Jij',xp:S.xp,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true});
+  let all;
+  const rows=window.fetchLeaderboard?await window.fetchLeaderboard():null;
+  if(rows){
+    all=rows;
+    const uid=window.AUTH&&window.AUTH.user&&window.AUTH.user.id;
+    if(uid)all.forEach(r=>{if(r.id===uid)r.me=true;}); // mark my own row
+    else all.push(localMe());                          // not logged in → show local progress too
+  }else{
+    all=[...LEADERBOARD,localMe()];                     // fallback: sample players + local "Jij"
+  }
+  all.sort((a,b)=>b.xp-a.xp);
   list.innerHTML=all.map((p,i)=>`<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div><div class="lb-avatar">${p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${p.langs}</div></div><div class="lb-xp">${p.xp.toLocaleString('nl-NL')} XP</div></div>`).join('');
 }
 
