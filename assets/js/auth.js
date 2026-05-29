@@ -1,4 +1,4 @@
-// TaluSuri — Supabase magic-link auth + real leaderboard sync.
+// TaluSuri — Supabase email+password auth + real leaderboard sync.
 // Loaded last (after app.js) as a classic script: all functions are global so
 // inline onclick handlers and app.js can reach them.
 //
@@ -40,22 +40,42 @@ function authButtonClick(){
 // Sign out (used by the profile view).
 function authSignOut(){if(sb)sb.auth.signOut();showView('home');}
 
-// ═══ LOGIN MODAL (magic link) ═══
+// ═══ LOGIN MODAL (email + password) ═══
+let authMode='login';   // 'login' or 'signup'
 function authOpenModal(){
-  document.getElementById('auth-form').style.display='block';
-  document.getElementById('auth-sent').style.display='none';
+  authMode='login';authApplyMode();
   document.getElementById('auth-email').value='';
+  document.getElementById('auth-pw').value='';
   document.getElementById('auth-modal').style.display='flex';
 }
 function authCloseModal(){document.getElementById('auth-modal').style.display='none';}
-// Send a magic link to the entered email; on success, show the "check inbox" state.
-async function authSubmitEmail(){
+// Reflect the current login/signup mode in the modal copy.
+function authApplyMode(){
+  const login=authMode==='login';
+  document.getElementById('auth-title').textContent=login?'Inloggen':'Account aanmaken';
+  document.getElementById('auth-sub').textContent=login?'Log in met je e-mailadres en wachtwoord.':'Maak een account met je e-mailadres en een wachtwoord.';
+  document.getElementById('auth-submit-btn').textContent=login?'Inloggen':'Account aanmaken';
+  document.getElementById('auth-pw').setAttribute('autocomplete',login?'current-password':'new-password');
+  document.getElementById('auth-toggle-text').textContent=login?'Nog geen account?':'Heb je al een account?';
+  document.getElementById('auth-toggle-link').textContent=login?'Account aanmaken':'Inloggen';
+}
+// Switch between login and signup.
+function authToggleMode(){authMode=authMode==='login'?'signup':'login';authApplyMode();}
+// Log in or sign up with email + password (no emails sent when "Confirm email" is off in Supabase).
+async function authPasswordSubmit(){
   const email=document.getElementById('auth-email').value.trim();
-  if(!email)return;
-  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});
-  if(error){alert('Inloggen mislukt: '+error.message);return;}
-  document.getElementById('auth-form').style.display='none';
-  document.getElementById('auth-sent').style.display='block';
+  const pw=document.getElementById('auth-pw').value;
+  if(!email||!pw)return;
+  if(pw.length<6){alert('Wachtwoord moet minstens 6 tekens zijn.');return;}
+  const res=authMode==='signup'
+    ? await sb.auth.signUp({email,password:pw})
+    : await sb.auth.signInWithPassword({email,password:pw});
+  if(res.error){alert((authMode==='signup'?'Registreren':'Inloggen')+' mislukt: '+res.error.message);return;}
+  if(authMode==='signup'&&!res.data.session){
+    alert('Account aangemaakt. Bevestig je e-mail om in te loggen — of schakel e-mailbevestiging uit in Supabase (Auth → Providers → Email).');
+    return;
+  }
+  authCloseModal();   // onAuthStateChange handles profile load + UI refresh
 }
 
 // ═══ DISPLAY-NAME MODAL (first login) ═══
@@ -123,7 +143,7 @@ function authInit(){
   const btn=document.getElementById('auth-btn');
   if(!AUTH_ENABLED){if(btn)btn.style.display='none';return;}
   if(btn)btn.style.display='';
-  // Fires on initial session, login, and logout (supabase-js handles the magic-link redirect).
+  // Fires on initial session, login, and logout (supabase-js persists the session locally).
   sb.auth.onAuthStateChange(async(_event,session)=>{
     AUTH.user=session?.user||null;
     if(AUTH.user)await authLoadProfile();

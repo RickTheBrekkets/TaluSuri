@@ -53,19 +53,20 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL (magic link) -->
+<!-- LOGIN MODAL (email + password) -->
 <div class="onboard" id="auth-modal" style="display:none;z-index:600;">
   <div class="onboard-inner" style="max-width:420px;">
     <div class="onboard-logo">Talu<span>Suri</span></div>
     <div id="auth-form">
-      <div class="onboard-q">Inloggen</div>
-      <div class="onboard-sub">Vul je e-mailadres in. We sturen je een magische inloglink — geen wachtwoord nodig.</div>
-      <input class="contact-input" id="auth-email" type="email" autocomplete="email" placeholder="jij@voorbeeld.nl" style="margin-bottom:12px;text-align:center;">
-      <button class="onboard-btn" onclick="authSubmitEmail()">Stuur magische link</button>
-    </div>
-    <div id="auth-sent" style="display:none;">
-      <div class="onboard-q">Check je inbox ✉️</div>
-      <div class="onboard-sub">We hebben je een inloglink gestuurd. Klik erop om in te loggen — je kunt dit tabblad sluiten.</div>
+      <div class="onboard-q" id="auth-title">Inloggen</div>
+      <div class="onboard-sub" id="auth-sub">Log in met je e-mailadres en wachtwoord.</div>
+      <input class="contact-input" id="auth-email" type="email" autocomplete="email" placeholder="jij@voorbeeld.nl" style="margin-bottom:10px;text-align:center;">
+      <input class="contact-input" id="auth-pw" type="password" autocomplete="current-password" placeholder="Wachtwoord (min. 6 tekens)" style="margin-bottom:12px;text-align:center;" onkeydown="if(event.key==='Enter')authPasswordSubmit()">
+      <button class="onboard-btn" id="auth-submit-btn" onclick="authPasswordSubmit()">Inloggen</button>
+      <div class="onboard-sub" style="margin-top:12px;font-size:12px;">
+        <span id="auth-toggle-text">Nog geen account?</span>
+        <a href="#" onclick="authToggleMode();return false;" id="auth-toggle-link" style="color:var(--green);font-weight:500;">Account aanmaken</a>
+      </div>
     </div>
     <button class="onboard-skip" onclick="authCloseModal()">Sluiten</button>
   </div>
@@ -516,7 +517,7 @@
     <div class="card">
       <div style="font-family:'Fraunces',serif;font-weight:600;font-size:16px;margin-bottom:8px;">🎙️ Hoe voeg ik een uitspraak toe?</div>
       <ol style="font-size:13px;color:var(--ink);line-height:1.7;padding-left:18px;margin:0;">
-        <li>Log in via de <strong>👤-knop</strong> rechtsboven (magische link per e-mail).</li>
+        <li>Log in via de <strong>👤-knop</strong> rechtsboven (e-mailadres en wachtwoord).</li>
         <li>Open het <strong>Woordenboek</strong> of een flashcard en tik op het <strong>🎙️-icoon</strong> bij een woord.</li>
         <li>Tik op <strong>Neem op</strong>, spreek het woord duidelijk in, en <strong>stuur het in</strong> (of upload een geluidsbestand).</li>
         <li>Stem met <strong>▲</strong> op de beste uitspraak van anderen. Veel upvotes leveren jou badges op: 🎤 → 🌟 → 👑.</li>
