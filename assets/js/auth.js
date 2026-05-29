@@ -11,7 +11,12 @@ const AUTH = { user: null, profile: null };   // current session user + their pr
 window.AUTH = AUTH;                            // app.js reads this to flag the "me" leaderboard row
 const AUTH_ENABLED = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined');
 let sb = null;
-if (AUTH_ENABLED) sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+// flowType 'implicit': magic-link/recovery links carry a hash token that establishes a
+// session on load without a stored PKCE code-verifier — so password-reset links work
+// reliably (incl. across browsers/devices). detectSessionInUrl consumes that hash.
+if (AUTH_ENABLED) sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+  auth: { flowType: 'implicit', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+});
 window.SB = sb;   // shared client for community.js / admin.js (null when auth disabled)
 
 // Build 2-letter avatar initials from a display name ("Priya R." -> "PR").
@@ -89,6 +94,8 @@ async function authForgot(){
 async function authSetNewPassword(){
   const pw=document.getElementById('pw-reset-input').value;
   if(pw.length<6){alert('Wachtwoord moet minstens 6 tekens zijn.');return;}
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){alert('Je herstel-sessie is verlopen. Open de reset-link opnieuw (en in dezelfde browser).');return;}
   const {error}=await sb.auth.updateUser({password:pw});
   if(error){alert('Opslaan mislukt: '+error.message);return;}
   document.getElementById('pw-reset-modal').style.display='none';
