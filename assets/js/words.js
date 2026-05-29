@@ -104,9 +104,15 @@ const FREQ_RANK = (typeof FREQ !== 'undefined')
 const TRANSLATIONS = {};
 function seedTranslations() {
   if (typeof LANGS === 'undefined') return;
+  const dict = (typeof DICT_TRANSLATIONS !== 'undefined') ? DICT_TRANSLATIONS : {};
   LANGS.forEach(l => {
     const t = {};
+    // 1. Lowest priority: dictionary-extracted words (status 'dict').
+    const dt = dict[l.id] || {};
+    Object.keys(dt).forEach(nl => { t[nl] = {w:dt[nl].w, p:dt[nl].p, status:'dict'}; });
+    // 2. Inline seed words (hand-curated, dictionary-cited) override dict.
     (l.words || []).forEach(w => { t[w.nl] = {w:w.w, p:w.p, status:'verified'}; });
+    // 3. Highest priority: manual EXTRA translations.
     const extra = EXTRA_TRANSLATIONS[l.id] || {};
     Object.keys(extra).forEach(nl => {
       t[nl] = {w:extra[nl].w, p:extra[nl].p, status:extra[nl].status || 'verified'};
