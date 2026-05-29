@@ -126,6 +126,23 @@ pronunciations:
 The publishable key is public by design; all access is constrained by the RLS policies
 in the migrations. Never put the `service_role` key in client code.
 
+### Email delivery (avoid the magic-link rate limit)
+
+Supabase's **built-in email** is for testing only — it caps magic-link sends at a few per
+hour, so logging in starts failing with `email rate limit exceeded` (HTTP 429). Fix it with
+a free custom SMTP provider in **Authentication → SMTP Settings → Enable Custom SMTP**:
+
+- **No domain → [Brevo](https://www.brevo.com):** 300 emails/day free; verify one sender
+  address (no DNS). Host `smtp-relay.brevo.com`, port `587`, username = your Brevo login,
+  password = an SMTP key from Brevo.
+- **Have a domain → [Resend](https://resend.com):** 3,000/mo free, better deliverability;
+  verify the domain (a few DNS records). Host `smtp.resend.com`, port `465`, username
+  `resend`, password = a Resend API key (`re_…`).
+
+Set the sender email to your verified address, then raise **Authentication → Rate Limits →
+emails per hour** to match the provider's allowance. The magic link redirects to
+`location.origin`, so that origin must be in **URL Configuration → Redirect URLs**.
+
 ## Deployment
 
 Deploy the folder to any static host (Netlify, GitHub Pages, Cloudflare Pages, …).
