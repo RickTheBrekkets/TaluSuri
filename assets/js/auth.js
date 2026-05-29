@@ -42,8 +42,16 @@ function authButtonClick(){
   if(AUTH.user)showView('profile');
   else authOpenModal();
 }
-// Sign out (used by the profile view).
-function authSignOut(){if(sb)sb.auth.signOut();showView('home');}
+// Sign out (used by the profile view). Force a LOCAL session clear so logout always
+// succeeds even if the server revoke call fails, then reset state/UI immediately rather
+// than waiting on the auth event.
+async function authSignOut(){
+  try{ if(sb)await sb.auth.signOut({scope:'local'}); }catch(e){}
+  AUTH.user=null; AUTH.profile=null;
+  if(typeof updateAuthUI==='function')updateAuthUI();
+  if(typeof renderLeaderboard==='function')renderLeaderboard();
+  showView('home');
+}
 
 // ═══ LOGIN MODAL (email + password) ═══
 let authMode='login';   // 'login' or 'signup'
