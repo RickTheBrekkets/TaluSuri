@@ -779,29 +779,36 @@ function renderCurriculum(){
   html+='</div>';el.innerHTML=html;
 }
 
-// ═══ CRASH COURSE (1000 woorden tiers) ═══
-// Render the crash-course frequency tiers for the active language.
+// ═══ CRASH COURSE (Pareto 1000-woorden model) ═══
+// Render the spoedcursus: frequency bands over the 1000-word spine (see words.js / freq.js),
+// showing how many words are available (translated) per band and overall coverage toward 1000.
 function renderCrash(){
   const track=document.getElementById('crash-track');if(!track)return;
-  const total=S.lang.words.length;
+  const target=(typeof CRASH_TARGET!=='undefined')?CRASH_TARGET:1000;
+  const coverage=(typeof langCoverage==='function')?langCoverage(S.lang.id):S.lang.words.length;
   const practiced=(S.crashProgress&&S.crashProgress[S.lang.id])||0;
   document.getElementById('crash-known').textContent=practiced;
-  // tiers based on frequency bands (we only have ~20-40 words per lang as sample of the "1000")
-  const tiers=[
-    {name:'Kern 1 — Allerbelangrijkste',range:[0,10],icon:'🥇',desc:'De 10 meest essentiële woorden'},
-    {name:'Kern 2 — Dagelijks gebruik',range:[10,20],icon:'🥈',desc:'Veelgebruikte alledaagse woorden'},
-    {name:'Kern 3 — Uitbreiding',range:[20,total],icon:'🥉',desc:'Bouw je woordenschat verder uit'}
-  ];
-  track.innerHTML=`<div class="crash-track-head"><div class="crash-track-title">⚡ ${S.lang.name} — kernwoorden in 3 niveaus</div></div>`+
-  tiers.map((t,i)=>{
-    const count=Math.max(0,Math.min(t.range[1],total)-t.range[0]);
-    if(count<=0)return'';
-    return `<div class="crash-tier"><div class="crash-tier-icon">${t.icon}</div><div class="crash-tier-info"><div class="crash-tier-name">${t.name}</div><div class="crash-tier-meta">${count} woorden · ${t.desc}</div></div><button class="crash-tier-btn" onclick="startCrashTier(${t.range[0]},${t.range[1]})">Start</button></div>`;
+  const cov=document.getElementById('crash-coverage');
+  if(cov)cov.textContent=coverage;
+  const bands=(typeof crashBandStats==='function')?crashBandStats(S.lang.id):[];
+  const pct=Math.round(coverage/target*100);
+  track.innerHTML=`<div class="crash-track-head"><div class="crash-track-title">⚡ ${S.lang.name} — kernwoorden op frequentie</div></div>`+
+  `<div class="crash-cov-bar"><div class="crash-cov-fill" style="width:${Math.min(100,pct)}%;"></div></div>`+
+  `<div class="crash-cov-lbl">${coverage} van ${target} woorden beschikbaar (${pct}%)</div>`+
+  bands.map(t=>{
+    const ready=t.have>0;
+    const btn=ready
+      ?`<button class="crash-tier-btn" onclick="startCrashTier(${t.range[0]},${t.range[1]})">Start</button>`
+      :`<button class="crash-tier-btn" disabled style="opacity:.4;cursor:default;">Binnenkort</button>`;
+    return `<div class="crash-tier"><div class="crash-tier-icon">${t.icon}</div><div class="crash-tier-info"><div class="crash-tier-name">${t.name}</div><div class="crash-tier-meta">${t.have} / ${t.size} woorden · ${t.desc}</div></div>${btn}</div>`;
   }).join('');
 }
-// Start a crash-course tier as an exercise and record words practiced.
-function startCrashTier(from,to){
-  const words=S.lang.words.slice(from,to);
+// Start a crash-course tier as an exercise. Picks the available (translated) words whose
+// frequency rank falls in [fromRank, toRank), then records how many were practiced.
+function startCrashTier(fromRank,toRank){
+  const words=(typeof crashTierWords==='function')
+    ?crashTierWords(S.lang.id,fromRank,toRank)
+    :S.lang.words.slice(fromRank,toRank);
   if(!words.length)return;
   S.ex={type:'crash',title:'Spoedcursus '+S.lang.name,emoji:'⚡',xp:Math.max(10,words.length),q:genLessonQuestions(words,Math.min(words.length,8)),cur:0,score:0,answered:false};
   S.crashProgress=S.crashProgress||{};S.crashProgress[S.lang.id]=(S.crashProgress[S.lang.id]||0)+words.length;

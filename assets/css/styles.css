@@ -449,6 +449,9 @@ select.contact-input{cursor:pointer;appearance:none;background-image:url("data:i
 .crash-tier-name{font-size:13px;font-weight:500;}
 .crash-tier-meta{font-size:11px;color:var(--muted);}
 .crash-tier-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.crash-cov-bar{height:8px;border-radius:6px;background:var(--bg);border:1px solid var(--border);overflow:hidden;margin-bottom:6px;}
+.crash-cov-fill{height:100%;background:var(--green);border-radius:6px;transition:width .4s ease;}
+.crash-cov-lbl{font-size:11px;color:var(--muted);margin-bottom:14px;}
 
 /* ═══ MY MISTAKES ═══ */
 .mistakes-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
