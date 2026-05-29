@@ -12,6 +12,7 @@ window.AUTH = AUTH;                            // app.js reads this to flag the 
 const AUTH_ENABLED = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && typeof supabase !== 'undefined');
 let sb = null;
 if (AUTH_ENABLED) sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+window.SB = sb;   // shared client for community.js / admin.js (null when auth disabled)
 
 // Build 2-letter avatar initials from a display name ("Priya R." -> "PR").
 function authInitials(n){return (n||'?').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();}
@@ -21,16 +22,23 @@ function authLangs(){return LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l
 // ═══ TOPBAR UI ═══
 // Reflect logged-in/out state in the topbar auth button.
 function updateAuthUI(){
-  const label=document.getElementById('auth-label'),btn=document.getElementById('auth-btn');
+  const label=document.getElementById('auth-label'),btn=document.getElementById('auth-btn'),ava=document.getElementById('auth-ava');
   if(!btn)return;
-  if(AUTH.user){label.textContent=AUTH.profile?.display_name||'Profiel';btn.title='Uitloggen';}
-  else{label.textContent='Inloggen';btn.title='Inloggen';}
+  if(AUTH.user){
+    label.textContent=AUTH.profile?.display_name||'Profiel';btn.title='Profiel';
+    if(ava)ava.innerHTML=AUTH.profile?.avatar_url?`<img src="${AUTH.profile.avatar_url}" alt="" style="width:20px;height:20px;border-radius:50%;object-fit:cover;display:block;">`:'<span class="emo">👤</span>';
+  }else{
+    label.textContent='Inloggen';btn.title='Inloggen';
+    if(ava)ava.innerHTML='<span class="emo">👤</span>';
+  }
 }
-// Topbar button: open the login modal when logged out, sign out when logged in.
+// Topbar button: open the profile view when logged in, else the login modal.
 function authButtonClick(){
-  if(AUTH.user){if(confirm('Uitloggen?'))sb.auth.signOut();}
+  if(AUTH.user)showView('profile');
   else authOpenModal();
 }
+// Sign out (used by the profile view).
+function authSignOut(){if(sb)sb.auth.signOut();showView('home');}
 
 // ═══ LOGIN MODAL (magic link) ═══
 function authOpenModal(){
@@ -70,11 +78,12 @@ async function authSubmitName(){
 // Load the user's profile after login; prompt for a name if they don't have one yet,
 // otherwise reconcile XP (keep the higher of local vs remote, then push).
 async function authLoadProfile(){
-  const {data}=await sb.from('profiles').select('id,display_name,xp,streak,langs').eq('id',AUTH.user.id).maybeSingle();
+  const {data}=await sb.from('profiles').select('id,display_name,xp,streak,langs,avatar_url').eq('id',AUTH.user.id).maybeSingle();
   if(data&&data.display_name){
     AUTH.profile=data;
     if(data.xp>S.xp){S.xp=data.xp;renderStats();saveState();}   // remote ahead → adopt
     await authPushProfile();                                     // push (covers local-ahead case)
+    if(window.communityOnLogin)window.communityOnLogin();        // contributor badges, avatar render (community.js)
   }else{
     authOpenNameModal();                                         // brand-new user → ask for a name
   }
@@ -86,6 +95,7 @@ async function authPushProfile(){
     id:AUTH.user.id,
     display_name:AUTH.profile.display_name,
     xp:S.xp,streak:S.streak,langs:authLangs(),
+    avatar_url:AUTH.profile.avatar_url||null,
     updated_at:new Date().toISOString()
   });
 }
@@ -103,9 +113,9 @@ window.onStateSaved=function(){
 // renderLeaderboard() can fall back to the sample LEADERBOARD.
 window.fetchLeaderboard=async function(){
   if(!AUTH_ENABLED)return null;
-  const {data,error}=await sb.from('profiles').select('id,display_name,xp,langs').order('xp',{ascending:false}).limit(50);
+  const {data,error}=await sb.from('profiles').select('id,display_name,xp,langs,avatar_url').order('xp',{ascending:false}).limit(50);
   if(error||!data)return null;
-  return data.map(r=>({id:r.id,name:r.display_name,xp:r.xp,langs:r.langs||'',avatar:authInitials(r.display_name)}));
+  return data.map(r=>({id:r.id,name:r.display_name,xp:r.xp,langs:r.langs||'',avatar:authInitials(r.display_name),avatar_url:r.avatar_url||null}));
 };
 
 // ═══ INIT ═══

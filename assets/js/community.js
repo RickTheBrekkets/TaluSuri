@@ -1,0 +1,199 @@
+// TaluSuri — community pronunciations: record, upvote, contributor badges,
+// profile pictures, and the official-audio override that replaces TTS.
+// Loaded after auth.js (reuses its Supabase client via window.SB). Classic
+// script: functions are global so inline onclick handlers can reach them.
+
+const SB = window.SB || null;                 // shared Supabase client (null when auth disabled)
+window.OFFICIAL_AUDIO = window.OFFICIAL_AUDIO || {};  // word_key -> public audio URL (read by speak() in app.js)
+
+// Stable key for a word across the app: "<langId>|<word>".
+function wordKey(langId, w){ return langId + '|' + w; }
+
+// ═══ OFFICIAL AUDIO (admin-promoted recordings replace the robot voice) ═══
+async function loadOfficialAudio(){
+  window.OFFICIAL_AUDIO = {};
+  if(!SB) return;
+  const {data} = await SB.from('recordings').select('word_key,audio_path').eq('is_official', true);
+  (data||[]).forEach(r=>{ window.OFFICIAL_AUDIO[r.word_key] = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl; });
+}
+// Play a stored audio URL (used by the recordings list and the speak() override).
+let _recAudio=null;
+function playRec(url){ if(_recAudio)_recAudio.pause(); _recAudio=new Audio(url); _recAudio.play(); }
+
+// ═══ RECORDINGS + VOTES MODAL ═══
+let CUR = {langId:null, word:null};   // word the recordings modal is open for
+
+// Entry point from the dictionary 🎙️ buttons.
+async function openRecordings(langId, word){
+  if(!SB){ alert('Community-opnames vereisen dat inloggen is ingesteld.'); return; }
+  CUR = {langId, word};
+  document.getElementById('rec-word-title').textContent = 'Uitspraken: ' + word;
+  document.getElementById('rec-word-sub').textContent = 'Beluister en stem op de beste uitspraak.';
+  document.getElementById('recordings-modal').style.display = 'flex';
+  await renderRecordingsList();
+}
+function closeRecordings(){ document.getElementById('recordings-modal').style.display='none'; }
+
+async function renderRecordingsList(){
+  const list = document.getElementById('rec-list');
+  list.innerHTML = '<div style="font-size:13px;color:var(--muted);">Laden…</div>';
+  const key = wordKey(CUR.langId, CUR.word);
+  const {data, error} = await SB.from('recordings').select('id,display_name,audio_path,is_official,recording_votes(count)').eq('word_key', key);
+  if(error){ list.innerHTML = '<div style="font-size:13px;color:var(--red);">Kon opnames niet laden.</div>'; return; }
+  let recs = (data||[]).map(r=>({...r, votes: r.recording_votes?.[0]?.count || 0}));
+  recs.sort((a,b)=>b.votes-a.votes);
+  if(!recs.length){ list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nog geen opnames. Wees de eerste! 🎙️</div>'; return; }
+  // which of these the current user already upvoted
+  let voted = new Set();
+  if(AUTH.user){
+    const {data:vs} = await SB.from('recording_votes').select('recording_id').eq('user_id', AUTH.user.id).in('recording_id', recs.map(r=>r.id));
+    (vs||[]).forEach(v=>voted.add(v.recording_id));
+  }
+  list.innerHTML = recs.map((r,i)=>{
+    const url = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
+    const mine = voted.has(r.id);
+    const best = (i===0 && r.votes>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
+    const official = r.is_official ? ' <span style="font-size:11px;">✅ officieel</span>' : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <button class="dict-btn" onclick="playRec('${url}')" title="Afspelen"><span class="emo">▶️</span></button>
+      <div style="flex:1;font-size:13px;font-weight:500;">${r.display_name||'Anoniem'}${best}${official}</div>
+      <button onclick="toggleVote('${r.id}')" style="border:1px solid var(--border);border-radius:8px;background:${mine?'var(--green-l)':'var(--card)'};color:${mine?'var(--green)':'var(--muted)'};padding:4px 11px;cursor:pointer;font-size:13px;font-weight:600;">▲ ${r.votes}</button>
+    </div>`;
+  }).join('');
+}
+
+// Toggle the current user's upvote on a recording.
+async function toggleVote(id){
+  if(!AUTH.user){ alert('Log eerst in om te stemmen.'); authOpenModal(); return; }
+  const uid = AUTH.user.id;
+  const {data:ex} = await SB.from('recording_votes').select('recording_id').eq('user_id', uid).eq('recording_id', id).maybeSingle();
+  if(ex) await SB.from('recording_votes').delete().eq('user_id', uid).eq('recording_id', id);
+  else   await SB.from('recording_votes').insert({recording_id:id, user_id:uid});
+  await renderRecordingsList();
+}
+
+// ═══ RECORD MODAL (MediaRecorder + file-upload fallback) ═══
+let mediaRecorder=null, recChunks=[], recordedBlob=null;
+
+function openRecordModal(){
+  if(!AUTH.user){ alert('Log eerst in om een opname in te sturen.'); authOpenModal(); return; }
+  recordedBlob=null;
+  document.getElementById('rec-modal-word').textContent = CUR.word;
+  document.getElementById('rec-toggle').textContent = '⏺ Start opname';
+  document.getElementById('rec-status').textContent = '';
+  const a=document.getElementById('rec-preview'); a.style.display='none'; a.removeAttribute('src');
+  document.getElementById('rec-file').value='';
+  document.getElementById('rec-submit').disabled=true;
+  document.getElementById('rec-modal').style.display='flex';
+}
+function closeRecordModal(){
+  if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop();
+  document.getElementById('rec-modal').style.display='none';
+}
+
+async function toggleRecord(){
+  if(mediaRecorder && mediaRecorder.state==='recording'){ mediaRecorder.stop(); return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    recChunks=[]; mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e=>{ if(e.data.size) recChunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      recordedBlob = new Blob(recChunks, {type: recChunks[0]?.type || 'audio/webm'});
+      const a=document.getElementById('rec-preview'); a.src=URL.createObjectURL(recordedBlob); a.style.display='block';
+      document.getElementById('rec-toggle').textContent='⏺ Opnieuw opnemen';
+      document.getElementById('rec-status').textContent='Opname klaar — beluister en stuur in.';
+      document.getElementById('rec-submit').disabled=false;
+    };
+    mediaRecorder.start();
+    document.getElementById('rec-toggle').textContent='⏹ Stop opname';
+    document.getElementById('rec-status').textContent='Aan het opnemen…';
+  }catch(err){
+    document.getElementById('rec-status').textContent='Microfoon niet beschikbaar — upload een bestand hieronder.';
+  }
+}
+// File-upload fallback when the mic is unavailable/denied.
+function onRecFile(e){
+  const f=e.target.files[0]; if(!f) return;
+  recordedBlob=f;
+  const a=document.getElementById('rec-preview'); a.src=URL.createObjectURL(f); a.style.display='block';
+  document.getElementById('rec-status').textContent='Bestand gekozen — stuur in.';
+  document.getElementById('rec-submit').disabled=false;
+}
+
+async function submitRecording(){
+  if(!recordedBlob || !AUTH.user) return;
+  document.getElementById('rec-submit').disabled=true;
+  const uid = AUTH.user.id;
+  const ext = (recordedBlob.type && recordedBlob.type.includes('ogg')) ? 'ogg' : (recordedBlob.type && recordedBlob.type.includes('mp')) ? 'mp3' : 'webm';
+  const path = `${uid}/${crypto.randomUUID()}.${ext}`;
+  const {error:upErr} = await SB.storage.from('pronunciations').upload(path, recordedBlob, {contentType: recordedBlob.type || 'audio/webm'});
+  if(upErr){ alert('Upload mislukt: '+upErr.message); document.getElementById('rec-submit').disabled=false; return; }
+  const {error:insErr} = await SB.from('recordings').insert({
+    word_key: wordKey(CUR.langId, CUR.word), lang_id: CUR.langId, word: CUR.word,
+    user_id: uid, display_name: AUTH.profile?.display_name || null, audio_path: path
+  });
+  if(insErr){ alert('Opslaan mislukt: '+insErr.message); document.getElementById('rec-submit').disabled=false; return; }
+  closeRecordModal();
+  await renderRecordingsList();
+  refreshContribBadges();
+}
+
+// ═══ CONTRIBUTOR BADGES (by total upvotes on your recordings) ═══
+async function refreshContribBadges(){
+  if(!SB || !AUTH.user) return;
+  const {data} = await SB.from('recordings').select('id,recording_votes(count)').eq('user_id', AUTH.user.id);
+  const recs = data||[];
+  if(recs.length) unlockBadge('rec_first');
+  const total = recs.reduce((s,r)=>s + (r.recording_votes?.[0]?.count || 0), 0);
+  if(total>=25)  unlockBadge('voice_25');
+  if(total>=100) unlockBadge('voice_100');
+}
+
+// ═══ PROFILE PICTURE ═══
+async function uploadAvatar(e){
+  const file = e.target.files[0];
+  if(!file || !AUTH.user) return;
+  const uid = AUTH.user.id;
+  const ext = (file.name.split('.').pop()||'png').toLowerCase();
+  const path = `${uid}/avatar.${ext}`;
+  const {error} = await SB.storage.from('avatars').upload(path, file, {upsert:true, contentType:file.type});
+  if(error){ alert('Upload mislukt: '+error.message); return; }
+  const base = SB.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+  const url = base + '?t=' + Date.now();   // cache-bust the reused path
+  AUTH.profile = AUTH.profile || {};
+  AUTH.profile.avatar_url = url;
+  await SB.from('profiles').update({avatar_url:url}).eq('id', uid);
+  updateAuthUI();
+  renderProfile();
+}
+
+// Fill the profile view (avatar, name, email, earned badges).
+function renderProfile(){
+  const nameEl=document.getElementById('pf-name'), emailEl=document.getElementById('pf-email'),
+        ava=document.getElementById('pf-ava'), badges=document.getElementById('pf-badges');
+  if(!nameEl) return;
+  if(!AUTH.user){ nameEl.textContent='Niet ingelogd'; if(emailEl)emailEl.textContent=''; if(ava)ava.innerHTML=''; if(badges)badges.innerHTML=''; return; }
+  nameEl.textContent = AUTH.profile?.display_name || '—';
+  if(emailEl) emailEl.textContent = AUTH.user.email || '';
+  if(ava) ava.innerHTML = AUTH.profile?.avatar_url
+    ? `<img src="${AUTH.profile.avatar_url}" alt="" style="width:96px;height:96px;border-radius:50%;object-fit:cover;">`
+    : `<div style="width:96px;height:96px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-family:'Fraunces',serif;">${authInitials(AUTH.profile?.display_name)}</div>`;
+  if(badges){
+    const earned = BADGES.filter(b=>S.badges.includes(b.id));
+    badges.innerHTML = earned.length ? earned.map(b=>`<span title="${b.name} — ${b.desc}" style="font-size:24px;">${b.icon}</span>`).join(' ')
+                                     : '<span style="font-size:12px;color:var(--muted);">Nog geen badges.</span>';
+  }
+}
+
+// Called by auth.js after a profile loads.
+window.communityOnLogin = function(){
+  loadOfficialAudio();
+  refreshContribBadges();
+  if(window.adminCheck) window.adminCheck();   // resolve admin status for the nav gate
+  updateAuthUI();
+  renderProfile();
+};
+
+// Load official audio for everyone (incl. anonymous) on startup.
+if(SB) loadOfficialAudio();

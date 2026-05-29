@@ -30,7 +30,10 @@ const BADGES=[
 {id:'polyglot',icon:'🌍',name:'Polyglot',desc:'Leer in 3 talen'},
 {id:'level_5',icon:'⭐',name:'Gevorderd',desc:'Bereik level 5'},
 {id:'contributor',icon:'🤝',name:'Bijdrager',desc:'Dien feedback in'},
-{id:'explorer',icon:'🧭',name:'Ontdekker',desc:'Bekijk alle 10 talen'}
+{id:'explorer',icon:'🧭',name:'Ontdekker',desc:'Bekijk alle 10 talen'},
+{id:'rec_first',icon:'🎤',name:'Stemgever',desc:'Eerste opname ingestuurd'},
+{id:'voice_25',icon:'🌟',name:'Geliefde stem',desc:'25 upvotes op je opnames'},
+{id:'voice_100',icon:'👑',name:'Uitspraakheld',desc:'100 upvotes op je opnames'}
 ];
 
 // Title shown for each level; indexed by (level - 1), capped at the last entry.
