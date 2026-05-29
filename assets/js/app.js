@@ -527,7 +527,7 @@ function renderExercise(){
   if(q.kind==='mc'||q.kind==='listen'){
     body+=`<div class="q-opts" id="q-opts"></div>`;
   }else if(q.kind==='type'){
-    body+=`<input class="q-input" id="q-input" placeholder="Typ hier..." autocomplete="off"><div style="font-size:11px;color:var(--muted);margin:-8px 0 14px;">💡 Hint: ${q.hint}</div><button class="q-check" id="q-check" onclick="checkType()">Controleer</button>`;
+    body+=`<input class="q-input" id="q-input" placeholder="Typ hier..." autocomplete="off"><div class="q-hint-row" style="margin:-8px 0 14px;"><button type="button" class="q-hint-btn" id="q-hint-btn" onclick="showHint()">💡 Hint tonen</button><span class="q-hint" id="q-hint" style="display:none;font-size:11px;color:var(--muted);">💡 ${q.hint}</span></div><button class="q-check" id="q-check" onclick="checkType()">Controleer</button>`;
   }
   body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button><button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>`;
   document.getElementById('modal-body').innerHTML=body;
@@ -537,6 +537,11 @@ function renderExercise(){
   }
   if(q.kind==='type'){const inp=document.getElementById('q-input');inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});setTimeout(()=>inp.focus(),100);}
   ex.answered=false;
+}
+// Reveal the type-in hint only when the learner asks for it (hidden by default).
+function showHint(){
+  const h=document.getElementById('q-hint');if(h)h.style.display='inline';
+  const b=document.getElementById('q-hint-btn');if(b)b.style.display='none';
 }
 // Handle scoring/feedback after an answer; records wrong words as mistakes.
 function afterAnswer(correct){

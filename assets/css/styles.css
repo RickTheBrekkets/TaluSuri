@@ -380,6 +380,8 @@ select.contact-input{cursor:pointer;appearance:none;background-image:url("data:i
 .q-input.correct{border-color:var(--green);background:var(--green-l);}
 .q-input.wrong{border-color:var(--red);background:var(--red-l);}
 .q-check{width:100%;padding:13px;border-radius:12px;border:none;background:var(--ink);color:var(--bg);font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;margin-bottom:16px;}
+.q-hint-btn{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;padding:0;text-decoration:underline;}
+.q-hint-btn:hover{color:var(--ink);}
 /* MATCH exercise */
 .q-match{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .q-match-col{display:flex;flex-direction:column;gap:8px;}
