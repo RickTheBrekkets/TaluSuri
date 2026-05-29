@@ -135,25 +135,35 @@ function onRecFile(e){
 }
 
 async function submitRecording(){
-  if(!recordedBlob || !AUTH.user) return;
-  document.getElementById('rec-submit').disabled=true;
-  const uid = AUTH.user.id;
-  const ext = (recordedBlob.type && recordedBlob.type.includes('ogg')) ? 'ogg' : (recordedBlob.type && recordedBlob.type.includes('mp')) ? 'mp3' : 'webm';
-  const path = `${uid}/${crypto.randomUUID()}.${ext}`;
-  const {error:upErr} = await SB.storage.from('pronunciations').upload(path, recordedBlob, {contentType: recordedBlob.type || 'audio/webm'});
-  if(upErr){ alert('Upload mislukt: '+upErr.message); document.getElementById('rec-submit').disabled=false; return; }
-  const {error:insErr} = await SB.from('recordings').insert({
-    word_key: wordKey(CUR.langId, CUR.word), lang_id: CUR.langId, word: CUR.word,
-    user_id: uid, display_name: AUTH.profile?.display_name || null, audio_path: path
-  });
-  if(insErr){ alert('Opslaan mislukt: '+insErr.message); document.getElementById('rec-submit').disabled=false; return; }
-  closeRecordModal();
-  await renderRecordingsList();
-  refreshContribBadges();
-  // Continue flow: offer the swipe-deck so contributing leads somewhere.
-  if(confirm('Opname ingestuurd! 🎉 Wil je nu op andere uitspraken stemmen?')){
-    closeRecordings();
-    showView('feedback');
+  if(!AUTH.user){ alert('Je bent niet ingelogd. Log in en probeer opnieuw.'); return; }
+  if(!recordedBlob){ alert('Geen opname gevonden. Neem eerst op of kies een bestand.'); return; }
+  const btn=document.getElementById('rec-submit');
+  btn.disabled=true; btn.textContent='Bezig met insturen…';
+  try{
+    const uid = AUTH.user.id;
+    const ext = (recordedBlob.type && recordedBlob.type.includes('ogg')) ? 'ogg' : (recordedBlob.type && recordedBlob.type.includes('mp')) ? 'mp3' : 'webm';
+    const rid = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'r'+Date.now()+Math.random().toString(16).slice(2);
+    const path = `${uid}/${rid}.${ext}`;
+    const {error:upErr} = await SB.storage.from('pronunciations').upload(path, recordedBlob, {contentType: recordedBlob.type || 'audio/webm', upsert:false});
+    if(upErr) throw new Error('Upload mislukt: '+(upErr.message||upErr));
+    const {error:insErr} = await SB.from('recordings').insert({
+      word_key: wordKey(CUR.langId, CUR.word), lang_id: CUR.langId, word: CUR.word,
+      user_id: uid, display_name: AUTH.profile?.display_name || null, audio_path: path
+    });
+    if(insErr) throw new Error('Opslaan mislukt: '+(insErr.message||insErr));
+    closeRecordModal();
+    await renderRecordingsList();
+    refreshContribBadges();
+    // Continue flow: offer the swipe-deck so contributing leads somewhere.
+    if(confirm('Opname ingestuurd! 🎉 Wil je nu op andere uitspraken stemmen?')){
+      closeRecordings();
+      showView('feedback');
+    }
+  }catch(err){
+    console.error('submitRecording failed:', err);
+    alert((err&&err.message)||'Insturen mislukt. Probeer het opnieuw.');
+  }finally{
+    btn.disabled=false; btn.textContent='Insturen';
   }
 }
 
