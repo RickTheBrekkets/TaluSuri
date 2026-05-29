@@ -43,7 +43,35 @@ const EXTRA_TRANSLATIONS = {
     'vertellen':{w:'fruteri',p:'fru-te-ri'},'brengen':{w:'tyari',p:'tya-ri'},'staan':{w:'tanapu',p:'ta-na-pu'},
     'zitten':{w:'sidon',p:'si-don'},'liggen':{w:'didon',p:'di-don'},'blijven':{w:'tan',p:'tan'},'wonen':{w:'libi',p:'li-bi'},
     'leven':{w:'libi',p:'li-bi'},'beginnen':{w:'bigin',p:'bi-gin'},'vallen':{w:'fadon',p:'fa-don'},'slapen':{w:'sribi',p:'sri-bi'},
-    'drinken':{w:'dringi',p:'drin-gi'},'lopen':{w:'waka',p:'wa-ka'},'houden':{w:'lobi',p:'lo-bi'}
+    'drinken':{w:'dringi',p:'drin-gi'},'lopen':{w:'waka',p:'wa-ka'},'houden':{w:'lobi',p:'lo-bi'},
+    // question words & function
+    'hoe':{w:'fa',p:'fa'},'wat':{w:'san',p:'san'},'wie':{w:'suma',p:'su-ma'},'waar':{w:'pe',p:'pe'},'waarom':{w:'fu san',p:'fu san'},
+    // animals
+    'vogel':{w:'fowru',p:'fow-ru'},'hond':{w:'dagu',p:'da-gu'},'kat':{w:'puspusi',p:'pus-pu-si'},'paard':{w:'asi',p:'a-si'},
+    'koe':{w:'kaw',p:'kaw'},'varken':{w:'agu',p:'a-gu'},'slang':{w:'sneki',p:'sne-ki'},'dier':{w:'meti',p:'me-ti'},
+    // food & drink
+    'brood':{w:'brede',p:'bre-de'},'rijst':{w:'aleisi',p:'a-lei-si'},'vlees':{w:'meti',p:'me-ti'},'ei':{w:'eksi',p:'ek-si'},
+    'zout':{w:'sowtu',p:'sow-tu'},'suiker':{w:'sukru',p:'su-kru'},'melk':{w:'merki',p:'mer-ki'},
+    // body
+    'voet':{w:'futu',p:'fu-tu'},'been':{w:'futu',p:'fu-tu'},'mond':{w:'mofo',p:'mo-fo'},'oor':{w:'yesi',p:'ye-si'},
+    'neus':{w:'noso',p:'no-so'},'tand':{w:'tifi',p:'ti-fi'},'haar':{w:'wiwiri',p:'wi-wi-ri'},'buik':{w:'bere',p:'be-re'},
+    'hart':{w:'ati',p:'a-ti'},'bloed':{w:'brudu',p:'bru-du'},'bot':{w:'bonyo',p:'bo-nyo'},'huid':{w:'buba',p:'bu-ba'},
+    // nature
+    'regen':{w:'alen',p:'a-len'},'wind':{w:'winti',p:'win-ti'},'aarde':{w:'gron',p:'gron'},'steen':{w:'ston',p:'ston'},
+    'zand':{w:'santi',p:'san-ti'},'zee':{w:'se',p:'se'},'bloem':{w:'bromki',p:'brom-ki'},'lucht':{w:'loktu',p:'lok-tu'},
+    // house & objects
+    'tafel':{w:'tafra',p:'ta-fra'},'stoel':{w:'sturu',p:'stu-ru'},'bed':{w:'bedi',p:'be-di'},'kleren':{w:'krosi',p:'kro-si'},
+    'schoen':{w:'susu',p:'su-su'},
+    // time & numbers
+    'week':{w:'wiki',p:'wi-ki'},'uur':{w:'yuru',p:'yu-ru'},'zes':{w:'siksi',p:'sik-si'},'zeven':{w:'seibi',p:'sei-bi'},
+    'acht':{w:'aiti',p:'ai-ti'},'negen':{w:'neigi',p:'nei-gi'},'honderd':{w:'hondro',p:'hon-dro'},
+    // more verbs
+    'sterven':{w:'dede',p:'de-de'},'dood':{w:'dede',p:'de-de'},'rennen':{w:'lon',p:'lon'},'zwemmen':{w:'swen',p:'swen'},
+    'vliegen':{w:'frei',p:'frei'},'zingen':{w:'singi',p:'sin-gi'},'dansen':{w:'dansi',p:'dan-si'},'wassen':{w:'wasi',p:'wa-si'},
+    'koken':{w:'bori',p:'bo-ri'},'openen':{w:'opo',p:'o-po'},'sluiten':{w:'tapu',p:'ta-pu'},'vinden':{w:'feni',p:'fe-ni'},
+    'verliezen':{w:'lasi',p:'la-si'},'tellen':{w:'teri',p:'te-ri'},'betalen':{w:'pai',p:'pai'},'verkopen':{w:'seri',p:'se-ri'},
+    'bouwen':{w:'bow',p:'bow'},'breken':{w:'broko',p:'bro-ko'},'trekken':{w:'hari',p:'ha-ri'},'duwen':{w:'pusu',p:'pu-su'},
+    'gooien':{w:'trowe',p:'tro-we'},'vangen':{w:'kisi',p:'ki-si'},'stoppen':{w:'tapu',p:'ta-pu'}
   },
   // Sarnami Hindoestani (Bhojpuri-based). Conservative set — only well-attested everyday words.
   sarnami: {
