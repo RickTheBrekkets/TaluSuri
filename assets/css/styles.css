@@ -239,6 +239,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 .flash-nl.show{opacity:1;}
 .flash-audio-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;min-height:30px;}
 .speak-btn{display:inline-flex;align-items:center;gap:5px;background:var(--green-l);border:1px solid var(--border);color:var(--green);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+/* Gold speaker = a community/official recording plays instead of the computer voice */
+.dict-btn.speak-official{color:var(--gold);background:var(--gold-l);}
+.speak-btn.speak-official{color:var(--gold);background:var(--gold-l);border-color:var(--gold);}
 .speak-btn:hover{background:var(--green);color:#fff;}
 .contrib-btn{display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);border:1px solid var(--border);color:var(--blue);border-radius:99px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .contrib-btn:hover{background:var(--blue);color:#fff;}

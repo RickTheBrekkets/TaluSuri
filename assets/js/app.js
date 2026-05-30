@@ -23,6 +23,14 @@ function speak(text,langCode){
   const u=new SpeechSynthesisUtterance(text);u.lang=langCode||'nl-NL';u.rate=0.85;
   window.speechSynthesis.speak(u);
 }
+// True when a community/official recording exists for this word — speak() plays it
+// instead of the computer voice, and the speaker icon is shown in gold.
+function hasOfficialAudio(text){
+  const k=(typeof wordKey==='function')?wordKey(S.lang.id,text):null;
+  return !!(k&&window.OFFICIAL_AUDIO&&window.OFFICIAL_AUDIO[k]);
+}
+// Re-render the word UIs so gold speakers appear once official audio has loaded (called from community.js).
+function refreshAudioUI(){try{if(typeof filterDict==='function')filterDict();if(typeof renderFlash==='function')renderFlash();if(typeof filterWB==='function')filterWB();}catch(e){}}
 
 // ═══ FLAGS / FEEDBACK ═══
 // Read the saved word-flag/feedback list from localStorage.
@@ -223,7 +231,7 @@ function renderDict(words){
   words.forEach((w,i)=>{
     const id='dw'+i;
     const row=document.createElement('div');row.className='dict-row';
-    row.innerHTML=`<span class="dict-nl">${w.nl}</span><div class="dict-actions"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="Uitspreken"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="openRecordings(S.lang.id,'${w.w.replace(/'/g,"\\'")}')" title="Uitspraken & opnemen"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')" title="Flag"><span class="emo">🚩</span></button></div><div class="dict-word-block"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></div>`;
+    row.innerHTML=`<span class="dict-nl">${w.nl}</span><div class="dict-actions"><button class="dict-btn ${hasOfficialAudio(w.w)?'speak-official':''}" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="${hasOfficialAudio(w.w)?'Community-opname':'Uitspreken'}"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="openRecordings(S.lang.id,'${w.w.replace(/'/g,"\\'")}')" title="Uitspraken & opnemen"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')" title="Flag"><span class="emo">🚩</span></button></div><div class="dict-word-block"><span class="dict-sr">${w.w}</span><span class="dict-pron">${w.p}</span></div>`;
     list.appendChild(row);
     const fw=document.createElement('div');
     fw.innerHTML=`<div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet aan "${w.w}"?</div><textarea placeholder="Bijv: verkeerde vertaling, andere uitspraak..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
@@ -257,7 +265,7 @@ function renderFlash(){
   S.flashRevealed=false;
   document.getElementById('fl-score').textContent=S.flashTot>0?S.flashOk+' van '+S.flashTot+' correct':'';
   const ar=document.getElementById('fl-audio-row');ar.innerHTML='';
-  if(audioMode==='tts')ar.innerHTML=`<button class="speak-btn" onclick="speak('${fc.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> Hoor uitspraak</button>`;
+  if(audioMode==='tts')ar.innerHTML=`<button class="speak-btn ${hasOfficialAudio(fc.w)?'speak-official':''}" onclick="speak('${fc.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')">${hasOfficialAudio(fc.w)?'<span class="emo">🔊</span> Community-opname':'<span class="emo">🔊</span> Hoor uitspraak'}</button>`;
   else if(audioMode==='guide')ar.innerHTML=`<span style="font-size:13px;color:var(--muted);">📖 Spreek uit: <strong style="color:var(--ink);">${fc.p}</strong></span>`;
   else ar.innerHTML=`<button class="contrib-btn" onclick="openRecordings(S.lang.id,'${fc.w.replace(/'/g,"\\'")}')"><span class="emo">🎙️</span> Opnames & opnemen</button>`;
 }
@@ -332,7 +340,7 @@ function renderLangGrid(){
 function renderWB(words){
   const grid=document.getElementById('wb-grid');grid.innerHTML='';
   words.forEach((w,i)=>{const id='wb'+i;const card=document.createElement('div');card.className='card';card.style.padding='14px';
-    card.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--green);">${w.w}</div><div style="display:flex;gap:3px;"><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="openRecordings(S.lang.id,'${w.w.replace(/'/g,"\\'")}')" title="Uitspraken & opnemen"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')"><span class="emo">🚩</span></button></div></div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div><div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
+    card.innerHTML=`<div style="font-size:11px;color:var(--muted);margin-bottom:3px;">${w.nl}</div><div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:17px;color:var(--green);">${w.w}</div><div style="display:flex;gap:3px;"><button class="dict-btn ${hasOfficialAudio(w.w)?'speak-official':''}" onclick="speak('${w.w.replace(/'/g,"\\'")}','${S.lang.speechLang}')" title="${hasOfficialAudio(w.w)?'Community-opname':'Uitspreken'}"><span class="emo">🔊</span></button><button class="dict-btn mic-contrib" onclick="openRecordings(S.lang.id,'${w.w.replace(/'/g,"\\'")}')" title="Uitspraken & opnemen"><span class="emo">🎙️</span></button><button class="dict-btn flag" onclick="toggleFlag('${id}')"><span class="emo">🚩</span></button></div></div><div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:2px;">/${w.p}/</div><div class="flag-form" id="flag-form-${id}"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitFlag('${id}','${w.w.replace(/'/g,"\\'")}','${w.nl.replace(/'/g,"\\'")}','${S.lang.name}')">Indienen</button><button class="flag-cancel" onclick="toggleFlag('${id}')">Annuleren</button></div></div><div class="flag-thanks" id="flag-thanks-${id}">✓ Bedankt!</div>`;
     grid.appendChild(card);});
 }
 // Re-render the Woordenboek filtered by its search box.
@@ -369,7 +377,7 @@ async function renderLeaderboard(){
   if(typeof rollPeriods==='function')rollPeriods();
   const {wk,mo}=lbPeriodKeys();
   // Effective period XP ignores counters whose stored period key is stale (an old week/month).
-  const localMe=()=>({name:'Jij',xp:S.xp,wxp:S.weekKey===wk?S.weekXP:0,mxp:S.monthKey===mo?S.monthXP:0,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true});
+  const localMe=()=>({name:'Jij',xp:S.xp,wxp:S.weekKey===wk?S.weekXP:0,mxp:S.monthKey===mo?S.monthXP:0,langs:LANGS.filter(l=>S.seenLangs.includes(l.id)).map(l=>l.name).join(', ')||S.lang.name,avatar:'JIJ',me:true,guest:true});
   let all;
   const rows=window.fetchLeaderboard?await window.fetchLeaderboard():null;
   if(rows){
@@ -385,7 +393,10 @@ async function renderLeaderboard(){
   list.innerHTML=all.map((p,i)=>{
     const sc=scoreOf(p);
     const rank=i<3?(i===0?'🥇':i===1?'🥈':'🥉'):'#'+(i+1);
-    return `<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${rank}</div><div class="lb-avatar">${p.avatar_url?`<img src="${p.avatar_url}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`:p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${p.langs}</div></div><div class="lb-xp">${sc.toLocaleString('nl-NL')} XP</div></div>`;
+    const detail=p.guest
+      ? `<a href="javascript:void(0)" onclick="authOpenModal()" style="color:var(--green);font-weight:500;">🔒 Log in om je voortgang op te slaan</a>`
+      : (p.langs||'');
+    return `<div class="lb-row ${p.me?'me':''}"><div class="lb-rank ${i<3?'top':''}">${rank}</div><div class="lb-avatar">${p.avatar_url?`<img src="${p.avatar_url}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`:p.avatar}</div><div class="lb-info"><div class="lb-name">${p.name}${p.me?' (jij)':''}</div><div class="lb-detail">${detail}</div></div><div class="lb-xp">${sc.toLocaleString('nl-NL')} XP</div></div>`;
   }).join('');
   // Earn a placement badge for finishing top-3 on the weekly/monthly boards.
   if(tab==='week'||tab==='month'){

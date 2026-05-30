@@ -15,6 +15,7 @@ async function loadOfficialAudio(){
   if(!SB) return;
   const {data} = await SB.from('recordings').select('word_key,audio_path').eq('is_official', true);
   (data||[]).forEach(r=>{ window.OFFICIAL_AUDIO[r.word_key] = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl; });
+  if(typeof refreshAudioUI==='function') refreshAudioUI();   // show gold speakers now that recordings are known
 }
 // Play a stored audio URL (used by the recordings list and the speak() override).
 let _recAudio=null;
