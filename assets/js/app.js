@@ -31,6 +31,9 @@ function hasOfficialAudio(text){
 }
 // Re-render the word UIs so gold speakers appear once official audio has loaded (called from community.js).
 function refreshAudioUI(){try{if(typeof filterDict==='function')filterDict();if(typeof renderFlash==='function')renderFlash();if(typeof filterWB==='function')filterWB();}catch(e){}}
+// A language is "low-resource" (under construction) when it has fewer than 100 words; the
+// spoedcursus is hidden for these and a call for native speakers/sources is shown.
+function isLowResource(l){l=l||S.lang;return ((l.words&&l.words.length)||0)<100;}
 
 // ═══ FLAGS / FEEDBACK ═══
 // Read the saved word-flag/feedback list from localStorage.
@@ -172,6 +175,11 @@ function setLang(l){
   document.getElementById('hero-title').textContent=l.full;
   document.getElementById('hero-sub').textContent=l.sub;
   document.getElementById('hero-deco').textContent=l.deco;
+  const hh=document.getElementById('hero-help');
+  if(hh){
+    if(isLowResource(l)){hh.style.display='block';hh.innerHTML=`🔎 We bouwen <strong>${l.name}</strong> nog uit. We zoeken native speakers en bronnen om deze taal te verrijken — kun je helpen? <a href="javascript:void(0)" onclick="goToContact()">Neem contact op</a>.`;}
+    else hh.style.display='none';
+  }
   const w=l.words[new Date().getDay()%l.words.length];
   document.getElementById('wod-w').textContent=w.w;
   document.getElementById('wod-nl').textContent=w.nl;
@@ -880,7 +888,7 @@ function buildCurriculum(){
     steps.push({phase:ph.phase});
     themes.forEach(c=>{const m=THEME_META[c];steps.push({type:'theme',cat:c,title:m.label,emoji:m.emoji,desc:`Leer woorden over ${m.label.toLowerCase()}`});});
     if(ph.grammar)steps.push({type:'grammar',title:ph.grammar.title,desc:ph.grammar.desc,emoji:ph.grammar.emoji});
-    if(ph.crash)steps.push({type:'crash',title:'Spoedcursus: kernwoorden',desc:'De meest gebruikte woorden (80/20-principe)',emoji:'⚡'});
+    if(ph.crash&&!isLowResource(S.lang))steps.push({type:'crash',title:'Spoedcursus: kernwoorden',desc:'De meest gebruikte woorden (80/20-principe)',emoji:'⚡'});
     if(ph.exam)steps.push({type:'exam',title:'Eindexamen',desc:'Test alles — haal 80% om te slagen',emoji:'🎓'});
   });
   return steps;
@@ -912,6 +920,14 @@ function renderCurriculum(){
 // showing how many words are available (translated) per band, most-frequent first.
 function renderCrash(){
   const track=document.getElementById('crash-track');if(!track)return;
+  // Low-resource languages don't have enough words for a frequency course yet.
+  if(isLowResource(S.lang)){
+    const cov=document.getElementById('crash-coverage');if(cov)cov.textContent='—';
+    const kn=document.getElementById('crash-known');if(kn)kn.textContent='0';
+    track.innerHTML=`<div class="crash-track-head"><div class="crash-track-title">⚡ ${S.lang.name}</div></div>`+
+      `<div style="font-size:13px;color:var(--muted);line-height:1.6;">De spoedcursus is voor ${S.lang.name} nog niet beschikbaar — we hebben meer woorden nodig. We zoeken native speakers en bronnen om deze taal te verrijken. Kun je helpen? <a href="javascript:void(0)" onclick="goToContact()" style="color:var(--green);font-weight:500;">Neem contact op</a>.</div>`;
+    return;
+  }
   const coverage=(typeof langCoverage==='function')?langCoverage(S.lang.id):S.lang.words.length;
   const practiced=(S.crashProgress&&S.crashProgress[S.lang.id])||0;
   document.getElementById('crash-known').textContent=practiced;

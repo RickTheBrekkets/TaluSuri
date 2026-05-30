@@ -140,6 +140,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-
 /* HERO */
 .hero-title{font-family:'Fraunces',serif;font-weight:600;font-size:32px;line-height:1.2;letter-spacing:-0.2px;margin-bottom:8px;}
 .hero-sub{font-size:13px;opacity:.8;margin-bottom:18px;line-height:1.5;}
+.hero-help{font-size:12px;line-height:1.5;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:9px 11px;margin-bottom:16px;}
+.hero-help a{color:#fff;font-weight:600;text-decoration:underline;cursor:pointer;}
 .hero-btns{display:flex;gap:8px;flex-wrap:wrap;}
 .hero-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--green);border:none;border-radius:99px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:transform .15s;}
 .hero-btn:hover{transform:scale(1.03);}
