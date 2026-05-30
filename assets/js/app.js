@@ -385,7 +385,7 @@ function renderAllLessons(){
   });
   // exam card
   const exam=document.createElement('div');exam.className='card clickable exam-card';
-  exam.innerHTML=`<div style="font-size:28px;margin-bottom:8px;">🎓</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;color:#fff;">Examen</div><div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:12px;">10 vragen · alle thema's</div><div style="font-size:11px;color:rgba(255,255,255,.6);">Haal 80% voor je certificaat 🏅</div>`;
+  exam.innerHTML=`<div style="font-size:28px;margin-bottom:8px;">🎓</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;color:#fff;">Examen</div><div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:12px;">10 vragen · alle thema's</div><div style="font-size:11px;color:rgba(255,255,255,.6);">Haal 80% om te slagen 🏅</div>`;
   exam.onclick=()=>startExam();grid.appendChild(exam);
 }
 // Render the full alphabetical grid of languages on the Talen view.
@@ -571,7 +571,7 @@ function startTheme(cat){
   const words=S.lang.words.filter(w=>w.cat===cat);
   if(words.length<4)return;
   const n=Math.min(8,words.length);
-  S.ex={type:'theme',title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,n),q:genLessonQuestions(words,n),cur:0,score:0,answered:false};
+  S.ex={type:'theme',cat,title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,n),q:genLessonQuestions(words,n),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
 // Close the exercise modal and stop any speech.
@@ -594,7 +594,7 @@ function renderExercise(){
   }else if(q.kind==='type'){
     body+=`<input class="q-input" id="q-input" placeholder="Typ hier..." autocomplete="off"><div class="q-hint-row" style="margin:-8px 0 14px;"><button type="button" class="q-hint-btn" id="q-hint-btn" onclick="showHint()">💡 Hint tonen</button><span class="q-hint" id="q-hint" style="display:none;font-size:11px;color:var(--muted);">💡 ${q.hint}</span></div><button class="q-check" id="q-check" onclick="checkType()">Controleer</button>`;
   }
-  body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button><button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>`;
+  body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button>${q.kind==='listen'?'<button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>':''}`;
   document.getElementById('modal-body').innerHTML=body;
   if(q.kind==='mc'||q.kind==='listen'){
     const opts=document.getElementById('q-opts');
@@ -654,7 +654,7 @@ function submitQFlag(){
 function nextEx(){S.ex.cur++;renderExercise();}
 // Skip the current question (stopping speech) and advance.
 function skipQ(){window.speechSynthesis&&window.speechSynthesis.cancel();S.ex.cur++;renderExercise();}
-// Render the end screen: score, XP, level-up/certificate and a culture fact.
+// Render the end screen: score, XP, level-up and a culture fact.
 function renderComplete(){
   const ex=S.ex;const pct=Math.round((ex.score/ex.q.length)*100);
   let leveledUp=false;let passedExam=false;
@@ -667,13 +667,16 @@ function renderComplete(){
   }else if(ex.type==='exam'){
     leveledUp=addXP(Math.round(ex.xp*pct/100));
     if(pct>=80){passedExam=true;unlockBadge('exam_pass');}
-  }else{ // practice: theme / crash — flat XP, streak, no exam certificate
+  }else{ // practice: theme / crash — flat XP, streak
     leveledUp=addXP(ex.xp);
     if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
     unlockBadge('first_lesson');
     if(pct===100)unlockBadge('perfect');
+    if(ex.type==='theme'&&ex.cat){const k='t-'+S.lang.id+'-'+ex.cat;S.themeProgress[k]=Math.max(S.themeProgress[k]||0,pct);}
   }
-  checkBadges();renderProgress();renderHomeLessons();renderAllLessons();saveState();
+  checkBadges();renderProgress();renderHomeLessons();renderAllLessons();
+  if(typeof renderCurriculum==='function')renderCurriculum();
+  saveState();
   const newBadges=BADGES.filter(b=>S.badges.includes(b.id));
   let badgeHtml='';
   // detect freshly relevant badge (simple: show first lesson / exam badge)
@@ -681,9 +684,9 @@ function renderComplete(){
   const title=ex.type==='exam'?(passedExam?'Geslaagd! 🎓':'Examen voltooid'):(pct>=80?'Schitterend!':pct>=60?'Goed gedaan!':'Blijf oefenen!');
   let body=`<div class="complete"><div class="complete-emoji">${rewardEmoji}</div><div class="complete-title">${title}</div><div class="complete-sub">${ex.score} van ${ex.q.length} goed — ${pct}%</div><div class="complete-rewards"><div class="complete-reward"><span class="emo">⚡</span> +${ex.type==='exam'?Math.round(ex.xp*pct/100):ex.xp} XP</div>`;
   if(leveledUp)body+=`<div class="complete-reward" style="background:var(--blue-l);color:var(--blue);"><span class="emo">⬆️</span> Level ${getLevel(S.xp)}!</div>`;
-  if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><span class="emo">📜</span> Certificaat 🏅</div>`;
+  if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><span class="emo">🏅</span> Geslaagd!</div>`;
   body+=`</div>`;
-  if(passedExam)body+=`<div class="complete-badge-unlock show"><div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:3px;">🏅 Certificaat behaald!</div><div style="font-size:12px;color:var(--muted);">Je beheerst de basis van ${S.lang.name}. Geweldig werk!</div></div>`;
+  if(passedExam)body+=`<div class="complete-badge-unlock show"><div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:3px;">🏅 Examen gehaald!</div><div style="font-size:12px;color:var(--muted);">Je beheerst de basis van ${S.lang.name}. Geweldig werk!</div></div>`;
   body+=`<div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div><button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button></div>`;
   document.getElementById('modal-body').innerHTML=body;
 }
@@ -815,22 +818,31 @@ function renderDiscover(){
 
 
 // ═══ CURRICULUM (logisch leerpad) ═══
-// Assemble the guided learning path (phases of lessons, grammar, crash course, exam).
+// Pedagogically ordered theme groups: each phase lists category keys (see THEME_META),
+// from most foundational to advanced. Only themes the language actually has words for
+// appear, and each step practises exactly that theme's words (via startTheme).
+const CURRICULUM_PHASES=[
+  {phase:'Fase 1 — Eerste woorden', cats:['social','family','number'],
+   grammar:{title:'Voornaamwoorden & basiszinnen',desc:'Leer ik/jij/hij en bouw je eerste zin',emoji:'🔤'}},
+  {phase:'Fase 2 — Dagelijks leven', cats:['food','drink','body','house','color','time'], crash:true},
+  {phase:'Fase 3 — De wereld om je heen', cats:['person','nature','animal','weather','place','clothing','travel','direction'],
+   grammar:{title:'Vragen & ontkenning',desc:'Stel vragen en zeg "nee"',emoji:'❓'}},
+  {phase:'Fase 4 — Taal & uitdrukking', cats:['verb','adjective','question','emotion','work','object'],
+   grammar:{title:'Tijden & meervoud',desc:'Verleden tijd en meervoudsvormen',emoji:'⏳'}, exam:true}
+];
+// Assemble the guided learning path for the active language from the phases above.
 function buildCurriculum(){
-  // A logical sequence: phases combining vocab lessons + grammar + crash + exam
-  const L=S.lang;const steps=[];
-  steps.push({phase:'Fase 1 — Eerste kennismaking'});
-  steps.push({type:'lesson',idx:0,title:L.lessons[0]?.title||'Begroetingen',desc:'Begin met de basiswoorden',emoji:L.lessons[0]?.emoji||'👋'});
-  steps.push({type:'grammar',title:'Voornaamwoorden & basiszinnen',desc:'Leer ik/jij/hij en bouw je eerste zin',emoji:'🔤'});
-  if(L.lessons[1])steps.push({type:'lesson',idx:1,title:L.lessons[1].title,desc:'Breid je woordenschat uit',emoji:L.lessons[1].emoji});
-  steps.push({phase:'Fase 2 — Verdieping'});
-  steps.push({type:'crash',title:'Spoedcursus: kernwoorden',desc:'De meest gebruikte woorden (80/20-principe)',emoji:'⚡'});
-  steps.push({type:'grammar',title:'Vragen & ontkenning',desc:'Stel vragen en zeg "nee"',emoji:'❓'});
-  for(let i=2;i<Math.min(L.lessons.length,5);i++)steps.push({type:'lesson',idx:i,title:L.lessons[i].title,desc:'Themawoorden oefenen',emoji:L.lessons[i].emoji});
-  steps.push({phase:'Fase 3 — Vloeiend worden'});
-  for(let i=5;i<L.lessons.length;i++)steps.push({type:'lesson',idx:i,title:L.lessons[i].title,desc:'Gevorderde thema\'s',emoji:L.lessons[i].emoji});
-  steps.push({type:'grammar',title:'Tijden & meervoud',desc:'Verleden tijd en meervoudsvormen',emoji:'⏳'});
-  steps.push({type:'exam',title:'Eindexamen',desc:'Test alles — haal 80% voor je certificaat',emoji:'🎓'});
+  const steps=[];
+  const counts={}; S.lang.words.forEach(w=>{if(w.cat)counts[w.cat]=(counts[w.cat]||0)+1;});
+  CURRICULUM_PHASES.forEach(ph=>{
+    const themes=ph.cats.filter(c=>THEME_META[c]&&counts[c]>=4);
+    if(!themes.length && !ph.crash && !ph.exam) return; // nothing to show for this language
+    steps.push({phase:ph.phase});
+    themes.forEach(c=>{const m=THEME_META[c];steps.push({type:'theme',cat:c,title:m.label,emoji:m.emoji,desc:`Leer woorden over ${m.label.toLowerCase()}`});});
+    if(ph.grammar)steps.push({type:'grammar',title:ph.grammar.title,desc:ph.grammar.desc,emoji:ph.grammar.emoji});
+    if(ph.crash)steps.push({type:'crash',title:'Spoedcursus: kernwoorden',desc:'De meest gebruikte woorden (80/20-principe)',emoji:'⚡'});
+    if(ph.exam)steps.push({type:'exam',title:'Eindexamen',desc:'Test alles — haal 80% om te slagen',emoji:'🎓'});
+  });
   return steps;
 }
 // Render the curriculum path with done/active states.
@@ -842,14 +854,15 @@ function renderCurriculum(){
     if(s.phase){html+=`<div class="curr-phase">${s.phase}</div>`;return;}
     stepNum++;
     let done=false;
-    if(s.type==='lesson')done=(S.themeProgress[S.lang.id+'-'+s.idx]||0)>=100;
+    if(s.type==='theme')done=(S.themeProgress['t-'+S.lang.id+'-'+s.cat]||0)>=80;
     const cls=done?'done':(stepNum===1?'active':'');
     let action='';
-    if(s.type==='lesson')action=`onclick="startLesson(${s.idx})"`;
+    if(s.type==='theme')action=`onclick="startTheme('${s.cat}')"`;
     else if(s.type==='grammar')action=`onclick="showView('grammatica')"`;
     else if(s.type==='crash')action=`onclick="showView('crash')"`;
     else if(s.type==='exam')action=`onclick="startExam()"`;
-    html+=`<div class="curr-step ${cls}" ${action}><div class="curr-step-num">Stap ${stepNum} · ${s.type==='lesson'?'Woordenschat':s.type==='grammar'?'Grammatica':s.type==='crash'?'Spoedcursus':'Examen'}</div><div class="curr-step-title">${s.emoji} ${s.title} ${done?'<span class="emo">✅</span>':''}</div><div class="curr-step-desc">${s.desc}</div></div>`;
+    const kind=s.type==='theme'?'Thema':s.type==='grammar'?'Grammatica':s.type==='crash'?'Spoedcursus':'Examen';
+    html+=`<div class="curr-step ${cls}" ${action}><div class="curr-step-num">Stap ${stepNum} · ${kind}</div><div class="curr-step-title">${s.emoji} ${s.title} ${done?'<span class="emo">✅</span>':''}</div><div class="curr-step-desc">${s.desc}</div></div>`;
   });
   html+='</div>';el.innerHTML=html;
 }
