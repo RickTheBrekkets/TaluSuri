@@ -728,9 +728,63 @@ function finishOnboard(skip){
   document.getElementById('onboard').style.display='none';
   document.getElementById('mainApp').style.display='block';
   bootApp();
+  setTimeout(startTour,500); // guided spotlight tour once the app UI is rendered
 }
 
-
+// ═══ GUIDED TOUR (spotlight) ═══
+// A spotlight walkthrough shown right after onboarding: where the leerpad and
+// spoedcursus live, how to contribute pronunciations, and (mobile) add-to-homescreen.
+let tourStep=0, tourSteps=[];
+function isMobileDevice(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(('ontouchstart'in window)&&window.matchMedia('(max-width:760px)').matches);}
+function homescreenHint(){
+  const ua=navigator.userAgent;
+  if(/iPhone|iPad|iPod/i.test(ua))return 'Tik op het <b>deel-icoon</b> (vierkant met pijl omhoog) en kies <b>Zet op beginscherm</b>.';
+  return 'Open het browsermenu (<b>⋮</b>) en kies <b>App installeren</b> of <b>Toevoegen aan startscherm</b>.';
+}
+function buildTourSteps(){
+  const s=[
+    {sel:'.tab[data-cat="leren"]',emoji:'📚',title:'Je leerpad',text:'Onder <b>Leren</b> vind je je <b>leerpad</b> — een stap-voor-stap route door alle thema\'s, van begroetingen tot werkwoorden.'},
+    {sel:'.tab[data-cat="leren"]',emoji:'⚡',title:'Spoedcursus',text:'Ook onder <b>Leren</b>: de <b>spoedcursus</b> met de meest gebruikte woorden, gerangschikt op hoe vaak ze voorkomen.'},
+    {sel:'.tab[data-cat="oefenen"]',emoji:'🎙️',title:'Help met uitspraak',text:'In het <b>Woordenboek</b> (onder Oefenen) neem je bij elk woord je eigen uitspraak op. De community stemt erop — bij <b>5+ upvotes</b> kan een beheerder jouw opname tot <b>officiële uitspraak</b> maken die de computerstem vervangt.'}
+  ];
+  if(isMobileDevice())s.push({sel:null,emoji:'📲',title:'Zet op je beginscherm',text:'Wil je TaluSuri als app gebruiken? '+homescreenHint(),install:true});
+  return s;
+}
+function startTour(){
+  tourSteps=buildTourSteps();tourStep=0;
+  let ov=document.getElementById('tour-overlay');
+  if(!ov){ov=document.createElement('div');ov.id='tour-overlay';document.body.appendChild(ov);}
+  renderTourStep();
+}
+function renderTourStep(){
+  const ov=document.getElementById('tour-overlay');if(!ov)return;
+  const st=tourSteps[tourStep];if(!st){endTour();return;}
+  const tgt=st.sel?document.querySelector(st.sel):null;
+  const r=tgt?tgt.getBoundingClientRect():null;
+  const last=tourStep===tourSteps.length-1;
+  const spot=r?`<div class="tour-spot" style="top:${r.top-6}px;left:${r.left-6}px;width:${r.width+12}px;height:${r.height+12}px;"></div>`:`<div class="tour-dim"></div>`;
+  // place card above bottom-nav targets; centre it when there's no target
+  const cardPos=r?`bottom:${window.innerHeight-r.top+14}px;left:12px;right:12px;`:`top:50%;left:12px;right:12px;transform:translateY(-50%);`;
+  const installBtn=st.install&&window.deferredInstallPrompt?`<button class="tour-install" onclick="tourInstall()">📲 App installeren</button>`:'';
+  ov.innerHTML=`${spot}
+    <div class="tour-card" style="${cardPos}">
+      <div class="tour-card-emoji">${st.emoji}</div>
+      <div class="tour-card-title">${st.title}</div>
+      <div class="tour-card-text">${st.text}</div>
+      ${installBtn}
+      <div class="tour-dots">${tourSteps.map((_,i)=>`<span class="${i===tourStep?'on':''}"></span>`).join('')}</div>
+      <div class="tour-actions">
+        <button class="tour-skip" onclick="endTour()">Overslaan</button>
+        ${tourStep>0?`<button class="tour-back" onclick="tourNav(-1)">Terug</button>`:''}
+        <button class="tour-next" onclick="${last?'endTour()':'tourNav(1)'}">${last?'Klaar':'Volgende'}</button>
+      </div>
+    </div>`;
+}
+function tourNav(d){tourStep+=d;renderTourStep();}
+function tourInstall(){if(window.deferredInstallPrompt){window.deferredInstallPrompt.prompt();window.deferredInstallPrompt=null;}}
+function endTour(){const ov=document.getElementById('tour-overlay');if(ov)ov.remove();}
+// Capture the install prompt (Android/Chrome) so the tour can offer an install button.
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.deferredInstallPrompt=e;});
 
 // ═══ GRAMMAR LESSONS (per taal, met fallback) ═══
 // Grammar notes keyed by language id. Languages without an entry use GRAMMAR_GENERIC.

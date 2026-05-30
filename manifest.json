@@ -1,0 +1,14 @@
+{
+  "name": "TaluSuri — Talen van Suriname",
+  "short_name": "TaluSuri",
+  "description": "Leer de 9 talen van Suriname.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF9F3",
+  "theme_color": "#3A7A4E",
+  "icons": [
+    { "src": "assets/img/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
