@@ -266,6 +266,7 @@ function setLang(l){
   document.getElementById('cult-title').textContent=l.cultureTitle;
   document.getElementById('cult-text').textContent=l.culture;
   renderPhrases();renderHomeLessons();
+  if(typeof refreshCultureBanner==='function')refreshCultureBanner(); // re-pick banner facts (incl. this language's migration history)
   document.querySelectorAll('.lang-card').forEach(c=>c.classList.toggle('active',c.dataset.id===l.id));
   document.getElementById('les-view-title').textContent='Lessen: '+l.full;
   renderAllLessons();renderThemes();
@@ -887,32 +888,36 @@ function renderGrammar(){
 }
 
 // ═══ SURINAME CULTURE CONTENT ═══
-// Slides for the auto-rotating "Discover Suriname" banner on the home screen.
-// Each: {emoji, title, desc, src (citation label), url (source link)}.
-const CULTURE_FACTS=[
-{emoji:'🎭',title:'Een smeltkroes van culturen',desc:'Suriname is een van de meest diverse landen ter wereld: Hindoestanen, Creolen, Javanen, Marrons, Inheemsen, Chinezen en meer leven samen — elk met eigen taal, keuken en tradities.',src:'Wikipedia — Suriname',url:'https://nl.wikipedia.org/wiki/Suriname'},
-{emoji:'🎶',title:'Kaseko & Kawina',desc:'Kaseko is dé Surinaamse muziekstijl, ontstaan uit Afrikaanse ritmes en Europese instrumenten. Kawina-muziek met trommels begeleidt feesten en winti-rituelen.',src:'Wikipedia — Kaseko',url:'https://nl.wikipedia.org/wiki/Kaseko'},
-{emoji:'🍛',title:'De Surinaamse keuken',desc:'Van roti en pom tot moksi-alesi en bami: de keuken weerspiegelt alle bevolkingsgroepen. Eten verbindt de gemeenschappen aan tafel.',src:'Wikipedia — Surinaamse keuken',url:'https://nl.wikipedia.org/wiki/Surinaamse_keuken'},
-{emoji:'🎉',title:'Feesten het hele jaar door',desc:'Holi Phagwa (kleurenfeest), Keti Koti (afschaffing slavernij), Divali, Eid en Chinees Nieuwjaar — Suriname viert de feesten van al haar volken samen.',src:'Wikipedia — Keti Koti',url:'https://nl.wikipedia.org/wiki/Keti_Koti'},
-{emoji:'🌳',title:'Het groenste land ter aarde',desc:'Meer dan 90% van Suriname is bedekt met ongerept regenwoud. De Marron- en Inheemse gemeenschappen leven al eeuwen in harmonie met dit bos.',src:'UNESCO — Central Suriname Nature Reserve',url:'https://whc.unesco.org/en/list/1017'},
-{emoji:'🪘',title:'Winti & spiritualiteit',desc:'Winti is een Afro-Surinaanse religie waarin natuur, voorouders en geesten centraal staan. Het overleefde de slavernij en leeft voort in muziek en dans.',src:'Wikipedia — Winti',url:'https://nl.wikipedia.org/wiki/Winti'},
-{emoji:'🧵',title:'Pangi & tembe-kunst',desc:'Marrons staan bekend om hun kleurrijke pangi-doeken en houtsnijwerk (tembe), met geometrische patronen die boodschappen en identiteit dragen.',src:'Wikipedia — Marrons',url:'https://nl.wikipedia.org/wiki/Marrons'},
-{emoji:'🏵️',title:'Pagara & Owru Yari',desc:'Oudejaarsdag wordt gevierd met enorme pagara (vuurwerkkettingen) op straat — een Chinees-Surinaamse traditie die heel Paramaribo samenbrengt.',src:'UNESCO — Historisch Paramaribo',url:'https://whc.unesco.org/en/list/940'}
-];
-let cbIdx=0,cbTimer=null;
-// Render the current slide of the rotating 'Discover Suriname' banner.
+// "Ontdek Suriname" banner. CULTURE_FACTS (~100) and LANG_FACTS come from facts.js.
+// Shows a rotating WINDOW of 5 facts (5 dots); after cycling through the window it picks a
+// fresh random 5 from the pool, so over time all facts surface. On Sranan/Sarnami the
+// language's own migration history is woven into the window.
+let cbWindow=[], cbIdx=0, cbTimer=null;
+function cbShuffle(a){const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+function cbPickWindow(){
+  const base=(typeof CULTURE_FACTS!=='undefined')?CULTURE_FACTS:[];
+  const lf=(typeof LANG_FACTS!=='undefined'&&LANG_FACTS[S.lang.id])?LANG_FACTS[S.lang.id]:[];
+  let win=lf.length?cbShuffle(lf).slice(0,2):[];          // feature up to 2 migration-history facts
+  win=win.concat(cbShuffle(base).slice(0,Math.max(0,5-win.length)));
+  cbWindow=cbShuffle(win).slice(0,5);
+  cbIdx=0;
+}
+// Render the current slide of the rotating "Ontdek Suriname" banner.
 function renderCultureBanner(){
-  const c=CULTURE_FACTS[cbIdx];
-  const em=document.getElementById('cb-emoji'),ti=document.getElementById('cb-title'),de=document.getElementById('cb-desc'),nav=document.getElementById('cb-nav');
-  if(!ti)return;
-  em.textContent=c.emoji;ti.textContent=c.title;
-  de.innerHTML=c.desc+(c.url?` <a href="${c.url}" target="_blank" rel="noopener" class="cb-src">${c.src} ↗</a>`:'');
-  nav.innerHTML=CULTURE_FACTS.map((_,i)=>`<div class="cb-dot ${i===cbIdx?'active':''}" onclick="setCultureBanner(${i})"></div>`).join('');
+  const ti=document.getElementById('cb-title');if(!ti)return;
+  if(!cbWindow.length)cbPickWindow();
+  const c=cbWindow[cbIdx%cbWindow.length];if(!c)return;
+  document.getElementById('cb-emoji').textContent=c.emoji;
+  ti.textContent=c.title;
+  document.getElementById('cb-desc').textContent=c.desc;
+  document.getElementById('cb-nav').innerHTML=cbWindow.map((_,i)=>`<div class="cb-dot ${i===cbIdx?'active':''}" onclick="setCultureBanner(${i})"></div>`).join('');
 }
 // Jump the culture banner to a specific slide and reset the auto-rotate timer.
 function setCultureBanner(i){cbIdx=i;renderCultureBanner();resetCbTimer();}
-// (Re)start the 7-second auto-rotate timer for the culture banner.
-function resetCbTimer(){if(cbTimer)clearInterval(cbTimer);cbTimer=setInterval(()=>{cbIdx=(cbIdx+1)%CULTURE_FACTS.length;renderCultureBanner();},7000);}
+// Re-pick the window for the active language (called on language switch).
+function refreshCultureBanner(){cbPickWindow();renderCultureBanner();resetCbTimer();}
+// (Re)start the 7-second auto-rotate timer; reshuffle the window after a full cycle.
+function resetCbTimer(){if(cbTimer)clearInterval(cbTimer);cbTimer=setInterval(()=>{cbIdx++;if(cbIdx>=cbWindow.length)cbPickWindow();renderCultureBanner();},7000);}
 
 // Culture cards shown on the Talen view. Each: {emoji, name, desc}.
 const DISCOVER=[
