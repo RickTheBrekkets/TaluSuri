@@ -357,13 +357,30 @@ function nextFlash(ok){S.flashTot++;if(ok){S.flashOk++;addXP(2);}S.flashIdx++;re
 // ═══ PROGRESS, PHRASES, LESSONS ═══
 // Render the per-theme progress ring for each lesson.
 function renderProgress(){
-  const grid=document.getElementById('prog-grid');grid.innerHTML='';
-  S.lang.lessons.forEach((les,i)=>{
-    const key=S.lang.id+'-'+i;const pct=S.themeProgress[key]||0,c=2*Math.PI*14,off=c*(1-pct/100);
-    const el=document.createElement('div');el.className='prog-item';
-    el.innerHTML=`<svg viewBox="0 0 36 36" width="44" height="44"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="18" cy="18" r="14" fill="none" stroke="${pct>0?'var(--green)':'transparent'}" stroke-width="3" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 18 18)" stroke-linecap="round"/><text x="18" y="22" text-anchor="middle" font-size="13" >${les.emoji}</text></svg><div class="prog-lbl">${les.title}</div>`;
+  const grid=document.getElementById('prog-grid');if(!grid)return;grid.innerHTML='';
+  const counts={};S.lang.words.forEach(w=>{if(w.cat&&THEME_META[w.cat])counts[w.cat]=(counts[w.cat]||0)+1;});
+  const cats=Object.keys(counts).filter(c=>counts[c]>=4).sort((a,b)=>counts[b]-counts[a]);
+  const learned=new Set(S.learnedWords||[]);
+  cats.forEach(cat=>{
+    const total=counts[cat];
+    const done=S.lang.words.filter(w=>w.cat===cat&&learned.has(S.lang.id+'|'+w.w)).length;
+    const pct=Math.round(done/total*100),c=2*Math.PI*14,off=c*(1-pct/100),m=THEME_META[cat];
+    const el=document.createElement('div');el.className='prog-item';el.style.cursor='pointer';
+    el.onclick=()=>openThemeWords(cat);
+    el.innerHTML=`<svg viewBox="0 0 36 36" width="44" height="44"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" stroke-width="3"/><circle cx="18" cy="18" r="14" fill="none" stroke="${pct>0?'var(--green)':'transparent'}" stroke-width="3" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 18 18)" stroke-linecap="round"/><text x="18" y="22" text-anchor="middle" font-size="13">${m.emoji}</text></svg><div class="prog-lbl">${m.label}</div>`;
     grid.appendChild(el);
   });
+}
+// Theme detail: list the theme's words with a checkmark for each one already learned.
+function openThemeWords(cat){
+  const m=THEME_META[cat];if(!m)return;
+  const words=S.lang.words.filter(w=>w.cat===cat);
+  const learned=new Set(S.learnedWords||[]);
+  const done=words.filter(w=>learned.has(S.lang.id+'|'+w.w)).length;
+  let body=`<div style="text-align:center;margin-bottom:14px;"><div style="font-size:28px;">${m.emoji}</div><div style="font-family:'Fraunces',serif;font-weight:600;font-size:19px;">${m.label}</div><div style="font-size:12px;color:var(--muted);">${done}/${words.length} woorden geleerd</div></div>`;
+  body+='<div class="tw-list">'+words.map(w=>{const ok=learned.has(S.lang.id+'|'+w.w);return `<div class="tw-row"><span class="tw-check ${ok?'on':''}">${ok?'✓':''}</span><span class="tw-nl">${w.nl}</span><span class="tw-w">${w.w}</span></div>`;}).join('')+'</div>';
+  body+=`<button class="complete-btn" onclick="closeModal();startTheme('${cat}')">Oefen dit thema</button>`;
+  document.getElementById('modal-body').innerHTML=body;document.getElementById('modal').classList.add('open');
 }
 // Render the handy-phrases list for the active language.
 function renderPhrases(){
@@ -571,13 +588,47 @@ function renderThemes(){
     ? cats.map(c=>{const m=THEME_META[c];return `<button class="theme-chip" onclick="startTheme('${c}')"><span class="theme-chip-emoji">${m.emoji}</span><span class="theme-chip-label">${m.label}</span><span class="theme-chip-count">${counts[c]}</span></button>`;}).join('')
     : '<div style="font-size:12px;color:var(--muted);">Nog te weinig woorden voor thema-oefeningen in deze taal.</div>';
 }
-// Start a practice exercise limited to one theme's words.
+// Theme-related example sentences, by language then category. Only the well-documented
+// languages (Sranan Tongo, Sarnami) have curated sentences using their attested grammar;
+// other languages fall back to their verified general phrases (see themeSentences).
+const SENTENCES={
+  sranan:{
+    social:[{nl:'Hallo, hoe gaat het?',w:'Odi, fa yu de?',p:'o-di, fa yu de'}],
+    family:[{nl:'Ik heb een broer.',w:'Mi abi wan brada.',p:'mi a-bi wan bra-da'},{nl:'Mijn moeder is thuis.',w:'Mi mama de na oso.',p:'mi ma-ma de na o-so'}],
+    number:[{nl:'Ik heb twee kinderen.',w:'Mi abi tu pikin.',p:'mi a-bi tu pi-kin'}],
+    food:[{nl:'Ik eet brood.',w:'Mi e nyan brede.',p:'mi e nyan bre-de'},{nl:'Het eten is lekker.',w:'A nyanyan switi.',p:'a nya-nyan swi-ti'}],
+    drink:[{nl:'Ik drink water.',w:'Mi e dringi watra.',p:'mi e drin-gi wat-ra'}],
+    body:[{nl:'Mijn hoofd doet pijn.',w:'Mi ede e hati.',p:'mi e-de e ha-ti'}],
+    house:[{nl:'Ik ga naar huis.',w:'Mi e go na oso.',p:'mi e go na o-so'}],
+    color:[{nl:'Het huis is rood.',w:'A oso redi.',p:'a o-so re-di'}],
+    time:[{nl:'Vandaag is een mooie dag.',w:'Tide na wan moi dei.',p:'ti-de na wan moi dei'}],
+    animal:[{nl:'Ik heb een hond.',w:'Mi abi wan dagu.',p:'mi a-bi wan da-gu'}],
+    nature:[{nl:'De rivier is groot.',w:'A liba bigi.',p:'a li-ba bi-gi'}]
+  },
+  sarnami:{
+    social:[{nl:'Hallo, hoe gaat het?',w:'Namaste, kaise hai?',p:'na-mas-te, kai-se hai'}],
+    family:[{nl:'Mijn moeder is thuis.',w:'Hamaar maai ghar mê hai.',p:'ha-maar maai ghar me hai'}],
+    food:[{nl:'Ik eet rijst.',w:'Ham bhaat khaaila.',p:'ham bhaat khaa-i-la'}],
+    drink:[{nl:'Ik drink water.',w:'Ham paanie piela.',p:'ham paa-nie pie-la'}],
+    number:[{nl:'Ik heb twee kinderen.',w:'Hamaar doei larka hai.',p:'ha-maar doei lar-ka hai'}]
+  }
+};
+// Example sentences for a theme: curated ones if available, else a verified general phrase.
+function themeSentences(langId,cat){
+  const byLang=SENTENCES[langId];
+  if(byLang&&byLang[cat])return byLang[cat];
+  return (S.lang.phrases||[]).slice(0,1); // fallback: a verified handy phrase
+}
+// Start a practice exercise limited to one theme's words, ending with example sentence(s).
 function startTheme(cat){
   const m=THEME_META[cat];if(!m)return;
   const words=S.lang.words.filter(w=>w.cat===cat);
   if(words.length<4)return;
   const n=Math.min(8,words.length);
-  S.ex={type:'theme',cat,title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,n),q:genLessonQuestions(words,n),cur:0,score:0,answered:false};
+  const sents=themeSentences(S.lang.id,cat).slice(0,2);
+  const sentQ=sents.map(s=>({kind:'type',q:`Typ de vertaling van de zin: "${s.nl}"`,c:s.w,hint:s.p,speak:s.w}));
+  const q=genLessonQuestions(words,n).concat(sentQ);
+  S.ex={type:'theme',cat,title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,q.length),q,cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
 // Close the exercise modal and stop any speech.
@@ -618,7 +669,10 @@ function showHint(){
 function afterAnswer(correct){
   S.ex.answered=true;
   const fb=document.getElementById('q-fb');
-  if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;}
+  if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;
+    const tw=S.ex.q[S.ex.cur].speak;   // mark the practised word as learned
+    if(tw){const key=S.lang.id+'|'+tw;if(!S.learnedWords.includes(key))S.learnedWords.push(key);}
+  }
   else{fb.className='q-fb bad';fb.textContent='Helaas, fout.';
     // record mistake — find the target word for this question
     const q=S.ex.q[S.ex.cur];
