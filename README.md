@@ -2,8 +2,8 @@
 
 A browser-based app for learning the **9 languages of Suriname** and bringing its
 communities closer together through language. Duolingo-style lessons, flashcards,
-a dictionary, grammar notes, a frequency-based crash course, gamification (XP, levels,
-streaks, badges) and a camera lens. The core app is a single static site that runs
+a dictionary, grammar notes, a frequency-based crash course and gamification (XP, levels,
+streaks, badges). The core app is a single static site that runs
 with **no backend**; an optional **Supabase** layer adds user accounts, a real
 leaderboard, and community-contributed pronunciations.
 
@@ -31,7 +31,6 @@ Arawak (Lokono) · Kari'na · Hakka · Matawai
 - **Grammar** notes per language (with a generic fallback)
 - **Crash course** — core vocabulary grouped into frequency tiers (80/20 principle)
 - **Curriculum** — a guided learning path combining vocab, grammar and exams
-- **Camera lens** — photograph an object and see its name in all 9 languages
 - **Gamification** — XP, levels, daily streaks, achievement badges, a leaderboard
 - **My mistakes** — wrong answers are collected for focused review
 - **Text-to-speech** pronunciation via the browser Speech Synthesis API
@@ -104,9 +103,8 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-> Open it through a server (not `file://`) so the camera lens, recording and form
-> `fetch` behave correctly. The camera lens and in-browser recording need `https://`
-> or `localhost` (both are secure contexts).
+> Open it through a server (not `file://`) so recording and form `fetch` behave
+> correctly. In-browser recording needs `https://` or `localhost` (secure contexts).
 
 ## Backend setup (Supabase — optional)
 

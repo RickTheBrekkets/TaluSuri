@@ -34,95 +34,6 @@ function clearFeedback(){if(confirm('Alle feedback wissen?')){localStorage.remov
 // Refresh the feedback count badge and the Ontdek nav dot.
 function updateFeedbackBadge(){const n=getFlags().length;const b=document.getElementById('more-feedback-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}const c=document.getElementById('feedback-count');if(c)c.textContent='('+n+')';const dot=document.getElementById('dot-ontdek');if(dot)dot.style.display=n>0?'block':'none';}
 
-// ═══ CAMERA LENS ═══
-// Concrete objects with emoji, matched to vocabulary across languages by Dutch keyword.
-const LENS_OBJECTS=[
-{emoji:'💧',nl:'water',keys:['water']},
-{emoji:'🏠',nl:'huis',keys:['huis']},
-{emoji:'🌳',nl:'boom',keys:['boom']},
-{emoji:'🔥',nl:'vuur',keys:['vuur']},
-{emoji:'🐟',nl:'vis',keys:['vis']},
-{emoji:'☀️',nl:'zon',keys:['zon']},
-{emoji:'🌙',nl:'maan',keys:['maan']},
-{emoji:'🍚',nl:'rijst',keys:['rijst']},
-{emoji:'🌊',nl:'rivier',keys:['rivier']},
-{emoji:'👤',nl:'kind',keys:['kind']},
-{emoji:'👩',nl:'moeder',keys:['moeder']},
-{emoji:'👨',nl:'vader',keys:['vader']},
-{emoji:'🌍',nl:'aarde',keys:['aarde']},
-{emoji:'🍴',nl:'eten',keys:['eten']},
-{emoji:'🙏',nl:'dank je',keys:['dank je','dank']}
-];
-let lensStream=null;
-// Show one camera-lens phase (start/camera/result/translations) and hide the rest.
-function setLensPhase(phase){
-  ['lens-start','lens-camera','lens-result','lens-translations'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.classList.toggle('hidden',id!=='lens-'+phase);
-  });
-}
-// Request the rear camera and start the live preview; fall back to manual pick on failure.
-async function startLens(){
-  try{
-    lensStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    const v=document.getElementById('lens-video');v.srcObject=lensStream;
-    setLensPhase('camera');
-  }catch(e){
-    alert('Kon de camera niet openen. Geef toestemming voor cameratoegang in je browser, of probeer het op een telefoon. Je kunt ook zonder camera een object kiezen.');
-    // fallback: skip straight to object picker
-    document.getElementById('lens-photo').style.display='none';
-    setLensPhase('result');renderLensObjects();
-  }
-}
-// Stop the camera stream and return to the lens start screen.
-function stopLens(){
-  if(lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
-  setLensPhase('start');
-}
-// Capture the current video frame to a photo, stop the camera, then show the object picker.
-function captureLens(){
-  const v=document.getElementById('lens-video'),c=document.getElementById('lens-canvas');
-  if(v.videoWidth){
-    c.width=v.videoWidth;c.height=v.videoHeight;
-    c.getContext('2d').drawImage(v,0,0);
-    const img=document.getElementById('lens-photo');
-    img.src=c.toDataURL('image/jpeg',0.85);img.style.display='block';
-  }
-  if(lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
-  document.getElementById('lens-search').value='';
-  setLensPhase('result');renderLensObjects();
-}
-// Render the object-picker grid, filtered by the search box.
-function renderLensObjects(){
-  const q=(document.getElementById('lens-search').value||'').toLowerCase().trim();
-  const grid=document.getElementById('lens-objects');if(!grid)return;
-  const list=q?LENS_OBJECTS.filter(o=>o.nl.includes(q)):LENS_OBJECTS;
-  if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:16px;">Geen object gevonden. Probeer een ander woord.</div>';return;}
-  grid.innerHTML=list.map((o,i)=>`<div class="lens-obj" onclick="showLensTranslations(${LENS_OBJECTS.indexOf(o)})"><div class="lens-obj-emoji">${o.emoji}</div><div class="lens-obj-name">${o.nl}</div></div>`).join('');
-}
-// Find the word in a language whose Dutch matches one of an object's keywords.
-function findWordInLang(lang,obj){
-  // find a word whose Dutch matches one of the object's keys
-  for(const k of obj.keys){
-    const w=lang.words.find(w=>w.nl.toLowerCase()===k||w.nl.toLowerCase().includes(k));
-    if(w)return w;
-  }
-  return null;
-}
-// Show the chosen object's word in every language (sorted), each with a TTS button.
-function showLensTranslations(idx){
-  const obj=LENS_OBJECTS[idx];if(!obj)return;
-  document.getElementById('lens-chosen-emoji').textContent=obj.emoji;
-  document.getElementById('lens-chosen-nl').textContent=obj.nl;
-  const list=document.getElementById('lens-trans-list');
-  list.innerHTML=[...LANGS].sort((a,b)=>a.name.localeCompare(b.name,'nl')).map(l=>{
-    const w=findWordInLang(l,obj);
-    if(!w)return '';
-    return `<div class="lens-trans-row"><span class="lens-trans-flag">${l.flag}</span><div class="lens-trans-info"><div class="lens-trans-lang">${l.name}</div><div class="lens-trans-word">${w.w}</div><div class="lens-trans-pron">/${w.p}/</div></div><button class="dict-btn" onclick="speak('${w.w.replace(/'/g,"")}','${l.speechLang}')"><span class="emo">🔊</span></button></div>`;
-  }).join('')||'<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px;">Dit woord is nog niet in onze woordenlijsten beschikbaar.</div>';
-  setLensPhase('translations');
-}
-// Reset the lens back to the start screen for another scan.
-function resetLens(){document.getElementById('lens-photo').style.display='block';setLensPhase('start');}
 
 // ═══ BETA BAR ═══
 // Open the Community view and scroll to the contact form.
@@ -494,8 +405,7 @@ const NAV_GROUPS={
     {v:'grammatica',icon:'✏️',label:'Grammatica'},
     {v:'crash',icon:'⚡',label:'Spoedcursus'}
   ]},
-  oefenen:{title:'Oefenen',sub:'Herhaal, zoek op en ontdek met je camera',items:[
-    {v:'lens',icon:'📷',label:'Camera-lens'},
+  oefenen:{title:'Oefenen',sub:'Herhaal en zoek woorden op',items:[
     {v:'mistakes',icon:'🔁',label:'Mijn fouten',badge:'more-mistakes-badge'},
     {v:'woordenboek',icon:'📕',label:'Woordenboek'}
   ]},
@@ -548,7 +458,6 @@ function showView(v){
   if(v==='mistakes')renderMistakes();
   if(v==='profile'&&typeof renderProfile==='function')renderProfile();
   if(v==='admin'&&typeof renderAdmin==='function')renderAdmin();
-  if(v==='lens'){setLensPhase('start');}else if(typeof lensStream!=='undefined'&&lensStream){lensStream.getTracks().forEach(t=>t.stop());lensStream=null;}
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
