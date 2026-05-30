@@ -79,6 +79,17 @@ const EXTRA_TRANSLATIONS = {
     'naam':{w:'naam',p:'naam'},'geld':{w:'paisa',p:'pai-sa'},'veel':{w:'bahoet',p:'ba-hoet'},'vuur':{w:'aag',p:'aag'},
     'man':{w:'aadmie',p:'aad-mie'},'vriend':{w:'dost',p:'dost'},'gaan':{w:'jaae',p:'jaa-e'},'komen':{w:'aae',p:'aa-e'},
     'eten':{w:'khaana',p:'khaa-na'},'nieuw':{w:'nawaa',p:'na-waa'},'oud':{w:'puraan',p:'pu-raan'},'vis':{w:'matjhie',p:'ma-tjhie'}
+  },
+  // Ndyuka (Aukaans) — cardinal numbers, verified via languagesandnumbers.com (ISO djk).
+  ndyuka: {
+    'drie':{w:'dii',p:'dii'},'vier':{w:'fo',p:'fo'},'vijf':{w:'feifi',p:'fei-fi'},'zes':{w:'sigisi',p:'si-gi-si'},
+    'zeven':{w:'seibin',p:'sei-bin'},'acht':{w:'aitin',p:'ai-tin'},'negen':{w:'neigin',p:'nei-gin'},'tien':{w:'tin',p:'tin'},
+    'honderd':{w:'wan ondoo',p:'wan on-doo'}
+  },
+  // Surinaams-Javaans — Javanese ngoko cardinal numbers (well-documented standard forms).
+  javaans: {
+    'vier':{w:'papat',p:'pa-pat'},'vijf':{w:'lima',p:'li-ma'},'zes':{w:'enem',p:'e-nem'},'zeven':{w:'pitu',p:'pi-tu'},
+    'acht':{w:'wolu',p:'wo-lu'},'negen':{w:'sanga',p:'sa-nga'},'tien':{w:'sepuluh',p:'se-pu-luh'},'honderd':{w:'satus',p:'sa-tus'}
   }
 };
 
