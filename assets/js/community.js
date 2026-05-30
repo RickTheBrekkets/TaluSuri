@@ -4,17 +4,29 @@
 // script: functions are global so inline onclick handlers can reach them.
 
 const SB = window.SB || null;                 // shared Supabase client (null when auth disabled)
-window.OFFICIAL_AUDIO = window.OFFICIAL_AUDIO || {};  // word_key -> public audio URL (read by speak() in app.js)
+window.OFFICIAL_AUDIO = window.OFFICIAL_AUDIO || {};  // word_key -> best community-recording URL (read by speak() in app.js)
 
 // Stable key for a word across the app: "<langId>|<word>".
 function wordKey(langId, w){ return langId + '|' + w; }
 
-// ═══ OFFICIAL AUDIO (admin-promoted recordings replace the robot voice) ═══
+// ═══ COMMUNITY AUDIO (a community recording replaces the robot voice when available) ═══
+// Build word_key -> best recording URL. Always prefer a community recording over TTS;
+// among recordings, an official (admin-promoted) one wins, otherwise the highest-voted.
 async function loadOfficialAudio(){
   window.OFFICIAL_AUDIO = {};
   if(!SB) return;
-  const {data} = await SB.from('recordings').select('word_key,audio_path').eq('is_official', true);
-  (data||[]).forEach(r=>{ window.OFFICIAL_AUDIO[r.word_key] = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl; });
+  const {data} = await SB.from('recordings').select('id,word_key,audio_path,is_official');
+  if(data && data.length){
+    let scoreMap={};
+    try{ const {data:sc}=await SB.from('recording_scores').select('recording_id,score'); (sc||[]).forEach(s=>{scoreMap[s.recording_id]=s.score||0;}); }catch(e){}
+    const best={};
+    data.forEach(r=>{
+      const cand={off:!!r.is_official, score:scoreMap[r.id]||0, path:r.audio_path};
+      const cur=best[r.word_key];
+      if(!cur || (cand.off&&!cur.off) || (cand.off===cur.off && cand.score>cur.score)) best[r.word_key]=cand;
+    });
+    Object.keys(best).forEach(k=>{ window.OFFICIAL_AUDIO[k] = SB.storage.from('pronunciations').getPublicUrl(best[k].path).data.publicUrl; });
+  }
   if(typeof refreshAudioUI==='function') refreshAudioUI();   // show gold speakers now that recordings are known
 }
 // Play a stored audio URL (used by the recordings list and the speak() override).
