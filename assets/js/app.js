@@ -130,7 +130,7 @@ function goToContact(){showView('feedback');setTimeout(()=>{const el=document.ge
 // Closed-beta bar + footer version. The bar is persistent (no dismiss) during the beta.
 function initBeta(){
   const fv=document.getElementById('footer-version');
-  if(fv)fv.textContent='versie '+(window.APP_VERSION||'?')+' · gesloten bèta';
+  if(fv)fv.textContent='versie '+(window.APP_VERSION||'?');
   updateBetaSeats();
 }
 // Show how many of the limited closed-beta seats are taken (X/MAX) in the beta bar.
