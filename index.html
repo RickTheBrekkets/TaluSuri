@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TaluSuri — Talen van Suriname</title>
-<meta name="description" content="Leer de 10 talen van Suriname. Van Sarnami tot Sranan Tongo.">
+<meta name="description" content="Leer de 9 talen van Suriname. Van Sarnami tot Sranan Tongo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -44,7 +44,7 @@
 
     <div class="onboard-step" id="ostep2">
       <div class="onboard-q">Welke taal wil je eerst leren?</div>
-      <div class="onboard-sub">Je kunt later altijd wisselen tussen alle 10 talen.</div>
+      <div class="onboard-sub">Je kunt later altijd wisselen tussen alle 9 talen.</div>
       <div class="onboard-lang-grid" id="onboard-langs"></div>
       <button class="onboard-btn" id="lang-next" disabled onclick="finishOnboard()">Start met leren</button>
     </div>
@@ -98,9 +98,8 @@
 
 <div class="app" id="mainApp" style="display:none;">
   <div class="beta-bar" id="beta-bar">
-    <span class="beta-tag">BÈTA</span>
-    <span class="beta-text">TaluSuri is nog in ontwikkeling en wordt steeds verbeterd. Je feedback is van harte welkom — <a href="javascript:void(0)" onclick="goToContact()">laat het ons weten</a>.</span>
-    <button class="beta-close" onclick="dismissBeta()" aria-label="Sluiten"><span class="emo">✕</span></button>
+    <span class="beta-tag">GESLOTEN BÈTA</span>
+    <span class="beta-text"><strong id="beta-seats"></strong> — besloten test met een beperkt aantal plekken. Feedback welkom: <a href="javascript:void(0)" onclick="goToContact()">laat het ons weten</a>.</span>
   </div>
   <div class="topbar">
     <div>
@@ -187,7 +186,7 @@
       </div>
 
       <div class="card c-search">
-        <div class="card-label">Zoek door alle 10 talen</div>
+        <div class="card-label">Zoek door alle 9 talen</div>
         <div class="search-box">
           <span class="emo">🔍</span>
           <input type="text" id="global-search" placeholder="Zoek een woord in het Nederlands of een Surinaamse taal..." oninput="globalSearch()">
@@ -258,7 +257,7 @@
   <!-- TALEN -->
   <div class="view" id="view-talen">
     <div class="card" style="margin-bottom:16px;background:var(--green);color:#fff;border:none;">
-      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:5px;">10 talen van Suriname</div>
+      <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:5px;">9 talen van Suriname</div>
       <div style="font-size:13px;opacity:.8;line-height:1.5;">Selecteer een taal om te starten.</div>
     </div>
     <div class="lang-grid" id="lang-grid"></div>
@@ -442,7 +441,7 @@
   <div class="view" id="view-lens">
     <div class="card" style="margin-bottom:20px;background:var(--green);color:#fff;border:none;">
       <div style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin-bottom:5px;">📷 Camera-lens</div>
-      <div style="font-size:13px;opacity:.85;line-height:1.5;">Richt je camera op een object, maak een foto en ontdek hoe het in alle 10 talen van Suriname heet. Een leuke manier om je omgeving te leren benoemen.</div>
+      <div style="font-size:13px;opacity:.85;line-height:1.5;">Richt je camera op een object, maak een foto en ontdek hoe het in alle 9 talen van Suriname heet. Een leuke manier om je omgeving te leren benoemen.</div>
     </div>
 
     <div class="lens-stage" id="lens-stage">
@@ -476,7 +475,7 @@
         <div style="text-align:center;margin-bottom:16px;">
           <div id="lens-chosen-emoji" style="font-size:40px;"></div>
           <div id="lens-chosen-nl" style="font-family:'Fraunces',serif;font-weight:600;font-size:20px;"></div>
-          <div style="font-size:12px;color:var(--muted);">in de 10 talen van Suriname</div>
+          <div style="font-size:12px;color:var(--muted);">in de 9 talen van Suriname</div>
         </div>
         <div id="lens-trans-list"></div>
         <button class="lens-btn" style="width:100%;margin-top:14px;" onclick="resetLens()">📷 Nog een object scannen</button>
@@ -557,7 +556,7 @@
 
   <footer class="footer">
     <div><div class="footer-logo">Talu<span>Suri</span></div><div class="footer-text" style="margin-top:4px;">Talen van Suriname — verbinding door taal</div></div>
-    <div class="footer-text" style="text-align:right;">versie 0.1 alpha<br>Gebouwd met ❤️ voor Suriname</div>
+    <div class="footer-text" style="text-align:right;"><span id="footer-version">versie 0.1.0 · gesloten bèta</span><br>Gebouwd met ❤️ voor Suriname</div>
   </footer>
 </div>
 

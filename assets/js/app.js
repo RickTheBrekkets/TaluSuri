@@ -125,12 +125,23 @@ function showLensTranslations(idx){
 function resetLens(){document.getElementById('lens-photo').style.display='block';setLensPhase('start');}
 
 // ═══ BETA BAR ═══
-// Hide the beta banner and remember the dismissal.
-function dismissBeta(){const b=document.getElementById('beta-bar');if(b)b.style.display='none';try{localStorage.setItem('talusuri_beta_dismissed','1');}catch(e){}}
 // Open the Community view and scroll to the contact form.
 function goToContact(){showView('feedback');setTimeout(()=>{const el=document.getElementById('contact-form');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}
-// Hide the beta banner on load if it was dismissed before.
-function initBeta(){try{if(localStorage.getItem('talusuri_beta_dismissed')){const b=document.getElementById('beta-bar');if(b)b.style.display='none';}}catch(e){}}
+// Closed-beta bar + footer version. The bar is persistent (no dismiss) during the beta.
+function initBeta(){
+  const fv=document.getElementById('footer-version');
+  if(fv)fv.textContent='versie '+(window.APP_VERSION||'?')+' · gesloten bèta';
+  updateBetaSeats();
+}
+// Show how many of the limited closed-beta seats are taken (X/MAX) in the beta bar.
+async function updateBetaSeats(){
+  const el=document.getElementById('beta-seats');if(!el)return;
+  const max=window.BETA_MAX_ACCOUNTS||0;
+  const count=window.fetchAccountCount?await window.fetchAccountCount():null;
+  if(count===null||!max){el.textContent='';return;}
+  const free=Math.max(0,max-count);
+  el.textContent=`${count}/${max} plekken bezet${free>0?` — nog ${free} vrij`:' — vol'}`;
+}
 
 // ═══ CONTACT FORM ═══
 // Fill the contact form's language dropdown once.
@@ -199,7 +210,7 @@ function checkBadges(){
   if(S.flashOk>=10)unlockBadge('flash_10');
   if(getLevel(S.xp)>=5)unlockBadge('level_5');
   if(S.seenLangs.length>=3)unlockBadge('polyglot');
-  if(S.seenLangs.length>=10)unlockBadge('explorer');
+  if(S.seenLangs.length>=LANGS.length)unlockBadge('explorer');
 }
 
 // ═══ EXERCISE GENERATION (varied types) ═══

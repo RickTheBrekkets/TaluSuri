@@ -79,10 +79,6 @@ const EXTRA_TRANSLATIONS = {
     'naam':{w:'naam',p:'naam'},'geld':{w:'paisa',p:'pai-sa'},'veel':{w:'bahoet',p:'ba-hoet'},'vuur':{w:'aag',p:'aag'},
     'man':{w:'aadmie',p:'aad-mie'},'vriend':{w:'dost',p:'dost'},'gaan':{w:'jaae',p:'jaa-e'},'komen':{w:'aae',p:'aa-e'},
     'eten':{w:'khaana',p:'khaa-na'},'nieuw':{w:'nawaa',p:'na-waa'},'oud':{w:'puraan',p:'pu-raan'},'vis':{w:'matjhie',p:'ma-tjhie'}
-  },
-  // Surinaams Nederlands — Dutch variety; only widely-used Sranan loanwords that map onto the spine.
-  'surinaams-nl': {
-    'geld':{w:'moni',p:'mo-ni'},'vriend':{w:'mati',p:'ma-ti'},'kind':{w:'pikin',p:'pi-kin'},'veel':{w:'furu',p:'fu-ru'}
   }
 };
 

@@ -80,6 +80,11 @@ async function authPasswordSubmit(){
   const pw=document.getElementById('auth-pw').value;
   if(!email||!pw)return;
   if(pw.length<6){alert('Wachtwoord moet minstens 6 tekens zijn.');return;}
+  if(authMode==='signup'){
+    const max=window.BETA_MAX_ACCOUNTS||0;
+    const count=await window.fetchAccountCount();
+    if(max&&count!==null&&count>=max){alert('De gesloten bèta zit vol ('+count+'/'+max+' plekken bezet). Houd ons in de gaten voor de volgende ronde!');return;}
+  }
   const res=authMode==='signup'
     ? await sb.auth.signUp({email,password:pw})
     : await sb.auth.signInWithPassword({email,password:pw});
@@ -169,6 +174,12 @@ window.onStateSaved=function(){
 // ═══ LEADERBOARD DATA ═══
 // Top players by XP. Returns null when auth is off or the request fails so
 // renderLeaderboard() can fall back to the sample LEADERBOARD.
+// Number of accounts created (profiles rows). null when auth is off or the request fails.
+window.fetchAccountCount=async function(){
+  if(!AUTH_ENABLED)return null;
+  const {count,error}=await sb.from('profiles').select('id',{count:'exact',head:true});
+  return error?null:(count||0);
+};
 window.fetchLeaderboard=async function(){
   if(!AUTH_ENABLED)return null;
   const {data,error}=await sb.from('profiles').select('id,display_name,xp,langs,avatar_url,week_xp,week_key,month_xp,month_key').order('xp',{ascending:false}).limit(50);
@@ -188,6 +199,7 @@ function authInit(){
     else AUTH.profile=null;
     updateAuthUI();
     renderLeaderboard();
+    if(typeof updateBetaSeats==='function')updateBetaSeats();   // refresh closed-beta seat count
     // Arrived via a password-reset link → let them set a new password.
     if(event==='PASSWORD_RECOVERY')document.getElementById('pw-reset-modal').style.display='flex';
   });

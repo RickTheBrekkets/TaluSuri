@@ -9,3 +9,9 @@
 //   Project Settings → API → Project URL  and  Project API keys → anon public
 window.SUPABASE_URL = 'https://jhfhbonsdfxrebfpqusv.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_xBE0dO5BkPrItDUfgSMNUw_tiwGiY5S';
+
+// App release info (shown in the footer and the closed-beta bar).
+window.APP_VERSION = '0.1.0';
+// Closed beta: max number of accounts. Enforced client-side (nice message) and
+// server-side by the trigger in supabase/beta_cap.sql.
+window.BETA_MAX_ACCOUNTS = 50;

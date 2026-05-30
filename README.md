@@ -1,6 +1,6 @@
 # TaluSuri — Talen van Suriname
 
-A browser-based app for learning the **10 languages of Suriname** and bringing its
+A browser-based app for learning the **9 languages of Suriname** and bringing its
 communities closer together through language. Duolingo-style lessons, flashcards,
 a dictionary, grammar notes, a frequency-based crash course, gamification (XP, levels,
 streaks, badges) and a camera lens. The core app is a single static site that runs
@@ -21,17 +21,17 @@ dictionaries (see the in-app *Bronnen* page and [Data & sources](#data--sources)
 ## Languages covered
 
 Sarnami Hindoestani · Sranan Tongo · Surinaams-Javaans · Ndyuka · Saramaccaans ·
-Arawak (Lokono) · Kari'na · Hakka · Surinaams-Nederlands · Matawai
+Arawak (Lokono) · Kari'na · Hakka · Matawai
 
 ## Features
 
 - **Lessons & exams** — auto-generated exercises (multiple choice, type-in, listen-and-choose)
 - **Flashcards** with reveal + self-scoring
-- **Dictionary** per language and a **global search** across all 10 languages
+- **Dictionary** per language and a **global search** across all 9 languages
 - **Grammar** notes per language (with a generic fallback)
 - **Crash course** — core vocabulary grouped into frequency tiers (80/20 principle)
 - **Curriculum** — a guided learning path combining vocab, grammar and exams
-- **Camera lens** — photograph an object and see its name in all 10 languages
+- **Camera lens** — photograph an object and see its name in all 9 languages
 - **Gamification** — XP, levels, daily streaks, achievement badges, a leaderboard
 - **My mistakes** — wrong answers are collected for focused review
 - **Text-to-speech** pronunciation via the browser Speech Synthesis API
@@ -118,7 +118,8 @@ pronunciations:
    email"** so email+password signup logs in instantly (no emails sent → no rate limit).
 3. **Storage:** create two **public** buckets — `pronunciations` and `avatars`.
 4. **SQL Editor:** run the migrations in order — `supabase/schema.sql`,
-   `supabase/community.sql`, `supabase/votes_value.sql`, then `supabase/leaderboards.sql`.
+   `supabase/community.sql`, `supabase/votes_value.sql`, `supabase/leaderboards.sql`,
+   then `supabase/beta_cap.sql` (closed-beta 50-account cap).
 5. Add admins by inserting their email into the `admins` table (seeded in `community.sql`).
 6. Put the **Project URL** and **anon/publishable key** into `assets/js/config.js`.
 
