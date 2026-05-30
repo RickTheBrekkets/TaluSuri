@@ -127,6 +127,12 @@ function resetLens(){document.getElementById('lens-photo').style.display='block'
 // ═══ BETA BAR ═══
 // Open the Community view and scroll to the contact form.
 function goToContact(){showView('feedback');setTimeout(()=>{const el=document.getElementById('contact-form');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}
+// Share the app via WhatsApp (uses the native share sheet on mobile when available).
+function shareApp(){
+  const url='https://talusuri.netlify.app';
+  const text='Leer de talen van Suriname met TaluSuri! 🇸🇷 '+url;
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');
+}
 // Closed-beta bar + footer version. The bar is persistent (no dismiss) during the beta.
 function initBeta(){
   const fv=document.getElementById('footer-version');
@@ -763,8 +769,9 @@ function renderTourStep(){
   const r=tgt?tgt.getBoundingClientRect():null;
   const last=tourStep===tourSteps.length-1;
   const spot=r?`<div class="tour-spot" style="top:${r.top-6}px;left:${r.left-6}px;width:${r.width+12}px;height:${r.height+12}px;"></div>`:`<div class="tour-dim"></div>`;
-  // place card above bottom-nav targets; centre it when there's no target
-  const cardPos=r?`bottom:${window.innerHeight-r.top+14}px;left:12px;right:12px;`:`top:50%;left:12px;right:12px;transform:translateY(-50%);`;
+  // Always centre the card (the spotlight ring marks the target) — keeps tall cards
+  // fully on-screen instead of overflowing above a bottom-nav target.
+  const cardPos='top:50%;left:12px;right:12px;transform:translateY(-50%);';
   const installBtn=st.install&&window.deferredInstallPrompt?`<button class="tour-install" onclick="tourInstall()">📲 App installeren</button>`:'';
   ov.innerHTML=`${spot}
     <div class="tour-card" style="${cardPos}">
