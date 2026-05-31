@@ -314,6 +314,33 @@ function renderProfile(){
   }
 }
 
+// ═══ ACCOUNT DELETION ("vergeet mij") ═══
+// Permanently delete the signed-in user. Removes their storage files (not cascaded by the
+// DB foreign keys), then calls the security-definer RPC that drops the auth account — which
+// cascades their profile, recordings and votes. Finally wipes local progress and signs out.
+// Irreversible; guarded by a confirm + typed confirmation. Needs supabase/forget-me.sql.
+async function forgetMe(){
+  if(!SB || !AUTH.user){ alert('Je moet ingelogd zijn om je account te verwijderen.'); return; }
+  if(!confirm('Weet je het zeker? Dit verwijdert je account, je opnames, je stemmen en je profiel definitief. Dit kan niet ongedaan worden gemaakt.')) return;
+  if((prompt('Typ VERWIJDER (in hoofdletters) om je account definitief te wissen.')||'').trim().toUpperCase()!=='VERWIJDER') return;
+  const uid=AUTH.user.id;
+  try{
+    // 1. remove the user's own storage files (folder is named by their uid in each bucket)
+    for(const bucket of ['pronunciations','avatars']){
+      const {data:files}=await SB.storage.from(bucket).list(uid,{limit:1000});
+      if(files&&files.length) await SB.storage.from(bucket).remove(files.map(f=>uid+'/'+f.name));
+    }
+    // 2. delete the auth user — cascades profiles, recordings and recording_votes
+    const {error}=await SB.rpc('delete_own_account');
+    if(error) throw error;
+  }catch(e){ alert('Verwijderen mislukt: '+(e.message||e)+'\nProbeer het opnieuw of neem contact op.'); return; }
+  // 3. wipe local progress on this device, sign out, and reload to a clean state
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('talusuri_')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  alert('Je account is verwijderd. Bedankt dat je TaluSuri hebt geprobeerd.');
+  try{ if(typeof authSignOut==='function') await authSignOut(); }catch(e){}
+  location.reload();
+}
+
 // Called by auth.js after a profile loads.
 window.communityOnLogin = function(){
   loadOfficialAudio();
