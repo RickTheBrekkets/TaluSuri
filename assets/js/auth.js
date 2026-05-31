@@ -42,15 +42,18 @@ function authButtonClick(){
   if(AUTH.user)showView('profile');
   else authOpenModal();
 }
-// Sign out (used by the profile view). Force a LOCAL session clear so logout always
-// succeeds even if the server revoke call fails, then reset state/UI immediately rather
-// than waiting on the auth event.
-async function authSignOut(){
-  try{ if(sb)await sb.auth.signOut({scope:'local'}); }catch(e){}
+// Sign out (used by the profile view). Reset state/UI FIRST and immediately, then clear the
+// Supabase session fire-and-forget — so logout always works even if the supabase call hangs
+// or rejects (an awaited signOut could otherwise block the whole reset and "do nothing").
+function authSignOut(){
   AUTH.user=null; AUTH.profile=null;
   if(typeof updateAuthUI==='function')updateAuthUI();
   if(typeof renderLeaderboard==='function')renderLeaderboard();
   showView('home');
+  try{ if(sb)sb.auth.signOut({scope:'local'}).catch(()=>{}); }catch(e){}
+  // Belt-and-suspenders: drop the persisted supabase session so logout survives a refresh
+  // even if the signOut call above hung before clearing it.
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
 }
 
 // ═══ LOGIN MODAL (email + password) ═══
