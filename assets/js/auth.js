@@ -169,9 +169,13 @@ async function authLoadProfile(){
     const {wk,mo}=lbPeriodKeys();
     if(data.week_key===wk&&(data.week_xp||0)>S.weekXP)S.weekXP=data.week_xp;     // adopt higher same-period totals
     if(data.month_key===mo&&(data.month_xp||0)>S.monthXP)S.monthXP=data.month_xp;
-    if(typeof renderStats==='function')renderStats();
-    if(typeof checkBadges==='function')checkBadges();
-    if(typeof renderHomeLessons==='function')renderHomeLessons();
+    // Best-effort re-render: on a refresh this can run before the app has built the UI, so
+    // never let a render error abort the rest (sync + communityOnLogin + the caller's updateAuthUI).
+    try{
+      if(typeof renderStats==='function')renderStats();
+      if(typeof checkBadges==='function')checkBadges();
+      if(typeof renderHomeLessons==='function')renderHomeLessons();
+    }catch(e){}
     saveState();
     await authPushProfile();                                     // push merged result (covers local-ahead case)
     if(window.communityOnLogin)window.communityOnLogin();        // contributor badges, avatar render (community.js)
@@ -228,7 +232,9 @@ function authInit(){
   // Fires on initial session, login, and logout (supabase-js persists the session locally).
   sb.auth.onAuthStateChange(async(event,session)=>{
     AUTH.user=session?.user||null;
-    if(AUTH.user)await authLoadProfile();
+    // Never let a profile-load error suppress the topbar update — otherwise the pill shows
+    // "Inloggen" after a refresh even though the session is restored (AUTH.user is set).
+    if(AUTH.user){try{await authLoadProfile();}catch(e){console.error('authLoadProfile failed:',e);}}
     else AUTH.profile=null;
     updateAuthUI();
     renderLeaderboard();
