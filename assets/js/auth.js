@@ -132,18 +132,47 @@ async function authSubmitName(){
 }
 
 // ═══ PROFILE LOAD / SYNC ═══
+// The durable progress that lives in one jsonb blob on the profile (everything except
+// xp/streak/week_*/month_*, which are their own columns for the leaderboard queries).
+function progressSnapshot(){
+  return {badges:S.badges, learnedWords:S.learnedWords, themeProgress:S.themeProgress,
+          crashProgress:S.crashProgress, seenLangs:S.seenLangs, goal:S.goal, onboarded:S.onboarded};
+}
+// Merge a remote progress blob into local state (union sets, keep the better of each value)
+// so logging in on a new device combines progress rather than overwriting it either way.
+function applyRemoteProgress(rp){
+  if(!rp||typeof rp!=='object')return;
+  const uniq=(a,b)=>Array.from(new Set([...(a||[]),...(b||[])]));
+  const maxMap=(a,b)=>{const o={...(a||{})};Object.keys(b||{}).forEach(k=>{o[k]=Math.max(o[k]||0,b[k]||0);});return o;};
+  S.badges=uniq(S.badges,rp.badges);
+  S.learnedWords=uniq(S.learnedWords,rp.learnedWords);
+  S.seenLangs=uniq(S.seenLangs,rp.seenLangs);
+  S.themeProgress=maxMap(S.themeProgress,rp.themeProgress);
+  S.crashProgress=maxMap(S.crashProgress,rp.crashProgress);
+  if(rp.goal&&!S.goal)S.goal=rp.goal;
+  S.onboarded=S.onboarded||!!rp.onboarded;
+}
 // Load the user's profile after login; prompt for a name if they don't have one yet,
-// otherwise reconcile XP (keep the higher of local vs remote, then push).
+// otherwise reconcile XP + progress (keep the better of local vs remote, then push).
 async function authLoadProfile(){
   const {data}=await sb.from('profiles').select('id,display_name,xp,streak,langs,avatar_url,week_xp,week_key,month_xp,month_key').eq('id',AUTH.user.id).maybeSingle();
   if(data&&data.display_name){
     AUTH.profile=data;
-    if(data.xp>S.xp){S.xp=data.xp;renderStats();saveState();}   // remote ahead → adopt
+    if(data.xp>S.xp)S.xp=data.xp;                               // remote ahead → adopt
+    if((data.streak||0)>S.streak)S.streak=data.streak;
+    // Progress lives in a jsonb column added by progress.sql. Fetch it separately and flag
+    // its presence so login + xp sync keep working even if that migration hasn't run yet.
+    const {data:pr,error:pe}=await sb.from('profiles').select('progress').eq('id',AUTH.user.id).maybeSingle();
+    if(pe){window.__progressCol=false;}else{window.__progressCol=true;applyRemoteProgress(pr&&pr.progress);}
     if(typeof rollPeriods==='function')rollPeriods();
     const {wk,mo}=lbPeriodKeys();
     if(data.week_key===wk&&(data.week_xp||0)>S.weekXP)S.weekXP=data.week_xp;     // adopt higher same-period totals
     if(data.month_key===mo&&(data.month_xp||0)>S.monthXP)S.monthXP=data.month_xp;
-    await authPushProfile();                                     // push (covers local-ahead case)
+    if(typeof renderStats==='function')renderStats();
+    if(typeof checkBadges==='function')checkBadges();
+    if(typeof renderHomeLessons==='function')renderHomeLessons();
+    saveState();
+    await authPushProfile();                                     // push merged result (covers local-ahead case)
     if(window.communityOnLogin)window.communityOnLogin();        // contributor badges, avatar render (community.js)
   }else{
     authOpenNameModal();                                         // brand-new user → ask for a name
@@ -153,14 +182,17 @@ async function authLoadProfile(){
 async function authPushProfile(){
   if(!AUTH.user||!AUTH.profile)return;
   if(typeof rollPeriods==='function')rollPeriods();   // ensure period counters are current before syncing
-  await sb.from('profiles').upsert({
+  const payload={
     id:AUTH.user.id,
     display_name:AUTH.profile.display_name,
     xp:S.xp,streak:S.streak,langs:authLangs(),
     week_xp:S.weekXP,week_key:S.weekKey,month_xp:S.monthXP,month_key:S.monthKey,
     avatar_url:AUTH.profile.avatar_url||null,
     updated_at:new Date().toISOString()
-  });
+  };
+  if(window.__progressCol!==false)payload.progress=progressSnapshot();   // omit only if the column is known missing
+  const {error}=await sb.from('profiles').upsert(payload);
+  if(error&&/progress/.test(error.message||'')){window.__progressCol=false;await sb.from('profiles').upsert((delete payload.progress,payload));}
 }
 
 // Debounced sync hook — saveState() in state.js calls this after every XP/progress change.
