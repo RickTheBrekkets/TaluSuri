@@ -16,22 +16,20 @@ create policy "av delete"   on storage.objects for delete
 
 -- ── Delete the calling user's own account ───────────────────────────
 -- security definer so it can touch auth.users; only ever acts on auth.uid(), so a user
--- can only ever delete themselves. Storage rows are cleared defensively too (the client
--- removes the actual blobs first, since deleting an object row leaves the file orphaned).
+-- can only ever delete themselves. Storage blobs are removed client-side first via the
+-- storage API (Supabase forbids direct DELETE on storage.objects from SQL), so this only
+-- drops the auth user — whose ON DELETE CASCADE clears profiles, recordings and votes.
 create or replace function public.delete_own_account()
 returns void
 language plpgsql
 security definer
-set search_path = public, auth, storage
+set search_path = public, auth
 as $$
 declare uid uuid := auth.uid();
 begin
   if uid is null then
     raise exception 'not authenticated';
   end if;
-  delete from storage.objects
-    where bucket_id in ('pronunciations', 'avatars')
-      and (storage.foldername(name))[1] = uid::text;
   delete from auth.users where id = uid;   -- cascades profiles, recordings, recording_votes
 end;
 $$;
