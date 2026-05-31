@@ -47,6 +47,7 @@ function authButtonClick(){
 // or rejects (an awaited signOut could otherwise block the whole reset and "do nothing").
 function authSignOut(){
   AUTH.user=null; AUTH.profile=null;
+  authCloseAllModals();   // never leave a modal covering the topbar after logout
   if(typeof updateAuthUI==='function')updateAuthUI();
   if(typeof renderLeaderboard==='function')renderLeaderboard();
   showView('home');
@@ -57,8 +58,14 @@ function authSignOut(){
 }
 
 // ═══ LOGIN MODAL (email + password) ═══
+// Hide every auth overlay (login, name, password-reset). Used on logout and before opening
+// the login modal so a stray overlay can never sit on top of the topbar / block the pill.
+function authCloseAllModals(){
+  ['auth-modal','name-modal','pw-reset-modal'].forEach(id=>{const m=document.getElementById(id);if(m)m.style.display='none';});
+}
 let authMode='login';   // 'login' or 'signup'
 function authOpenModal(){
+  authCloseAllModals();
   authMode='login';authApplyMode();
   document.getElementById('auth-email').value='';
   document.getElementById('auth-pw').value='';
