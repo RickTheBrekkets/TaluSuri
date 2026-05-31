@@ -136,7 +136,7 @@ async function authSubmitName(){
 // xp/streak/week_*/month_*, which are their own columns for the leaderboard queries).
 function progressSnapshot(){
   return {badges:S.badges, learnedWords:S.learnedWords, themeProgress:S.themeProgress,
-          crashProgress:S.crashProgress, seenLangs:S.seenLangs, goal:S.goal, onboarded:S.onboarded};
+          crashProgress:S.crashProgress, seenLangs:S.seenLangs, goal:S.goal, onboarded:S.onboarded, theme:S.theme};
 }
 // Merge a remote progress blob into local state (union sets, keep the better of each value)
 // so logging in on a new device combines progress rather than overwriting it either way.
@@ -151,6 +151,7 @@ function applyRemoteProgress(rp){
   S.crashProgress=maxMap(S.crashProgress,rp.crashProgress);
   if(rp.goal&&!S.goal)S.goal=rp.goal;
   S.onboarded=S.onboarded||!!rp.onboarded;
+  if(rp.theme&&rp.theme!==S.theme){S.theme=rp.theme;if(typeof applyTheme==='function')applyTheme();}  // adopt the device-saved theme
 }
 // Load the user's profile after login; prompt for a name if they don't have one yet,
 // otherwise reconcile XP + progress (keep the better of local vs remote, then push).
