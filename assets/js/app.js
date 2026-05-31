@@ -481,37 +481,14 @@ function showView(v){
 }
 
 // ═══ LESSON / EXAM ENGINE ═══
-// Map each lesson title to the word categories (freq.js `cat`) it should quiz, so a
-// lesson only samples on-theme words — e.g. the greetings lesson never asks for "tomaat".
-// Titles not listed here (e.g. 'Eerste woorden') intentionally use the full word list.
-const LESSON_CATS={
-  'Begroetingen':['social'],
-  'Familie':['family','person'],
-  'Cijfers':['number'],
-  'Kleuren':['color'],
-  'Lichaam':['body'],
-  'Gevoelens':['emotion'],
-  'Natuur':['nature','animal','weather'],
-  'Natuur & Omgeving':['nature','animal','weather','place'],
-  'Natuur & Leven':['nature','animal','weather'],
-  'Huis & Omgeving':['house','object','place'],
-  'Huis & Leven':['house','object'],
-  'Eten & Drinken':['food','drink'],
-  'Eten & Huis':['food','drink','house']
-};
-// Curated greeting/courtesy lemmas. Most of these fall outside the frequency spine, so
-// they carry no `cat` — match them by Dutch lemma to populate the greetings lesson.
-const GREETING_NL=['hallo','hoi','dag','goedemorgen','goedendag','goedemiddag','goedenavond',
-  'dank je','dank u','bedankt','ja','nee','welkom','tot ziens','hoe gaat het?','hoe gaat het',
-  'alsjeblieft','alstublieft','sorry','doei','groet'];
-// The on-theme words for a lesson: those whose cat matches, plus (for greetings) curated
-// courtesy words. Falls back to the full list when a language has too few themed words.
+// The on-theme words for a lesson, looked up from the shared LESSON_CATALOG (words.js).
+// Returns only words in the lesson's categories (plus courtesy words for greetings), so a
+// lesson never quizzes off-theme words like "tomaat". 'Eerste woorden' (and any title not
+// in the catalog) uses the full word list. Falls back to all words if a pool is too thin.
 function lessonWords(title){
-  const cats=LESSON_CATS[title];
-  if(!cats)return S.lang.words;
-  const greet=cats.includes('social');
-  const pool=S.lang.words.filter(w=>cats.includes(w.cat)
-    ||(greet&&GREETING_NL.some(g=>w.nl===g||w.nl.startsWith(g+' '))));
+  const L=(typeof LESSON_CATALOG!=='undefined'?LESSON_CATALOG:[]).find(x=>x.title===title);
+  if(!L)return S.lang.words;
+  const pool=lessonPoolWords(S.lang.words,L);
   return pool.length>=3?pool:S.lang.words;
 }
 // Start a lesson: build its questions and open the exercise modal.

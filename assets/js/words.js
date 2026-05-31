@@ -161,16 +161,63 @@ function crashTierWords(langId, fromRank, toRank) {
   return buildLangWords(langId).filter(w => w.rank !== null && w.rank >= fromRank && w.rank < toRank);
 }
 
-// Apply: rebuild every language's `words` array in frequency order.
+// ═══ LESSONS ═══
+// Curated greeting/courtesy lemmas. Most fall outside the frequency spine (so they carry no
+// `cat`); matched by Dutch lemma so the greetings lesson populates in every language.
+const GREETING_NL = ['hallo','hoi','dag','goedemorgen','goedendag','goedemiddag','goedenavond',
+  'dank je','dank u','bedankt','ja','nee','welkom','tot ziens','hoe gaat het?','hoe gaat het',
+  'alsjeblieft','alstublieft','sorry','doei','groet'];
+// Canonical lesson catalog (ordered). Each lesson quizzes only words in its `cats` (freq.js
+// `cat`), so a lesson stays on-theme — the greetings lesson never asks for "tomaat". Lessons
+// are generated per language: a themed lesson appears only when the language has enough
+// on-theme words (LESSON_MIN); 'Begroetingen' is special-cased to also match GREETING_NL.
+const LESSON_CATALOG = [
+  {title:'Begroetingen',    emoji:'👋', xp:10, cats:['social'], greet:true},
+  {title:'Familie',         emoji:'👨‍👩‍👧‍👦', xp:15, cats:['family','person']},
+  {title:'Cijfers',         emoji:'🔢', xp:10, cats:['number']},
+  {title:'Kleuren',         emoji:'🌈', xp:10, cats:['color']},
+  {title:'Eten & Drinken',  emoji:'🍛', xp:15, cats:['food','drink']},
+  {title:'Lichaam',         emoji:'🧍', xp:15, cats:['body']},
+  {title:'Huis & Omgeving', emoji:'🏠', xp:15, cats:['house','object','place']},
+  {title:'Natuur',          emoji:'🌿', xp:10, cats:['nature','animal','weather']},
+  {title:'Tijd',            emoji:'🕐', xp:10, cats:['time']},
+  {title:'Gevoelens',       emoji:'❤️', xp:15, cats:['emotion']},
+  {title:'Kleding',         emoji:'👕', xp:10, cats:['clothing']},
+  {title:'Reizen',          emoji:'✈️', xp:15, cats:['travel','direction']},
+  {title:'Werk',            emoji:'💼', xp:15, cats:['work']},
+  {title:'Werkwoorden',     emoji:'🏃', xp:20, cats:['verb']}
+];
+const LESSON_MIN = 6;       // min on-theme words for a themed lesson to appear
+const GREETING_MIN = 4;     // greetings need fewer (curated, off-spine set)
+
+// The on-theme words a catalog lesson quizzes (cat match, plus courtesy lemmas for greetings).
+function lessonPoolWords(words, lesson) {
+  const greet = lesson.greet;
+  return words.filter(w => lesson.cats.includes(w.cat)
+    || (greet && GREETING_NL.some(g => w.nl === g || w.nl.startsWith(g + ' '))));
+}
+// Build a language's lesson path from the catalog: keep each lesson with enough on-theme
+// words. Low-resource languages (most words off-spine, uncategorised) also get an 'Eerste
+// woorden' lesson over the full list so they always have a learnable path.
+function buildLessons(words) {
+  const out = LESSON_CATALOG
+    .filter(L => lessonPoolWords(words, L).length >= (L.greet ? GREETING_MIN : LESSON_MIN))
+    .map(L => ({emoji:L.emoji, title:L.title, xp:L.xp}));
+  if (words.length < 100) out.unshift({emoji:'🌱', title:'Eerste woorden', xp:10});
+  return out;
+}
+
+// Apply: rebuild every language's `words` array in frequency order, then its lesson path.
 function applyFrequencyOrder() {
   if (typeof LANGS === 'undefined') return;
-  LANGS.forEach(l => { l.words = buildLangWords(l.id); });
+  LANGS.forEach(l => { l.words = buildLangWords(l.id); l.lessons = buildLessons(l.words); });
 }
 
 seedTranslations();
 applyFrequencyOrder();
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {TRANSLATIONS, EXTRA_TRANSLATIONS, CRASH_BANDS,
-    buildLangWords, langCoverage, crashBandStats, crashTierWords, applyFrequencyOrder, seedTranslations};
+  module.exports = {TRANSLATIONS, EXTRA_TRANSLATIONS, CRASH_BANDS, LESSON_CATALOG, GREETING_NL,
+    buildLangWords, langCoverage, crashBandStats, crashTierWords, applyFrequencyOrder, seedTranslations,
+    lessonPoolWords, buildLessons};
 }
