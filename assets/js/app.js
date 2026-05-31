@@ -574,16 +574,29 @@ function startTheme(cat){
 function closeModal(){document.getElementById('modal').classList.remove('open');window.speechSynthesis&&window.speechSynthesis.cancel();}
 
 // Render the current question (or the completion screen) inside the modal.
+// Build an exercise audio row: the speaker (gold for a community recording) plus a mic that
+// opens the recordings modal so a learner can mark this word for a better pronunciation.
+// When only the computer voice exists, a 🤖 hint nudges the community to record the real one.
+function exAudioRow(word,playLabel){
+  const w=word.replace(/'/g,"\\'");
+  const official=hasOfficialAudio(word);
+  return `<div class="q-speak-row">`
+    +`<button class="speak-btn ${official?'speak-official':''}" onclick="speak('${w}','${S.lang.speechLang}')"><span class="emo">🔊</span> ${playLabel||(official?'Community-opname':'Hoor uitspraak')}</button>`
+    +`<button class="contrib-btn" onclick="openRecordings(S.lang.id,'${w}')" title="Markeer dit woord om de uitspraak te verbeteren"><span class="emo">🎙️</span> Verbeter uitspraak</button>`
+    +(official?'':`<span style="font-size:15px;align-self:center;cursor:help;" title="Dit is nog een computerstem — help met een echte opname">🤖</span>`)
+    +`</div>`;
+}
 function renderExercise(){
   const ex=S.ex;
   if(ex.cur>=ex.q.length){renderComplete();return;}
   const q=ex.q[ex.cur];const pct=Math.round((ex.cur/ex.q.length)*100);
   let body=`<div class="q-counter">${ex.emoji} ${ex.title} · Vraag ${ex.cur+1} van ${ex.q.length}</div><div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div><div class="q-q">${q.q}</div>`;
-  // Audio helper for listen-type and others
+  // Audio helper for listen-type and others — includes a "verbeter uitspraak" mic so a
+  // learner can flag a word for a real recording, especially when it's still a computer voice.
   if(q.kind==='listen'){
-    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.listenWord.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> 🔊 Speel woord af</button></div>`;
+    body+=exAudioRow(q.listenWord,'Speel woord af');
   }else if(q.speak){
-    body+=`<div class="q-speak-row"><button class="speak-btn" onclick="speak('${q.speak.replace(/'/g,"\\'")}','${S.lang.speechLang}')"><span class="emo">🔊</span> Hoor uitspraak</button></div>`;
+    body+=exAudioRow(q.speak);
   }
   if(q.kind==='mc'||q.kind==='listen'){
     body+=`<div class="q-opts" id="q-opts"></div>`;
