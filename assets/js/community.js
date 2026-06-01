@@ -321,6 +321,35 @@ async function refreshContribBadges(){
   if(total>=100) unlockBadge('voice_100');
 }
 
+// Render the signed-in user's own recordings with the votes each one received.
+async function renderMyRecordings(){
+  const cont=document.getElementById('pf-recordings'); if(!cont) return;
+  if(!SB||!AUTH.user){ cont.innerHTML=''; return; }
+  cont.innerHTML='<div style="font-size:12px;color:var(--muted);">Laden…</div>';
+  const {data,error}=await SB.from('recordings')
+    .select('id,word,lang_id,audio_path,is_official,created_at')
+    .eq('user_id',AUTH.user.id).order('created_at',{ascending:false});
+  if(error){ cont.innerHTML='<div style="font-size:12px;color:var(--red);">Kon je opnames niet laden.</div>'; return; }
+  const recs=data||[];
+  if(!recs.length){ cont.innerHTML='<div style="font-size:12px;color:var(--muted);">Je hebt nog geen uitspraken ingestuurd. Tik op het 🎙️-icoon bij een woord.</div>'; return; }
+  const scores=await fetchScores(recs.map(r=>r.id));
+  const totalNet=recs.reduce((s,r)=>s+((scores[r.id]&&scores[r.id].score)||0),0);
+  const rows=recs.map(r=>{
+    const url=SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
+    const sc=scores[r.id]||{score:0,ups:0,downs:0};
+    const lang=(typeof LANGS!=='undefined')?LANGS.find(l=>l.id===r.lang_id):null;
+    const official=r.is_official?' <span style="color:var(--gold);font-size:11px;">✅ officieel</span>':'';
+    const col=sc.score>0?'var(--green)':sc.score<0?'var(--red)':'var(--muted)';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);">
+      <button class="dict-btn" onclick="playRec('${url}')" title="Afspelen"><span class="emo">▶️</span></button>
+      <div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:14px;">${r.word}${official}</div><div style="font-size:11px;color:var(--muted);">${lang?lang.name:r.lang_id}</div></div>
+      <div style="text-align:right;"><div style="font-weight:600;font-size:13px;color:${col};">${sc.score>0?'+':''}${sc.score||0}</div><div style="font-size:11px;color:var(--muted);">👍 ${sc.ups||0} · 👎 ${sc.downs||0}</div></div>
+    </div>`;
+  }).join('');
+  const summary=`<div style="font-size:12px;color:var(--muted);margin-bottom:2px;">${recs.length} opname${recs.length===1?'':'s'} · ${totalNet>0?'+':''}${totalNet} netto stemmen</div>`;
+  cont.innerHTML=summary+rows;
+}
+
 // ═══ PROFILE PICTURE ═══
 async function uploadAvatar(e){
   const file = e.target.files[0];
@@ -344,7 +373,8 @@ function renderProfile(){
   const nameEl=document.getElementById('pf-name'), emailEl=document.getElementById('pf-email'),
         ava=document.getElementById('pf-ava'), badges=document.getElementById('pf-badges');
   if(!nameEl) return;
-  if(!AUTH.user){ nameEl.textContent='Niet ingelogd'; if(emailEl)emailEl.textContent=''; if(ava)ava.innerHTML=''; if(badges)badges.innerHTML=''; return; }
+  if(!AUTH.user){ nameEl.textContent='Niet ingelogd'; if(emailEl)emailEl.textContent=''; if(ava)ava.innerHTML=''; if(badges)badges.innerHTML=''; const rc=document.getElementById('pf-recordings'); if(rc)rc.innerHTML=''; return; }
+  renderMyRecordings();
   nameEl.textContent = AUTH.profile?.display_name || '—';
   if(emailEl) emailEl.textContent = AUTH.user.email || '';
   if(ava) ava.innerHTML = AUTH.profile?.avatar_url
