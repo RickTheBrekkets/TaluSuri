@@ -317,13 +317,26 @@ function renderPhrases(){
 }
 // Return the saved completion percentage for a lesson index.
 function lessonProgress(i){return S.themeProgress[S.lang.id+'-'+i]||0;}
-// Render the two lesson cards shown on the home screen.
+// The lesson to continue with: the first not-yet-completed lesson in the path, or the last
+// one if everything is done. This is what the home hero "Les starten" button launches.
+function nextLessonIdx(){
+  const n=S.lang.lessons.length;
+  for(let i=0;i<n;i++){if(lessonProgress(i)<100)return i;}
+  return Math.max(0,n-1);
+}
+// Start the lesson where the user left off (home hero button).
+function startNextLesson(){startLesson(nextLessonIdx());}
+// Render the two lesson cards shown on the home screen, and point the hero button at the
+// next lesson in the learning path.
 function renderHomeLessons(){
   S.lang.lessons.slice(0,2).forEach((l,i)=>{
     const el=document.getElementById('les'+i);if(!el)return;const pct=lessonProgress(i);
     el.innerHTML=`${pct>=100?'<span class="emo lesson-done">✅</span>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
     el.onclick=()=>startLesson(i);
   });
+  const hb=document.getElementById('hero-lesson-btn');
+  if(hb){const ni=nextLessonIdx();const les=S.lang.lessons[ni];
+    hb.innerHTML=`<span class="emo">▶️</span> ${les?(lessonProgress(ni)>0?'Verder: ':'Les ')+les.title:'Les starten'}`;}
 }
 // Render all lesson cards (plus the exam card) on the Lessons view.
 function renderAllLessons(){
