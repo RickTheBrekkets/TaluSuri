@@ -261,17 +261,21 @@ function authInit(){
   if(!AUTH_ENABLED){if(btn)btn.style.display='none';return;}
   if(btn)btn.style.display='';
   // Fires on initial session, login, and logout (supabase-js persists the session locally).
-  sb.auth.onAuthStateChange(async(event,session)=>{
+  sb.auth.onAuthStateChange((event,session)=>{
+    // IMPORTANT: keep this callback synchronous and fast. supabase-js invokes it inside its
+    // auth lock and (in current versions) awaits it — so awaiting heavy work here (a profile
+    // load) blocks the very signIn/refresh that triggered it, making login hang ("knop doet
+    // niks" / "duurt te lang"). Update the UI immediately, then load the profile DETACHED.
     AUTH.user=session?.user||null;
-    // Never let a profile-load error suppress the topbar update — otherwise the pill shows
-    // "Inloggen" after a refresh even though the session is restored (AUTH.user is set).
-    if(AUTH.user){try{await authLoadProfile();}catch(e){console.error('authLoadProfile failed:',e);}}
-    else AUTH.profile=null;
+    if(!AUTH.user)AUTH.profile=null;
     updateAuthUI();
     renderLeaderboard();
     if(typeof updateBetaSeats==='function')updateBetaSeats();   // refresh closed-beta seat count
-    // Arrived via a password-reset link → let them set a new password.
     if(event==='PASSWORD_RECOVERY')document.getElementById('pw-reset-modal').style.display='flex';
+    if(AUTH.user)setTimeout(()=>{
+      authLoadProfile().catch(e=>console.error('authLoadProfile failed:',e))
+        .finally(()=>{try{updateAuthUI();renderLeaderboard();}catch(e){}});
+    },0);
   });
   updateAuthUI();
 }
