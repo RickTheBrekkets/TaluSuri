@@ -14,8 +14,16 @@ let sb = null;
 // flowType 'implicit': magic-link/recovery links carry a hash token that establishes a
 // session on load without a stored PKCE code-verifier — so password-reset links work
 // reliably (incl. across browsers/devices). detectSessionInUrl consumes that hash.
+// Custom auth lock: supabase-js serializes auth calls with the Web Locks API, which WAITS
+// forever if another tab (or a stuck operation) holds the lock — making signIn/signOut
+// silently hang ("knop doet niks"). Grab the lock only if free; if busy, run unlocked rather
+// than block. Worst case is a rare cross-tab token race, far better than a frozen login.
+function authLock(name, _acquireTimeout, fn){
+  if(typeof navigator==='undefined' || !navigator.locks || !navigator.locks.request) return fn();
+  return navigator.locks.request(name, {ifAvailable:true}, ()=>fn());
+}
 if (AUTH_ENABLED) sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
-  auth: { flowType: 'implicit', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+  auth: { flowType: 'implicit', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true, lock: authLock }
 });
 window.SB = sb;   // shared client for community.js / admin.js (null when auth disabled)
 
@@ -88,22 +96,35 @@ function authToggleMode(){authMode=authMode==='login'?'signup':'login';authApply
 async function authPasswordSubmit(){
   const email=document.getElementById('auth-email').value.trim();
   const pw=document.getElementById('auth-pw').value;
-  if(!email||!pw)return;
+  if(!email||!pw){alert('Vul je e-mailadres en wachtwoord in.');return;}
   if(pw.length<6){alert('Wachtwoord moet minstens 6 tekens zijn.');return;}
-  if(authMode==='signup'){
-    const max=window.BETA_MAX_ACCOUNTS||0;
-    const count=await window.fetchAccountCount();
-    if(max&&count!==null&&count>=max){alert('De gesloten bèta zit vol ('+count+'/'+max+' plekken bezet). Houd ons in de gaten voor de volgende ronde!');return;}
+  const btn=document.getElementById('auth-submit-btn');
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Bezig…';}
+  // Never let the request hang silently — race it against a timeout so the button always
+  // either succeeds, shows an error, or tells the user to retry.
+  const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error('__timeout')),ms))]);
+  try{
+    if(authMode==='signup'){
+      const max=window.BETA_MAX_ACCOUNTS||0;
+      const count=await window.fetchAccountCount();
+      if(max&&count!==null&&count>=max){alert('De gesloten bèta zit vol ('+count+'/'+max+' plekken bezet). Houd ons in de gaten voor de volgende ronde!');return;}
+    }
+    const res=await withTimeout(authMode==='signup'
+      ? sb.auth.signUp({email,password:pw})
+      : sb.auth.signInWithPassword({email,password:pw}), 15000);
+    if(res.error){alert((authMode==='signup'?'Registreren':'Inloggen')+' mislukt: '+res.error.message);return;}
+    if(authMode==='signup'&&!res.data.session){
+      alert('Account aangemaakt. Bevestig je e-mail om in te loggen — of schakel e-mailbevestiging uit in Supabase (Auth → Providers → Email).');
+      return;
+    }
+    authCloseModal();   // onAuthStateChange handles profile load + UI refresh
+  }catch(e){
+    if(e&&e.message==='__timeout')alert('Inloggen duurt te lang. Sluit eventuele andere TaluSuri-tabbladen en herlaad de pagina, en probeer opnieuw.');
+    else alert('Er ging iets mis bij het inloggen. Probeer het opnieuw.');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=orig;}
   }
-  const res=authMode==='signup'
-    ? await sb.auth.signUp({email,password:pw})
-    : await sb.auth.signInWithPassword({email,password:pw});
-  if(res.error){alert((authMode==='signup'?'Registreren':'Inloggen')+' mislukt: '+res.error.message);return;}
-  if(authMode==='signup'&&!res.data.session){
-    alert('Account aangemaakt. Bevestig je e-mail om in te loggen — of schakel e-mailbevestiging uit in Supabase (Auth → Providers → Email).');
-    return;
-  }
-  authCloseModal();   // onAuthStateChange handles profile load + UI refresh
 }
 // Send a password-reset email (also how old magic-link accounts set their first password).
 async function authForgot(){
