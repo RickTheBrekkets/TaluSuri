@@ -148,6 +148,10 @@ function closeRecordModal(){
 
 async function toggleRecord(){
   if(mediaRecorder && mediaRecorder.state==='recording'){ mediaRecorder.stop(); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder==='undefined'){
+    document.getElementById('rec-status').textContent='Opnemen wordt niet ondersteund in deze browser. Probeer Chrome, Edge of een recente Safari.';
+    return;
+  }
   try{
     const stream = await navigator.mediaDevices.getUserMedia({audio:true});
     recChunks=[]; mediaRecorder=new MediaRecorder(stream);
@@ -168,7 +172,9 @@ async function toggleRecord(){
     document.getElementById('rec-toggle').textContent='⏹ Stop opname';
     document.getElementById('rec-status').textContent='Aan het opnemen…';
   }catch(err){
-    document.getElementById('rec-status').textContent='Microfoon niet beschikbaar. Sta microfoon-toegang toe in je browser en probeer opnieuw.';
+    document.getElementById('rec-status').textContent = (err && err.name==='NotAllowedError')
+      ? 'Microfoon-toegang geweigerd. Sta het toe in je browser-instellingen en probeer opnieuw.'
+      : 'Microfoon niet beschikbaar. Controleer of er een microfoon is aangesloten en probeer opnieuw.';
   }
 }
 
