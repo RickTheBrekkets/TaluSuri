@@ -9,9 +9,14 @@ window.OFFICIAL_AUDIO = window.OFFICIAL_AUDIO || {};  // word_key -> best commun
 // Stable key for a word across the app: "<langId>|<word>".
 function wordKey(langId, w){ return langId + '|' + w; }
 
-// ═══ COMMUNITY AUDIO (a community recording replaces the robot voice when available) ═══
-// Build word_key -> best recording URL. Always prefer a community recording over TTS;
-// among recordings, an official (admin-promoted) one wins, otherwise the highest-voted.
+// Net upvotes a (non-official) community recording needs before it auto-replaces the robot
+// voice. An admin-promoted (official) recording always wins, regardless of score.
+const VOICE_MIN_SCORE = 3;
+
+// ═══ COMMUNITY AUDIO (a vetted community recording replaces the robot voice) ═══
+// Build word_key -> active recording URL. An official (admin-promoted) recording wins;
+// otherwise the highest-voted one, but ONLY once its net score reaches VOICE_MIN_SCORE — so a
+// single unreviewed or low-quality clip never silently overrides TTS for everyone.
 async function loadOfficialAudio(){
   window.OFFICIAL_AUDIO = {};
   if(!SB) return;
@@ -25,7 +30,11 @@ async function loadOfficialAudio(){
       const cur=best[r.word_key];
       if(!cur || (cand.off&&!cur.off) || (cand.off===cur.off && cand.score>cur.score)) best[r.word_key]=cand;
     });
-    Object.keys(best).forEach(k=>{ window.OFFICIAL_AUDIO[k] = SB.storage.from('pronunciations').getPublicUrl(best[k].path).data.publicUrl; });
+    Object.keys(best).forEach(k=>{
+      const c=best[k];
+      if(c.off || c.score>=VOICE_MIN_SCORE)   // gate: official, or enough community upvotes
+        window.OFFICIAL_AUDIO[k] = SB.storage.from('pronunciations').getPublicUrl(c.path).data.publicUrl;
+    });
   }
   if(typeof refreshAudioUI==='function') refreshAudioUI();   // show gold speakers now that recordings are known
 }
@@ -67,15 +76,24 @@ async function renderRecordingsList(){
   const scores = await fetchScores(recs.map(r=>r.id));
   recs = recs.map(r=>({...r, score: scores[r.id]?.score || 0}));
   recs.sort((a,b)=>b.score-a.score);
+  // Which recording is actually the active voice: an official one, else the top one once it
+  // reaches VOICE_MIN_SCORE. Below that the robot voice stays and we show votes-to-go.
+  const officialRec = recs.find(r=>r.is_official);
+  const top = recs[0];
+  const activeId = officialRec ? officialRec.id : (top && top.score>=VOICE_MIN_SCORE ? top.id : null);
+  let note='';
+  if(activeId) note=`<div style="font-size:12px;color:var(--gold);margin-bottom:8px;">🔊 De gemarkeerde opname vervangt nu de computerstem.</div>`;
+  else if(top){ const need=Math.max(1,VOICE_MIN_SCORE-top.score); note=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">🤖 Computerstem nog actief — nog ${need} stem${need===1?'':'men'} tot de beste opname het overneemt.</div>`; }
   // the current user's existing vote value per recording (1 / -1)
   let mine = {};
   if(AUTH.user){
     const {data:vs} = await SB.from('recording_votes').select('recording_id,value').eq('user_id', AUTH.user.id).in('recording_id', recs.map(r=>r.id));
     (vs||[]).forEach(v=>{ mine[v.recording_id]=v.value; });
   }
-  list.innerHTML = recs.map((r,i)=>{
+  list.innerHTML = note + recs.map((r,i)=>{
     const url = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
-    const best = (i===0 && r.score>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
+    const best = (r.id===activeId) ? ' <span style="color:var(--gold);font-size:11px;">🔊 in gebruik</span>'
+               : (i===0 && r.score>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
     const official = r.is_official ? ' <span style="font-size:11px;">✅ officieel</span>' : '';
     const up=mine[r.id]===1, down=mine[r.id]===-1;
     return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
