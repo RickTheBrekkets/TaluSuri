@@ -326,14 +326,21 @@ function nextLessonIdx(){
 }
 // Start the lesson where the user left off (home hero button).
 function startNextLesson(){startLesson(nextLessonIdx());}
-// Render the two lesson cards shown on the home screen, and point the hero button at the
-// next lesson in the learning path.
+// Render the two lesson cards shown on the home screen — they slide along the learning path
+// to start at where the user left off — and point the hero button at the next lesson.
 function renderHomeLessons(){
-  S.lang.lessons.slice(0,2).forEach((l,i)=>{
-    const el=document.getElementById('les'+i);if(!el)return;const pct=lessonProgress(i);
-    el.innerHTML=`${pct>=100?'<span class="emo lesson-done">✅</span>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${i+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
-    el.onclick=()=>startLesson(i);
-  });
+  const n=S.lang.lessons.length;
+  let start=nextLessonIdx();
+  if(start>n-2)start=Math.max(0,n-2);   // keep both cards filled when near the end of the path
+  for(let k=0;k<2;k++){
+    const el=document.getElementById('les'+k);if(!el)continue;
+    const idx=start+k, l=S.lang.lessons[idx];
+    if(!l){el.style.display='none';continue;}
+    el.style.display='';
+    const pct=lessonProgress(idx);
+    el.innerHTML=`${pct>=100?'<span class="emo lesson-done">✅</span>':''}<div class="lesson-emoji">${l.emoji}</div><div class="lesson-title">${l.title}</div><div class="lesson-meta">Les ${idx+1} · 6 vragen · ${l.xp} XP</div><div class="lesson-bar"><div class="lesson-fill" style="width:${pct}%"></div></div>`;
+    el.onclick=()=>startLesson(idx);
+  }
   const hb=document.getElementById('hero-lesson-btn');
   if(hb){const ni=nextLessonIdx();const les=S.lang.lessons[ni];
     hb.innerHTML=`<span class="emo">▶️</span> ${les?(lessonProgress(ni)>0?'Verder: ':'Les ')+les.title:'Les starten'}`;}
