@@ -169,12 +169,24 @@ function authOpenNameModal(){
   document.getElementById('name-input').value='';
   document.getElementById('name-modal').style.display='flex';
 }
+// True when another account already uses this display name (case-insensitive). The DB unique
+// index (username-unique.sql) is the hard guarantee; this is just for a friendly message.
+async function isNameTaken(name){
+  if(!sb||!name)return false;
+  try{
+    const {data}=await sb.from('profiles').select('id').ilike('display_name',name).neq('id',AUTH.user?.id||'00000000-0000-0000-0000-000000000000').limit(1);
+    return !!(data&&data.length);
+  }catch(e){return false;}
+}
 // Save the chosen display name, create the profiles row (migrating local XP), and refresh.
 async function authSubmitName(){
   const name=document.getElementById('name-input').value.trim();
   if(!name)return;
+  if(name.length>24){alert('Naam mag maximaal 24 tekens zijn.');return;}
+  if(await isNameTaken(name)){alert('Die weergavenaam is al in gebruik. Kies een andere.');return;}
   AUTH.profile={display_name:name,xp:S.xp,streak:S.streak};
-  await authPushProfile();
+  const ok=await authPushProfile();
+  if(!ok){alert('Opslaan mislukt — mogelijk is die naam net bezet. Kies een andere en probeer opnieuw.');return;}
   document.getElementById('name-modal').style.display='none';
   updateAuthUI();
   renderLeaderboard();

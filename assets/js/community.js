@@ -348,6 +348,7 @@ async function renameUser(){
   const name=(prompt('Nieuwe weergavenaam (max 24 tekens).\nLet op: je kunt dit maar ÉÉN keer wijzigen.', cur)||'').trim();
   if(!name || name===cur) return;
   if(name.length>24){ alert('Naam mag maximaal 24 tekens zijn.'); return; }
+  if(typeof isNameTaken==='function' && await isNameTaken(name)){ alert('Die weergavenaam is al in gebruik. Kies een andere.'); return; }
   if(!confirm('Je weergavenaam wordt "'+name+'".\nDit kan hierna niet meer gewijzigd worden. Doorgaan?')) return;
   const prev=AUTH.profile.display_name;
   AUTH.profile.display_name=name;
