@@ -349,10 +349,19 @@ async function renameUser(){
   if(!name || name===cur) return;
   if(name.length>24){ alert('Naam mag maximaal 24 tekens zijn.'); return; }
   if(!confirm('Je weergavenaam wordt "'+name+'".\nDit kan hierna niet meer gewijzigd worden. Doorgaan?')) return;
+  const prev=AUTH.profile.display_name;
   AUTH.profile.display_name=name;
   S.nameChanged=true;
+  // Only commit the one-time change once the server has accepted it — otherwise revert,
+  // so a failed sync can't leave the user "spent" locally (or let them rename twice).
+  let ok=false;
+  try{ ok=(typeof authPushProfile==='function') ? await authPushProfile() : false; }catch(e){ ok=false; }
+  if(!ok){
+    AUTH.profile.display_name=prev; S.nameChanged=false; saveState();
+    alert('Opslaan van je nieuwe naam is mislukt. Probeer het opnieuw.');
+    return;
+  }
   saveState();
-  try{ if(typeof authPushProfile==='function') await authPushProfile(); }catch(e){}
   if(typeof updateAuthUI==='function') updateAuthUI();
   renderProfile();
   if(typeof renderLeaderboard==='function') renderLeaderboard();

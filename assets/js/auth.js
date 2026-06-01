@@ -236,7 +236,7 @@ async function authLoadProfile(){
 }
 // Upsert the current state to the profiles row (idempotent; RLS restricts to own id).
 async function authPushProfile(){
-  if(!AUTH.user||!AUTH.profile)return;
+  if(!AUTH.user||!AUTH.profile)return false;
   if(typeof rollPeriods==='function')rollPeriods();   // ensure period counters are current before syncing
   const payload={
     id:AUTH.user.id,
@@ -248,7 +248,8 @@ async function authPushProfile(){
   };
   if(window.__progressCol!==false)payload.progress=progressSnapshot();   // omit only if the column is known missing
   const {error}=await sb.from('profiles').upsert(payload);
-  if(error&&/progress/.test(error.message||'')){window.__progressCol=false;await sb.from('profiles').upsert((delete payload.progress,payload));}
+  if(error&&/progress/.test(error.message||'')){window.__progressCol=false;const {error:e2}=await sb.from('profiles').upsert((delete payload.progress,payload));return !e2;}
+  return !error;
 }
 
 // Debounced sync hook — saveState() in state.js calls this after every XP/progress change.
@@ -293,6 +294,7 @@ function authInit(){
     if(typeof updateBetaSeats==='function')updateBetaSeats();   // refresh closed-beta seat count
     if(event==='PASSWORD_RECOVERY')document.getElementById('pw-reset-modal').style.display='flex';
     if(AUTH.user)setTimeout(()=>{
+      if(!AUTH.user)return;   // logged out again before this fired — don't load a stale profile
       authLoadProfile().catch(e=>console.error('authLoadProfile failed:',e))
         .finally(()=>{try{updateAuthUI();renderLeaderboard();}catch(e){}});
     },0);
