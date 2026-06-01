@@ -337,6 +337,25 @@ function renderProfile(){
     badges.innerHTML = earned.length ? earned.map(b=>`<span title="${b.name} — ${b.desc}" style="font-size:24px;">${b.icon}</span>`).join(' ')
                                      : '<span style="font-size:12px;color:var(--muted);">Nog geen badges.</span>';
   }
+  const rn=document.getElementById('pf-rename');
+  if(rn) rn.style.display = (AUTH.user && !S.nameChanged) ? 'inline-block' : 'none';   // one rename allowed
+}
+// Change the display name — allowed only ONCE per account. Marks it used and syncs.
+async function renameUser(){
+  if(!AUTH.user||!AUTH.profile){ alert('Log eerst in.'); return; }
+  if(S.nameChanged){ alert('Je kunt je weergavenaam maar één keer wijzigen — dat is al gebeurd.'); return; }
+  const cur=AUTH.profile.display_name||'';
+  const name=(prompt('Nieuwe weergavenaam (max 24 tekens).\nLet op: je kunt dit maar ÉÉN keer wijzigen.', cur)||'').trim();
+  if(!name || name===cur) return;
+  if(name.length>24){ alert('Naam mag maximaal 24 tekens zijn.'); return; }
+  if(!confirm('Je weergavenaam wordt "'+name+'".\nDit kan hierna niet meer gewijzigd worden. Doorgaan?')) return;
+  AUTH.profile.display_name=name;
+  S.nameChanged=true;
+  saveState();
+  try{ if(typeof authPushProfile==='function') await authPushProfile(); }catch(e){}
+  if(typeof updateAuthUI==='function') updateAuthUI();
+  renderProfile();
+  if(typeof renderLeaderboard==='function') renderLeaderboard();
 }
 
 // ═══ ACCOUNT DELETION ("vergeet mij") ═══
