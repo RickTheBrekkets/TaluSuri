@@ -98,8 +98,36 @@ async function vote(id, value){
   await renderRecordingsList();
 }
 
-// ═══ RECORD MODAL (MediaRecorder + file-upload fallback) ═══
+// ═══ RECORD MODAL (live microphone recording only — no file upload) ═══
 let mediaRecorder=null, recChunks=[], recordedBlob=null;
+// Live waveform drawn from the mic stream while recording.
+let _waveCtx=null, _waveRaf=null;
+function startWave(stream){
+  const canvas=document.getElementById('rec-wave'); if(!canvas) return;
+  const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+  canvas.style.display='block';
+  _waveCtx=new AC();
+  const analyser=_waveCtx.createAnalyser(); analyser.fftSize=1024;
+  _waveCtx.createMediaStreamSource(stream).connect(analyser);
+  const buf=new Uint8Array(analyser.fftSize), g=canvas.getContext('2d');
+  const colour=(getComputedStyle(document.documentElement).getPropertyValue('--green')||'#3A7A4E').trim();
+  const draw=()=>{
+    _waveRaf=requestAnimationFrame(draw);
+    analyser.getByteTimeDomainData(buf);
+    const w=canvas.width, h=canvas.height;
+    g.clearRect(0,0,w,h);
+    g.lineWidth=2; g.strokeStyle=colour; g.beginPath();
+    const slice=w/buf.length;
+    for(let i=0;i<buf.length;i++){const y=(buf[i]/128)*h/2; const x=i*slice; i?g.lineTo(x,y):g.moveTo(x,y);}
+    g.stroke();
+  };
+  draw();
+}
+function stopWave(){
+  if(_waveRaf) cancelAnimationFrame(_waveRaf); _waveRaf=null;
+  if(_waveCtx){ try{_waveCtx.close();}catch(e){} _waveCtx=null; }
+  const canvas=document.getElementById('rec-wave'); if(canvas) canvas.style.display='none';
+}
 
 function openRecordModal(){
   if(!AUTH.user){ alert('Log eerst in om een opname in te sturen.'); authOpenModal(); return; }
@@ -108,12 +136,13 @@ function openRecordModal(){
   document.getElementById('rec-toggle').textContent = '⏺ Start opname';
   document.getElementById('rec-status').textContent = '';
   const a=document.getElementById('rec-preview'); a.style.display='none'; a.removeAttribute('src');
-  document.getElementById('rec-file').value='';
+  stopWave();
   document.getElementById('rec-submit').disabled=true;
   document.getElementById('rec-modal').style.display='flex';
 }
 function closeRecordModal(){
   if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop();
+  stopWave();
   document.getElementById('rec-modal').style.display='none';
 }
 
@@ -124,6 +153,7 @@ async function toggleRecord(){
     recChunks=[]; mediaRecorder=new MediaRecorder(stream);
     mediaRecorder.ondataavailable = e=>{ if(e.data.size) recChunks.push(e.data); };
     mediaRecorder.onstop = ()=>{
+      stopWave();
       stream.getTracks().forEach(t=>t.stop());
       recordedBlob = new Blob(recChunks, {type: recChunks[0]?.type || 'audio/webm'});
       const a=document.getElementById('rec-preview'); a.src=URL.createObjectURL(recordedBlob); a.style.display='block';
@@ -132,19 +162,14 @@ async function toggleRecord(){
       document.getElementById('rec-submit').disabled=false;
     };
     mediaRecorder.start();
+    document.getElementById('rec-preview').style.display='none';
+    document.getElementById('rec-submit').disabled=true;
+    startWave(stream);
     document.getElementById('rec-toggle').textContent='⏹ Stop opname';
     document.getElementById('rec-status').textContent='Aan het opnemen…';
   }catch(err){
-    document.getElementById('rec-status').textContent='Microfoon niet beschikbaar — upload een bestand hieronder.';
+    document.getElementById('rec-status').textContent='Microfoon niet beschikbaar. Sta microfoon-toegang toe in je browser en probeer opnieuw.';
   }
-}
-// File-upload fallback when the mic is unavailable/denied.
-function onRecFile(e){
-  const f=e.target.files[0]; if(!f) return;
-  recordedBlob=f;
-  const a=document.getElementById('rec-preview'); a.src=URL.createObjectURL(f); a.style.display='block';
-  document.getElementById('rec-status').textContent='Bestand gekozen — stuur in.';
-  document.getElementById('rec-submit').disabled=false;
 }
 
 async function submitRecording(){

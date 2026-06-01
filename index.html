@@ -510,7 +510,7 @@
       <ol style="font-size:13px;color:var(--ink);line-height:1.7;padding-left:18px;margin:0;">
         <li>Log in via de <strong>👤-knop</strong> rechtsboven (e-mailadres en wachtwoord).</li>
         <li>Open het <strong>Woordenboek</strong> of een flashcard en tik op het <strong>🎙️-icoon</strong> bij een woord.</li>
-        <li>Tik op <strong>Neem op</strong>, spreek het woord duidelijk in, en <strong>stuur het in</strong> (of upload een geluidsbestand).</li>
+        <li>Tik op <strong>Neem op</strong>, spreek het woord duidelijk in (je ziet een live geluidsgolf), en <strong>stuur het in</strong>.</li>
         <li>Stem met <strong>▲</strong> op de beste uitspraak van anderen. Veel upvotes leveren jou badges op: 🎤 → 🌟 → 👑.</li>
         <li>Een beheerder kan een populaire opname (≥5 upvotes) tot <strong>officiële uitspraak</strong> maken — die vervangt dan de computerstem.</li>
       </ol>
@@ -556,9 +556,8 @@
     <div class="onboard-sub">Woord: <strong id="rec-modal-word"></strong></div>
     <button class="onboard-btn" id="rec-toggle" onclick="toggleRecord()">⏺ Start opname</button>
     <div id="rec-status" style="font-size:13px;color:var(--muted);margin-top:10px;min-height:18px;"></div>
+    <canvas id="rec-wave" width="600" height="64" style="display:none;width:100%;height:64px;margin-top:14px;"></canvas>
     <audio id="rec-preview" controls style="display:none;width:100%;margin-top:12px;"></audio>
-    <div style="font-size:12px;color:var(--muted);margin:14px 0 6px;">of upload een geluidsbestand:</div>
-    <input type="file" id="rec-file" accept="audio/*" onchange="onRecFile(event)" style="font-size:13px;">
     <button class="onboard-btn" id="rec-submit" onclick="submitRecording()" disabled style="margin-top:16px;">Insturen</button>
     <button class="onboard-skip" onclick="closeRecordModal()">Annuleren</button>
   </div>
