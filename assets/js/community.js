@@ -106,6 +106,9 @@ function startWave(stream){
   const canvas=document.getElementById('rec-wave'); if(!canvas) return;
   const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
   canvas.style.display='block';
+  // Size the backing store to the displayed size × devicePixelRatio for a crisp line on retina.
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round((canvas.clientWidth||600)*dpr); canvas.height=Math.round(64*dpr);
   _waveCtx=new AC();
   const analyser=_waveCtx.createAnalyser(); analyser.fftSize=1024;
   _waveCtx.createMediaStreamSource(stream).connect(analyser);
@@ -116,7 +119,7 @@ function startWave(stream){
     analyser.getByteTimeDomainData(buf);
     const w=canvas.width, h=canvas.height;
     g.clearRect(0,0,w,h);
-    g.lineWidth=2; g.strokeStyle=colour; g.beginPath();
+    g.lineWidth=2*dpr; g.strokeStyle=colour; g.beginPath();
     const slice=w/buf.length;
     for(let i=0;i<buf.length;i++){const y=(buf[i]/128)*h/2; const x=i*slice; i?g.lineTo(x,y):g.moveTo(x,y);}
     g.stroke();
@@ -154,12 +157,17 @@ async function toggleRecord(){
   }
   try{
     const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    recChunks=[]; mediaRecorder=new MediaRecorder(stream);
+    recChunks=[];
+    // Pick a codec the browser actually supports (Safari needs mp4/aac, not webm).
+    let mime=''; const prefs=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'];
+    if(MediaRecorder.isTypeSupported){ for(const t of prefs){ if(MediaRecorder.isTypeSupported(t)){ mime=t; break; } } }
+    try{ mediaRecorder = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
+    catch(e){ mediaRecorder = new MediaRecorder(stream); }
     mediaRecorder.ondataavailable = e=>{ if(e.data.size) recChunks.push(e.data); };
     mediaRecorder.onstop = ()=>{
       stopWave();
       stream.getTracks().forEach(t=>t.stop());
-      recordedBlob = new Blob(recChunks, {type: recChunks[0]?.type || 'audio/webm'});
+      recordedBlob = new Blob(recChunks, {type: recChunks[0]?.type || mediaRecorder.mimeType || 'audio/webm'});
       const a=document.getElementById('rec-preview'); a.src=URL.createObjectURL(recordedBlob); a.style.display='block';
       document.getElementById('rec-toggle').textContent='⏺ Opnieuw opnemen';
       document.getElementById('rec-status').textContent='Opname klaar — beluister en stuur in.';
@@ -185,7 +193,11 @@ async function submitRecording(){
   btn.disabled=true; btn.textContent='Bezig met insturen…';
   try{
     const uid = AUTH.user.id;
-    const ext = (recordedBlob.type && recordedBlob.type.includes('ogg')) ? 'ogg' : (recordedBlob.type && recordedBlob.type.includes('mp')) ? 'mp3' : 'webm';
+    const t = recordedBlob.type || '';
+    const ext = (t.includes('mp4')||t.includes('aac')||t.includes('m4a')) ? 'm4a'
+              : t.includes('ogg') ? 'ogg'
+              : (t.includes('mpeg')||t.includes('mp3')) ? 'mp3'
+              : 'webm';
     const rid = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'r'+Date.now()+Math.random().toString(16).slice(2);
     const path = `${uid}/${rid}.${ext}`;
     const {error:upErr} = await SB.storage.from('pronunciations').upload(path, recordedBlob, {contentType: recordedBlob.type || 'audio/webm', upsert:false});
@@ -346,21 +358,27 @@ function renderProfile(){
   const rn=document.getElementById('pf-rename');
   if(rn) rn.style.display = (AUTH.user && !S.nameChanged) ? 'inline-block' : 'none';   // one rename allowed
 }
-// Change the display name — allowed only ONCE per account. Marks it used and syncs.
-async function renameUser(){
+// Open the rename modal (display-name change is allowed only ONCE per account).
+function renameUser(){
   if(!AUTH.user||!AUTH.profile){ alert('Log eerst in.'); return; }
   if(S.nameChanged){ alert('Je kunt je weergavenaam maar één keer wijzigen — dat is al gebeurd.'); return; }
+  const inp=document.getElementById('rename-input'); if(inp)inp.value=AUTH.profile.display_name||'';
+  const m=document.getElementById('rename-modal'); if(m)m.style.display='flex';
+}
+function closeRenameModal(){ const m=document.getElementById('rename-modal'); if(m)m.style.display='none'; }
+// Submit the rename from the modal: validate, check uniqueness, then commit ONLY after the
+// server accepts it — so a failed sync can't spend the one-time change or allow a second one.
+async function submitRename(){
+  if(!AUTH.user||!AUTH.profile){ closeRenameModal(); return; }
+  if(S.nameChanged){ alert('Je kunt je weergavenaam maar één keer wijzigen — dat is al gebeurd.'); closeRenameModal(); return; }
+  const name=(document.getElementById('rename-input').value||'').trim();
   const cur=AUTH.profile.display_name||'';
-  const name=(prompt('Nieuwe weergavenaam (max 24 tekens).\nLet op: je kunt dit maar ÉÉN keer wijzigen.', cur)||'').trim();
-  if(!name || name===cur) return;
+  if(!name || name===cur){ closeRenameModal(); return; }
   if(name.length>24){ alert('Naam mag maximaal 24 tekens zijn.'); return; }
   if(typeof isNameTaken==='function' && await isNameTaken(name)){ alert('Die weergavenaam is al in gebruik. Kies een andere.'); return; }
-  if(!confirm('Je weergavenaam wordt "'+name+'".\nDit kan hierna niet meer gewijzigd worden. Doorgaan?')) return;
   const prev=AUTH.profile.display_name;
   AUTH.profile.display_name=name;
   S.nameChanged=true;
-  // Only commit the one-time change once the server has accepted it — otherwise revert,
-  // so a failed sync can't leave the user "spent" locally (or let them rename twice).
   let ok=false;
   try{ ok=(typeof authPushProfile==='function') ? await authPushProfile() : false; }catch(e){ ok=false; }
   if(!ok){
@@ -369,6 +387,7 @@ async function renameUser(){
     return;
   }
   saveState();
+  closeRenameModal();
   if(typeof updateAuthUI==='function') updateAuthUI();
   renderProfile();
   if(typeof renderLeaderboard==='function') renderLeaderboard();

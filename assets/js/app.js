@@ -719,11 +719,11 @@ function renderComplete(){
   if(passedExam)body+=`<div class="complete-reward" style="background:var(--green-l);color:var(--green);"><span class="emo">🏅</span> Geslaagd!</div>`;
   body+=`</div>`;
   if(passedExam)body+=`<div class="complete-badge-unlock show"><div style="font-size:13px;font-weight:500;color:var(--green);margin-bottom:3px;">🏅 Examen gehaald!</div><div style="font-size:12px;color:var(--muted);">Je beheerst de basis van ${S.lang.name}. Geweldig werk!</div></div>`;
-  // Guest who just finished their first lesson → nudge them to log in so progress is kept.
-  // Shown once per device (a signed-out visitor loses progress on logout).
+  // Guest who just finished their first exercise (lesson, theme or crash) → nudge them to log
+  // in so progress is kept. Shown once per device (a signed-out visitor loses progress).
   const authOn=(typeof AUTH_ENABLED==='undefined')||AUTH_ENABLED;
   const isGuest=!(window.AUTH&&window.AUTH.user);
-  if(ex.type==='lesson'&&isGuest&&authOn&&!localStorage.getItem('talusuri_guest_saveprompt')){
+  if(isGuest&&authOn&&!localStorage.getItem('talusuri_guest_saveprompt')){
     try{localStorage.setItem('talusuri_guest_saveprompt','1');}catch(e){}
     body+=`<div class="complete-badge-unlock show" style="background:var(--gold-l);"><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;">💾 Bewaar je voortgang</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Je bent niet ingelogd. Maak gratis een account of log in om je XP, badges en lessen te bewaren — anders ben je ze kwijt zodra je weggaat.</div><button class="complete-btn" style="margin:0;" onclick="closeModal();authOpenModal();"><span class="emo">🔒</span> Inloggen / account maken</button></div>`;
   }

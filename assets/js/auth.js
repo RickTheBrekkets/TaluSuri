@@ -87,7 +87,7 @@ function authSignOut(){
 // Hide every auth overlay (login, name, password-reset). Used on logout and before opening
 // the login modal so a stray overlay can never sit on top of the topbar / block the pill.
 function authCloseAllModals(){
-  ['auth-modal','name-modal','pw-reset-modal'].forEach(id=>{const m=document.getElementById(id);if(m)m.style.display='none';});
+  ['auth-modal','name-modal','pw-reset-modal','rename-modal'].forEach(id=>{const m=document.getElementById(id);if(m)m.style.display='none';});
 }
 let authMode='login';   // 'login' or 'signup'
 function authOpenModal(){

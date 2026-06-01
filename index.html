@@ -107,6 +107,17 @@
   </div>
 </div>
 
+<!-- RENAME MODAL (one-time display-name change) -->
+<div class="onboard" id="rename-modal" style="display:none;z-index:650;">
+  <div class="onboard-inner" style="max-width:420px;">
+    <div class="onboard-q">Weergavenaam wijzigen</div>
+    <div class="onboard-sub">Je kunt dit maar <strong>één keer</strong> doen, dus kies zorgvuldig.</div>
+    <input class="contact-input" id="rename-input" type="text" maxlength="24" placeholder="Nieuwe naam" style="margin-bottom:12px;text-align:center;">
+    <button class="onboard-btn" onclick="submitRename()">Opslaan</button>
+    <button class="onboard-skip" onclick="closeRenameModal()">Annuleren</button>
+  </div>
+</div>
+
 <div class="app" id="mainApp" style="display:none;">
   <div class="beta-bar" id="beta-bar">
     <span class="beta-tag">GESLOTEN BÈTA</span>
