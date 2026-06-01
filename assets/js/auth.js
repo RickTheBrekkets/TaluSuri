@@ -53,8 +53,26 @@ function authButtonClick(){
 // Sign out (used by the profile view). Reset state/UI FIRST and immediately, then clear the
 // Supabase session fire-and-forget — so logout always works even if the supabase call hangs
 // or rejects (an awaited signOut could otherwise block the whole reset and "do nothing").
+// Reset the local progress to a blank "guest" state. Called on logout so a signed-out
+// visitor is treated as an unknown user (XP/streak/badges/lessons back to zero); the real
+// progress stays safe on the server and is restored on the next login.
+function resetProgressToGuest(){
+  S.xp=0; S.streak=1; S.weekXP=0; S.monthXP=0;
+  S.badges=[]; S.learnedWords=[];
+  S.themeProgress={}; S.crashProgress={};
+  S.seenLangs=[S.lang.id]; S.goal=null;
+  if(typeof rollPeriods==='function')rollPeriods();
+  saveState();   // AUTH.user is already null here, so onStateSaved won't push 0 to the server
+  try{
+    if(typeof renderStats==='function')renderStats();
+    if(typeof renderHomeLessons==='function')renderHomeLessons();
+    if(typeof renderAllLessons==='function')renderAllLessons();
+    if(typeof renderProfile==='function')renderProfile();
+  }catch(e){}
+}
 function authSignOut(){
   AUTH.user=null; AUTH.profile=null;
+  resetProgressToGuest();  // signed out → behandel als onbekende gebruiker, voortgang naar 0
   authCloseAllModals();   // never leave a modal covering the topbar after logout
   if(typeof updateAuthUI==='function')updateAuthUI();
   if(typeof renderLeaderboard==='function')renderLeaderboard();
