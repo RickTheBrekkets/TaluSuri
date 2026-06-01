@@ -785,7 +785,7 @@ function buildTourSteps(){
   const s=[
     {sel:'.tab[data-cat="leren"]',emoji:'📚',title:'Je leerpad',text:'Onder <b>Leren</b> vind je je <b>leerpad</b> — een stap-voor-stap route door alle thema\'s, van begroetingen tot werkwoorden.'},
     {sel:'.tab[data-cat="leren"]',emoji:'⚡',title:'Spoedcursus',text:'Ook onder <b>Leren</b>: de <b>spoedcursus</b> met de meest gebruikte woorden, gerangschikt op hoe vaak ze voorkomen.'},
-    {sel:'.tab[data-cat="oefenen"]',emoji:'🎙️',title:'Help met uitspraak',text:'In het <b>Woordenboek</b> (onder Oefenen) neem je bij elk woord je eigen uitspraak op. De community stemt erop — bij <b>5+ upvotes</b> kan een beheerder jouw opname tot <b>officiële uitspraak</b> maken die de computerstem vervangt.'}
+    {sel:'.tab[data-cat="oefenen"]',emoji:'🎙️',title:'Help met uitspraak',text:'In het <b>Woordenboek</b> (onder Oefenen) neem je bij elk woord je eigen uitspraak op. De community stemt erop — bij <b>3+ upvotes</b> vervangt jouw opname automatisch de computerstem (of een beheerder maakt hem officieel).'}
   ];
   if(isMobileDevice())s.push({sel:null,emoji:'📲',title:'Zet op je beginscherm',text:'Wil je TaluSuri als app gebruiken? '+homescreenHint(),install:true});
   return s;

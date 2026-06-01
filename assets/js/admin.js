@@ -1,11 +1,11 @@
 // TaluSuri — admin panel. Gated to emails in the `admins` table.
-// Promotes a community recording (with ≥5 upvotes) to the word's official
+// Promotes a community recording (with ≥3 upvotes) to the word's official
 // pronunciation, replacing the text-to-speech voice.
 // UI gating here is convenience only — the real protection is the is_admin()
 // RLS policy on recordings.update.
 
 const SBA = window.SB || null;
-const PROMOTE_MIN = 5;          // upvotes required before a recording is promotable
+const PROMOTE_MIN = 3;          // upvotes required before a recording is promotable (matches VOICE_MIN_SCORE)
 window.IS_ADMIN = false;
 
 // Check whether the logged-in user is an admin (called by community.js after login).
@@ -16,7 +16,7 @@ window.adminCheck = async function(){
   window.IS_ADMIN = !!data;
 };
 
-// Render the admin candidates list: top recording per word with ≥5 upvotes.
+// Render the admin candidates list: top recording per word with ≥3 upvotes.
 async function renderAdmin(){
   const cont = document.getElementById('admin-list');
   if(!cont) return;
