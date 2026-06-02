@@ -1088,10 +1088,30 @@ function updateSwitcherLabel(){const f=document.getElementById('ls-flag'),n=docu
 // Close the language-switcher dropdown when clicking anywhere outside it.
 document.addEventListener('click',e=>{const sw=document.getElementById('lang-switch');if(sw&&!sw.contains(e.target)){document.getElementById('lang-switch-menu')?.classList.remove('open');}});
 
+// ═══ KETI KOTI COUNTDOWN ═══
+// Keti Koti (1 July) — emancipation day; the day the closed beta opens to everyone.
+const KETI_KOTI = new Date('2026-07-01T00:00:00');
+function renderKetiKoti(){
+  const el=document.getElementById('kk-timer'); if(!el) return;
+  let diff=KETI_KOTI.getTime()-Date.now();
+  if(diff<=0){
+    el.innerHTML='<div style="font-size:15px;font-weight:600;">🎉 Fri! Keti Koti — TaluSuri is nu voor iedereen open. Fa waka!</div>';
+    if(window.__kkTimer){clearInterval(window.__kkTimer);window.__kkTimer=null;}
+    return;
+  }
+  const d=Math.floor(diff/864e5); diff-=d*864e5;
+  const h=Math.floor(diff/36e5); diff-=h*36e5;
+  const m=Math.floor(diff/6e4); diff-=m*6e4;
+  const s=Math.floor(diff/1e3);
+  const cell=(v,l)=>`<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px 12px;text-align:center;min-width:54px;"><div style="font-size:22px;font-weight:700;font-family:'Fraunces',serif;line-height:1;">${String(v).padStart(2,'0')}</div><div style="font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">${l}</div></div>`;
+  el.innerHTML=cell(d,'dagen')+cell(h,'uur')+cell(m,'min')+cell(s,'sec');
+}
+
 // ═══ INIT ═══
 // Render everything and initialise the app after onboarding.
 function bootApp(){
   applyTheme();renderStats();renderLangGrid();renderSourcesGrid();renderHomeBadges();renderBadgesGrid();setLang(S.lang);renderProgress();updateFeedbackBadge();renderCultureBanner();resetCbTimer();renderDiscover();updateSwitcherLabel();updateMistakesBadge();initBeta();
+  renderKetiKoti(); if(!window.__kkTimer)window.__kkTimer=setInterval(renderKetiKoti,1000);
 }
 // Entry point: show onboarding, or boot straight into the app if already onboarded.
 function init(){
