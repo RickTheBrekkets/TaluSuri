@@ -340,6 +340,40 @@ async function refreshContribBadges(){
   if(total>=100) unlockBadge('voice_100');
 }
 
+// ═══ REFERRALS ═══
+function inviteLink(){ return location.origin + '/?ref=' + (AUTH.user ? AUTH.user.id : ''); }
+async function refreshReferralBadges(){
+  if(!SB || !AUTH.user) return 0;
+  try{
+    const {count}=await SB.from('profiles').select('id',{count:'exact',head:true}).eq('referred_by',AUTH.user.id);
+    const n=count||0;
+    if(n>=1) unlockBadge('ambassador');
+    if(n>=5) unlockBadge('ambassador_5');
+    return n;
+  }catch(e){ return 0; }
+}
+function copyInvite(){
+  const l=inviteLink();
+  if(navigator.clipboard){ navigator.clipboard.writeText(l).then(()=>alert('Uitnodigingslink gekopieerd! Plak hem in WhatsApp of social.'),()=>prompt('Kopieer je link:',l)); }
+  else prompt('Kopieer je link:',l);
+}
+function shareInvite(){
+  const l=inviteLink();
+  const t='Leer de talen van Suriname met mij op TaluSuri! '+l;
+  if(navigator.share){ navigator.share({text:t,url:l}).catch(()=>{}); }
+  else copyInvite();
+}
+async function renderInvite(){
+  const cont=document.getElementById('pf-invite'); if(!cont) return;
+  if(!AUTH.user){ cont.innerHTML=''; return; }
+  const n=await refreshReferralBadges();
+  cont.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${n>0?'Je hebt <strong>'+n+'</strong> vriend'+(n===1?'':'en')+' uitgenodigd. 📣 Bedankt!':'Deel je link — krijg de Ambassadeur-badge zodra een vriend zich aanmeldt.'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="onboard-btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="copyInvite()">🔗 Kopieer link</button>
+      <button class="onboard-btn" style="width:auto;padding:8px 14px;font-size:13px;" onclick="shareInvite()">📤 Deel uitnodiging</button>
+    </div>`;
+}
+
 // Render the signed-in user's own recordings with the votes each one received.
 async function renderMyRecordings(){
   const cont=document.getElementById('pf-recordings'); if(!cont) return;
@@ -392,8 +426,9 @@ function renderProfile(){
   const nameEl=document.getElementById('pf-name'), emailEl=document.getElementById('pf-email'),
         ava=document.getElementById('pf-ava'), badges=document.getElementById('pf-badges');
   if(!nameEl) return;
-  if(!AUTH.user){ nameEl.textContent='Niet ingelogd'; if(emailEl)emailEl.textContent=''; if(ava)ava.innerHTML=''; if(badges)badges.innerHTML=''; const rc=document.getElementById('pf-recordings'); if(rc)rc.innerHTML=''; return; }
+  if(!AUTH.user){ nameEl.textContent='Niet ingelogd'; if(emailEl)emailEl.textContent=''; if(ava)ava.innerHTML=''; if(badges)badges.innerHTML=''; const rc=document.getElementById('pf-recordings'); if(rc)rc.innerHTML=''; const iv=document.getElementById('pf-invite'); if(iv)iv.innerHTML=''; return; }
   renderMyRecordings();
+  renderInvite();
   nameEl.textContent = AUTH.profile?.display_name || '—';
   if(emailEl) emailEl.textContent = AUTH.user.email || '';
   if(ava) ava.innerHTML = AUTH.profile?.avatar_url

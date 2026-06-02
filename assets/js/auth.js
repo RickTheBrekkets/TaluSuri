@@ -189,9 +189,20 @@ async function authSubmitName(){
   AUTH.profile={display_name:name,xp:S.xp,streak:S.streak};
   const ok=await authPushProfile();
   if(!ok){alert('Opslaan mislukt — mogelijk is die naam net bezet. Kies een andere en probeer opnieuw.');return;}
+  await applyPendingReferral();   // record who invited this new account, if anyone
   document.getElementById('name-modal').style.display='none';
   updateAuthUI();
   renderLeaderboard();
+}
+// Record a pending referral (?ref=<uid>) on the just-created profile, once. References a real
+// user (FK), so an invalid code just fails silently. Needs supabase/referrals.sql.
+async function applyPendingReferral(){
+  try{
+    const ref=localStorage.getItem('talusuri_ref');
+    if(!sb||!AUTH.user||!ref||ref===AUTH.user.id)return;
+    await sb.from('profiles').update({referred_by:ref}).eq('id',AUTH.user.id).is('referred_by',null);
+    localStorage.removeItem('talusuri_ref');
+  }catch(e){}
 }
 
 // ═══ PROFILE LOAD / SYNC ═══

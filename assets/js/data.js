@@ -33,6 +33,8 @@ const BADGES=[
 {id:'rec_first',icon:'🎤',name:'Stemgever',desc:'Eerste opname ingestuurd'},
 {id:'voice_25',icon:'🌟',name:'Geliefde stem',desc:'25 upvotes op je opnames'},
 {id:'voice_100',icon:'👑',name:'Uitspraakheld',desc:'100 upvotes op je opnames'},
+{id:'ambassador',icon:'📣',name:'Ambassadeur',desc:'Nodig een vriend uit'},
+{id:'ambassador_5',icon:'🤩',name:'Superambassadeur',desc:'Nodig 5 vrienden uit'},
 {id:'week_gold',icon:'🥇',name:'Goud van de week',desc:'Eindig 1e op het weekklassement'},
 {id:'week_silver',icon:'🥈',name:'Zilver van de week',desc:'Eindig 2e op het weekklassement'},
 {id:'week_bronze',icon:'🥉',name:'Brons van de week',desc:'Eindig 3e op het weekklassement'},
