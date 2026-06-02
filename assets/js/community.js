@@ -257,17 +257,18 @@ async function renderVoteDeck(){
   showVoteCard();
 }
 
-// Fetch recordings the user hasn't made and hasn't voted on yet.
+// Fetch every recording the user didn't make (including ones they already voted on, so the
+// deck is the same across accounts); annotate each with the user's current vote.
 async function loadVoteDeck(){
   const {data}=await SB.from('recordings').select('id,word,lang_id,display_name,audio_path').neq('user_id',AUTH.user.id);
   let recs=data||[];
+  let mine={};
   if(recs.length){
-    const {data:vs}=await SB.from('recording_votes').select('recording_id').eq('user_id',AUTH.user.id).in('recording_id',recs.map(r=>r.id));
-    const voted=new Set((vs||[]).map(v=>v.recording_id));
-    recs=recs.filter(r=>!voted.has(r.id));
+    const {data:vs}=await SB.from('recording_votes').select('recording_id,value').eq('user_id',AUTH.user.id).in('recording_id',recs.map(r=>r.id));
+    (vs||[]).forEach(v=>{ mine[v.recording_id]=v.value; });
   }
   const scores=await fetchScores(recs.map(r=>r.id));
-  recs=recs.map(r=>({...r,score:scores[r.id]?.score||0}));
+  recs=recs.map(r=>({...r,score:scores[r.id]?.score||0,myVote:mine[r.id]||0}));
   recs.sort((a,b)=>a.score-b.score); // surface under-voted clips first
   voteQueue=recs; voteIdx=0;
 }
@@ -289,7 +290,7 @@ function showVoteCard(){
         <div class="swipe-lang">${lang}</div>
         <div class="swipe-word">${r.word}</div>
         <button class="speak-btn" onclick="playRec('${url}')"><span class="emo">▶️</span> Beluister</button>
-        <div class="swipe-meta">door ${r.display_name||'Anoniem'} · score ${r.score}</div>
+        <div class="swipe-meta">door ${r.display_name||'Anoniem'} · score ${r.score}${r.myVote===1?' · jij: 👍':r.myVote===-1?' · jij: 👎':''}</div>
       </div>
     </div>
     <div class="swipe-actions">
