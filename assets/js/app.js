@@ -31,6 +31,35 @@ function hasOfficialAudio(text){
 }
 // Re-render the word UIs so gold speakers appear once official audio has loaded (called from community.js).
 function refreshAudioUI(){try{if(typeof filterDict==='function')filterDict();if(typeof renderFlash==='function')renderFlash();if(typeof filterWB==='function')filterWB();}catch(e){}}
+
+// ═══ SOUND EFFECTS ═══
+let _sfxCtx=null;
+function sfxCtx(){
+  if(!_sfxCtx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{_sfxCtx=new AC();}catch(e){return null;}}
+  if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+  return _sfxCtx;
+}
+// Short, upbeat "correct" cue with a Surinamese feel: two apinti-style drum taps (kawina
+// groove) resolving into a bright marimba two-note rise. Synthesized — no audio file needed.
+function playCorrect(){
+  const ctx=sfxCtx();if(!ctx)return;
+  const t0=ctx.currentTime;
+  const drum=(t,freq,gain)=>{ // membrane drum: pitched sine dropping fast
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(freq*0.5,t+0.12);
+    g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.13);
+    o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+0.14);
+  };
+  const note=(t,freq,gain)=>{ // bright marimba-ish pluck
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='triangle';o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+    o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+0.24);
+  };
+  drum(t0,180,0.5); drum(t0+0.10,150,0.4);
+  note(t0+0.16,1046.5,0.34); // C6
+  note(t0+0.30,1318.5,0.34); // E6
+}
 // A language is "low-resource" (under construction) when it has fewer than 100 words; the
 // spoedcursus is hidden for these and a call for native speakers/sources is shown.
 function isLowResource(l){l=l||S.lang;return ((l.words&&l.words.length)||0)<100;}
@@ -642,6 +671,7 @@ function afterAnswer(correct){
   S.ex.answered=true;
   const fb=document.getElementById('q-fb');
   if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;
+    if(typeof playCorrect==='function')playCorrect();
     const tw=S.ex.q[S.ex.cur].speak;   // mark the practised word as learned
     if(tw){const key=S.lang.id+'|'+tw;if(!S.learnedWords.includes(key))S.learnedWords.push(key);}
   }
