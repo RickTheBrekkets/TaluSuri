@@ -659,6 +659,8 @@ function renderExercise(){
     q.o.forEach(opt=>{const b=document.createElement('button');b.className='q-opt';b.textContent=opt;b.onclick=()=>answerMC(opt,q.c,b);opts.appendChild(b);});
   }
   if(q.kind==='type'){const inp=document.getElementById('q-input');inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkType();});setTimeout(()=>inp.focus(),100);}
+  // "Listen & choose": auto-play the word — speak() prefers a community recording over TTS.
+  if(q.kind==='listen'&&q.listenWord)speak(q.listenWord,S.lang.speechLang);
   ex.answered=false;
 }
 // Reveal the type-in hint only when the learner asks for it (hidden by default).
