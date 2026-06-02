@@ -1091,6 +1091,56 @@ function updateSwitcherLabel(){const f=document.getElementById('ls-flag'),n=docu
 // Close the language-switcher dropdown when clicking anywhere outside it.
 document.addEventListener('click',e=>{const sw=document.getElementById('lang-switch');if(sw&&!sw.contains(e.target)){document.getElementById('lang-switch-menu')?.classList.remove('open');}});
 
+// ═══ SHARE CARDS (social growth) ═══
+// Draw a branded square card to a canvas and share it (Web Share API with image), falling
+// back to a PNG download. Used for the word of the day and the progress card.
+async function shareImageCard({heading, big, sub, meta, shareText}){
+  const W=1080,H=1080,c=document.createElement('canvas');c.width=W;c.height=H;
+  const g=c.getContext('2d');
+  g.fillStyle='#FBF9F3';g.fillRect(0,0,W,H);
+  g.fillStyle='#2e6b41';g.fillRect(0,0,W,18);
+  g.textBaseline='alphabetic';
+  // logo
+  g.font='600 54px Georgia,serif';g.fillStyle='#1b2a20';g.fillText('Talu',80,150);
+  const tw=g.measureText('Talu').width;g.fillStyle='#2e6b41';g.fillText('Suri',80+tw,150);
+  // heading
+  g.fillStyle='#7a7a7a';g.font='34px DM Sans,Arial,sans-serif';g.fillText(heading,80,300);
+  // big word — auto-fit to width
+  let fs=150;g.fillStyle='#1b2a20';
+  do{ g.font='700 '+fs+'px Georgia,serif'; if(g.measureText(big).width<=W-160)break; fs-=6; }while(fs>48);
+  g.fillText(big,80,300+fs);
+  let y=300+fs;
+  if(sub){ g.fillStyle='#2e6b41';g.font='40px DM Sans,Arial,sans-serif';y+=70;g.fillText(sub,80,y); }
+  if(meta){ g.fillStyle='#444';g.font='38px DM Sans,Arial,sans-serif';y+=80;
+    // wrap meta
+    const words=meta.split(' ');let line='';
+    for(const w of words){ const t=line?line+' '+w:w; if(g.measureText(t).width>W-160){g.fillText(line,80,y);y+=54;line=w;}else line=t; }
+    g.fillText(line,80,y);
+  }
+  // footer
+  g.fillStyle='#7a7a7a';g.font='30px DM Sans,Arial,sans-serif';g.fillText('Leer de 9 talen van Suriname · talusuri.netlify.app',80,H-70);
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  const file=new File([blob],'talusuri.png',{type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file],text:shareText}); return; }catch(e){ if(e&&e.name==='AbortError')return; }
+  }
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='talusuri.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+// Share today's word of the day as an image card.
+function shareWordOfDay(){
+  const w=S.lang.words[new Date().getDay()%S.lang.words.length];
+  shareImageCard({heading:'Woord van de dag · '+S.lang.name, big:w.w, sub:'/'+w.p+'/',
+    meta:'"'+w.nl+'" in het '+S.lang.name,
+    shareText:'Woord van de dag: "'+w.w+'" = "'+w.nl+'" ('+S.lang.name+'). Leer de 9 talen van Suriname op TaluSuri → talusuri.netlify.app'});
+}
+// Share the user's progress as an image card.
+function shareProgress(){
+  const lvl=getLevel(S.xp);
+  shareImageCard({heading:'Mijn voortgang', big:'Level '+lvl, sub:getLevelTitle(lvl),
+    meta:S.xp+' XP · '+S.streak+' dagen streak · ik leer '+S.lang.name,
+    shareText:'Ik leer '+S.lang.name+' op TaluSuri — level '+lvl+', '+S.xp+' XP! Leer mee → talusuri.netlify.app'});
+}
+
 // ═══ KETI KOTI COUNTDOWN ═══
 // Keti Koti (1 July) — emancipation day; the day the closed beta opens to everyone.
 const KETI_KOTI = new Date('2026-07-01T00:00:00');
