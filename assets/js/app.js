@@ -93,9 +93,12 @@ function initBeta(){
 // Show how many of the limited closed-beta seats are taken (X/MAX) in the beta bar.
 async function updateBetaSeats(){
   const el=document.getElementById('beta-seats');if(!el)return;
-  const max=window.BETA_MAX_ACCOUNTS||0;
+  const max=window.betaMax?window.betaMax():(window.BETA_MAX_ACCOUNTS||0);
+  const bar=document.getElementById('beta-bar');
+  if(!max){ if(bar)bar.style.display='none'; el.textContent=''; return; }   // cap lifted → hide the beta bar
+  if(bar)bar.style.display='';
   const count=window.fetchAccountCount?await window.fetchAccountCount():null;
-  if(count===null||!max){el.textContent='';return;}
+  if(count===null){el.textContent='';return;}
   const free=Math.max(0,max-count);
   el.textContent=`${count}/${max} plekken bezet${free>0?` — nog ${free} vrij`:' — vol'}`;
 }

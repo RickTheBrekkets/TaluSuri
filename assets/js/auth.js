@@ -124,9 +124,11 @@ async function authPasswordSubmit(){
   const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error('__timeout')),ms))]);
   try{
     if(authMode==='signup'){
-      const max=window.BETA_MAX_ACCOUNTS||0;
-      const count=await window.fetchAccountCount();
-      if(max&&count!==null&&count>=max){alert('De gesloten bèta zit vol ('+count+'/'+max+' plekken bezet). Houd ons in de gaten voor de volgende ronde!');return;}
+      const max=window.betaMax?window.betaMax():(window.BETA_MAX_ACCOUNTS||0);
+      if(max){
+        const count=await window.fetchAccountCount();
+        if(count!==null&&count>=max){alert('De gesloten bèta zit vol ('+count+'/'+max+' plekken bezet). Houd ons in de gaten — de cap gaat omhoog en op 1 juli (Keti Koti) helemaal open!');return;}
+      }
     }
     const res=await withTimeout(authMode==='signup'
       ? sb.auth.signUp({email,password:pw})
