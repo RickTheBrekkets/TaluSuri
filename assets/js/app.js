@@ -1136,30 +1136,78 @@ function shareProgress(){
     shareText:'Ik leer '+S.lang.name+' op TaluSuri — level '+lvl+', '+S.xp+' XP! Leer mee → talusuri.netlify.app'});
 }
 
-// ═══ KETI KOTI COUNTDOWN ═══
-// Keti Koti (1 July) — emancipation day; the day the closed beta opens to everyone.
-const KETI_KOTI = new Date('2026-07-01T00:00:00');
-function renderKetiKoti(){
-  const el=document.getElementById('kk-timer'); if(!el) return;
-  let diff=KETI_KOTI.getTime()-Date.now();
-  if(diff<=0){
-    el.innerHTML='<div style="font-size:15px;font-weight:600;">🎉 Fri! Keti Koti — TaluSuri is nu voor iedereen open. Fa waka!</div>';
-    if(window.__kkTimer){clearInterval(window.__kkTimer);window.__kkTimer=null;}
-    return;
-  }
-  const d=Math.floor(diff/864e5); diff-=d*864e5;
-  const h=Math.floor(diff/36e5); diff-=h*36e5;
-  const m=Math.floor(diff/6e4); diff-=m*6e4;
+// ═══ SURINAAMSE GEBEURTENISSEN — COUNTDOWN ═══
+// Rotates (every 7s, like the "Ontdek Suriname" banner) through the next 3 upcoming events,
+// soonest first, with a live per-second countdown. Fixed-date events recur yearly; variable
+// (Hindu/Muslim/Christian) ones carry an explicit per-year date — update these each year.
+const SURI_EVENTS=[
+  {emoji:'🎉',name:'Nieuwjaar',m:0,d:1,desc:'Nieuwjaarsdag'},
+  {emoji:'🗣️',name:'Internationale Moedertaaldag',m:1,d:21,desc:'UNESCO-dag van de moedertaal'},
+  {emoji:'🛠️',name:'Dag van de Arbeid',m:4,d:1,desc:'Dag van de Arbeid'},
+  {emoji:'🚢',name:'Hindostaanse Immigratiedag',m:5,d:5,desc:'Aankomst eerste contractanten, 1873'},
+  {emoji:'⛓️‍💥',name:'Keti Koti',m:6,d:1,desc:'Afschaffing van de slavernij, 1863'},
+  {emoji:'🪶',name:'Dag der Inheemsen',m:7,d:9,desc:'Dag van de inheemse volken'},
+  {emoji:'🌺',name:'Javaanse Immigratiedag',m:7,d:9,desc:'Aankomst eerste contractanten, 1890'},
+  {emoji:'✊🏿',name:'Dag der Marrons',m:9,d:10,desc:'Dag van de Marrons'},
+  {emoji:'🏮',name:'Chinese Immigratiedag',m:9,d:20,desc:'Aankomst eerste contractanten, 1853'},
+  {emoji:'🇸🇷',name:'Onafhankelijkheidsdag',m:10,d:25,desc:'Srefidensi — onafhankelijkheid 1975'},
+  {emoji:'🎄',name:'Kerst',m:11,d:25,desc:'Eerste Kerstdag'},
+  // variable-date events — best estimates for 2026 (verify/replace yearly)
+  {emoji:'🌈',name:'Holi Phagwa',date:'2026-03-04',desc:'Hindostaans kleurenfeest'},
+  {emoji:'🌙',name:'Id-ul-Fitr',date:'2026-03-20',desc:'Suikerfeest — einde ramadan'},
+  {emoji:'✝️',name:'Goede Vrijdag',date:'2026-04-03',desc:'Goede Vrijdag'},
+  {emoji:'🪔',name:'Divali',date:'2026-11-08',desc:'Hindostaans lichtjesfeest'}
+];
+// Next occurrence of an event (this year or next for fixed dates; the fixed date for variable).
+function eventNextDate(ev,now){
+  if(ev.date) return new Date(ev.date+'T00:00:00');
+  const y=now.getFullYear();
+  let t=new Date(y,ev.m,ev.d,0,0,0);
+  if(t.getTime()<=now.getTime()) t=new Date(y+1,ev.m,ev.d,0,0,0);
+  return t;
+}
+// The n soonest upcoming events, soonest first.
+function nextEvents(n){
+  const now=new Date();
+  return SURI_EVENTS.map(ev=>({...ev,when:eventNextDate(ev,now)}))
+    .filter(ev=>ev.when.getTime()>now.getTime())
+    .sort((a,b)=>a.when-b.when).slice(0,n);
+}
+let evList=[], evIdx=0, evRotTimer=null, evTickTimer=null;
+function renderEventCountdown(){
+  const card=document.getElementById('ketikoti-card'); if(!card) return;
+  if(!evList.length){evList=nextEvents(3);evIdx=0;}
+  if(!evList.length){card.style.display='none';return;}
+  card.style.display='';
+  const ev=evList[evIdx%evList.length];
+  document.getElementById('kk-title').innerHTML=ev.emoji+' Aftellen naar '+ev.name;
+  document.getElementById('kk-sub').textContent=ev.when.toLocaleDateString('nl-NL',{day:'numeric',month:'long'})+' · '+ev.desc;
+  let diff=Math.max(0,ev.when.getTime()-Date.now());
+  const d=Math.floor(diff/864e5);diff-=d*864e5;
+  const h=Math.floor(diff/36e5);diff-=h*36e5;
+  const m=Math.floor(diff/6e4);diff-=m*6e4;
   const s=Math.floor(diff/1e3);
   const cell=(v,l)=>`<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px 12px;text-align:center;min-width:54px;"><div style="font-size:22px;font-weight:700;font-family:'Fraunces',serif;line-height:1;">${String(v).padStart(2,'0')}</div><div style="font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">${l}</div></div>`;
-  el.innerHTML=cell(d,'dagen')+cell(h,'uur')+cell(m,'min')+cell(s,'sec');
+  document.getElementById('kk-timer').innerHTML=cell(d,'dagen')+cell(h,'uur')+cell(m,'min')+cell(s,'sec');
+  const cur=evIdx%evList.length;
+  document.getElementById('kk-nav').innerHTML=evList.map((e,i)=>`<div onclick="setEventCountdown(${i})" title="${e.name}" style="width:8px;height:8px;border-radius:50%;background:${i===cur?'#fff':'rgba(255,255,255,.35)'};cursor:pointer;"></div>`).join('');
+}
+// Jump to an event and restart the rotate timer.
+function setEventCountdown(i){evIdx=i;renderEventCountdown();resetEventRotate();}
+// (Re)start the 7s rotate — same cadence as the Ontdek Suriname banner.
+function resetEventRotate(){if(evRotTimer)clearInterval(evRotTimer);evRotTimer=setInterval(()=>{evIdx++;if(evIdx>=evList.length){evList=nextEvents(3);evIdx=0;}renderEventCountdown();},7000);}
+// Boot: always start at the soonest event; tick the digits every second.
+function startEventCountdown(){
+  evList=nextEvents(3); evIdx=0; renderEventCountdown();
+  if(!evTickTimer)evTickTimer=setInterval(renderEventCountdown,1000);
+  resetEventRotate();
 }
 
 // ═══ INIT ═══
 // Render everything and initialise the app after onboarding.
 function bootApp(){
   applyTheme();renderStats();renderLangGrid();renderSourcesGrid();renderHomeBadges();renderBadgesGrid();setLang(S.lang);renderProgress();updateFeedbackBadge();renderCultureBanner();resetCbTimer();renderDiscover();updateSwitcherLabel();updateMistakesBadge();initBeta();
-  renderKetiKoti(); if(!window.__kkTimer)window.__kkTimer=setInterval(renderKetiKoti,1000);
+  startEventCountdown();
 }
 // Entry point: show onboarding, or boot straight into the app if already onboarded.
 function init(){
