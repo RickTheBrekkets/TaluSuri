@@ -1126,13 +1126,6 @@ async function shareImageCard({heading, big, sub, meta, shareText}){
   }
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='talusuri.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-// Share today's word of the day as an image card.
-function shareWordOfDay(){
-  const w=S.lang.words[new Date().getDay()%S.lang.words.length];
-  shareImageCard({heading:'Woord van de dag · '+S.lang.name, big:w.w, sub:'/'+w.p+'/',
-    meta:'"'+w.nl+'" in het '+S.lang.name,
-    shareText:'Woord van de dag: "'+w.w+'" = "'+w.nl+'" ('+S.lang.name+'). Leer de 9 talen van Suriname op TaluSuri → talusuri.netlify.app'});
-}
 // Share the user's progress as an image card.
 function shareProgress(){
   const lvl=getLevel(S.xp);
@@ -1168,6 +1161,8 @@ function bootApp(){
 }
 // Entry point: show onboarding, or boot straight into the app if already onboarded.
 function init(){
+  // Capture a referral code (?ref=<uid>) for later — applied when an account is created.
+  try{const ref=new URLSearchParams(location.search).get('ref');if(ref)localStorage.setItem('talusuri_ref',ref);}catch(e){}
   applyTheme();
   if(S.onboarded){
     document.getElementById('onboard').style.display='none';
