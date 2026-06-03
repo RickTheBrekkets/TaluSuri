@@ -788,7 +788,11 @@ function renderOdoBonus(){
     +`<div class="complete-emoji">🗣️</div>`
     +`<div class="complete-title">Foutloos! Bonus-gezegde</div>`
     +`<div class="complete-sub">Wat betekent dit Surinaamse gezegde?</div>`
-    +`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;font-family:'Fraunces',serif;font-weight:600;font-size:18px;line-height:1.4;margin-bottom:18px;">${odo.w}</div>`
+    +`<div style="position:relative;background:linear-gradient(135deg,var(--gold-l) 0%,var(--card) 55%,var(--green-l) 100%);border:2px solid var(--gold);border-radius:18px;padding:28px 22px;margin-bottom:18px;box-shadow:0 8px 22px rgba(0,0,0,.07);overflow:hidden;">`
+    +`<div style="position:absolute;top:2px;left:14px;font-family:'Fraunces',serif;font-size:54px;color:var(--gold);opacity:.55;line-height:1;">&ldquo;</div>`
+    +`<div style="position:relative;font-family:'Fraunces',serif;font-weight:600;font-size:19px;line-height:1.45;color:var(--ink);text-align:center;padding:0 8px;">${odo.w}</div>`
+    +`<div style="position:absolute;bottom:-14px;right:16px;font-family:'Fraunces',serif;font-size:54px;color:var(--green);opacity:.55;line-height:1;">&rdquo;</div>`
+    +`</div>`
     +`<div class="q-opts" id="odo-opts"></div><div class="q-fb" id="odo-fb"></div></div>`;
   document.getElementById('modal-body').innerHTML=body;
   const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;
