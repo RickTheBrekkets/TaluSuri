@@ -1187,7 +1187,7 @@ function renderEventCountdown(){
   const h=Math.floor(diff/36e5);diff-=h*36e5;
   const m=Math.floor(diff/6e4);diff-=m*6e4;
   const s=Math.floor(diff/1e3);
-  const cell=(v,l)=>`<div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px 12px;text-align:center;min-width:54px;"><div style="font-size:22px;font-weight:700;font-family:'Fraunces',serif;line-height:1;">${String(v).padStart(2,'0')}</div><div style="font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">${l}</div></div>`;
+  const cell=(v,l)=>`<div style="background:rgba(255,255,255,.14);border-radius:10px;padding:8px 12px;text-align:center;min-width:54px;"><div style="font-size:22px;font-weight:700;font-family:'Fraunces',serif;line-height:1;color:#FFD016;">${String(v).padStart(2,'0')}</div><div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;">${l}</div></div>`;
   document.getElementById('kk-timer').innerHTML=cell(d,'dagen')+cell(h,'uur')+cell(m,'min')+cell(s,'sec');
   const cur=evIdx%evList.length;
   document.getElementById('kk-nav').innerHTML=evList.map((e,i)=>`<div onclick="setEventCountdown(${i})" title="${e.name}" style="width:8px;height:8px;border-radius:50%;background:${i===cur?'#fff':'rgba(255,255,255,.35)'};cursor:pointer;"></div>`).join('');
