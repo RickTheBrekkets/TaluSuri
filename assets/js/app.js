@@ -79,12 +79,17 @@ function updateFeedbackBadge(){const n=getFlags().length;const b=document.getEle
 // ═══ BETA BAR ═══
 // Open the Community view and scroll to the contact form.
 function goToContact(){showView('feedback');setTimeout(()=>{const el=document.getElementById('contact-form');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);}
-// Share the app via WhatsApp (uses the native share sheet on mobile when available).
-function shareApp(){
-  const url='https://talusuri.netlify.app';
-  const text='Leer de talen van Suriname met TaluSuri! 🇸🇷 '+url;
-  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');
-}
+// ═══ SHARE THE APP ═══
+const SHARE_URL='https://talusuri.netlify.app';
+const SHARE_TEXT='Leer de talen van Suriname met TaluSuri! 🇸🇷';
+function shareNative(){ if(navigator.share){ navigator.share({title:'TaluSuri',text:SHARE_TEXT,url:SHARE_URL}).catch(()=>{}); } else shareCopyLink(); }
+function shareWhatsApp(){ window.open('https://wa.me/?text='+encodeURIComponent(SHARE_TEXT+' '+SHARE_URL),'_blank','noopener'); }
+function shareFacebook(){ window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(SHARE_URL),'_blank','noopener'); }
+function shareX(){ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(SHARE_TEXT)+'&url='+encodeURIComponent(SHARE_URL),'_blank','noopener'); }
+function shareTelegram(){ window.open('https://t.me/share/url?url='+encodeURIComponent(SHARE_URL)+'&text='+encodeURIComponent(SHARE_TEXT),'_blank','noopener'); }
+function shareEmail(){ window.location.href='mailto:?subject='+encodeURIComponent('TaluSuri — leer de talen van Suriname')+'&body='+encodeURIComponent(SHARE_TEXT+'\n\n'+SHARE_URL); }
+function shareCopyLink(){ if(navigator.clipboard){ navigator.clipboard.writeText(SHARE_URL).then(()=>alert('Link gekopieerd!'),()=>prompt('Kopieer de link:',SHARE_URL)); } else prompt('Kopieer de link:',SHARE_URL); }
+function shareApp(){ shareWhatsApp(); }   // backwards-compatible alias
 // Closed-beta bar + footer version. The bar is persistent (no dismiss) during the beta.
 function initBeta(){
   const fv=document.getElementById('footer-version');

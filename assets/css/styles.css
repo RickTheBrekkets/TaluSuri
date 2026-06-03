@@ -350,6 +350,8 @@ select.contact-input{cursor:pointer;appearance:none;background-image:url("data:i
 .modal-close{position:absolute;top:16px;right:16px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;width:40px;height:40px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;color:var(--muted);z-index:2;}
 .modal-close:hover{border-color:var(--red);color:var(--red);}
 #modal-body{padding-top:34px;}
+.share-pill{border:none;border-radius:99px;padding:9px 15px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .12s;}
+.share-pill:hover{transform:translateY(-1px);}
 #modal-body .speak-btn,#modal-body .contrib-btn{font-size:14px;padding:9px 16px;}
 .q-counter{font-size:13px;color:var(--muted);margin-bottom:16px;}
 .q-progress{height:7px;background:var(--border);border-radius:4px;margin-bottom:24px;overflow:hidden;}
