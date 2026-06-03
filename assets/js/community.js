@@ -12,6 +12,21 @@ function wordKey(langId, w){ return langId + '|' + w; }
 // Net upvotes a (non-official) community recording needs before it auto-replaces the robot
 // voice. An admin-promoted (official) recording always wins, regardless of score.
 const VOICE_MIN_SCORE = 3;
+// A recording with this many downvotes is hidden from voting and never used as the voice.
+const DOWNVOTE_HIDE = 10;
+
+// Start of the current month (UTC) as ISO — used to enforce one vote per word per month.
+function monthStartISO(){ const d=new Date(); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString(); }
+// Has the user already voted on any recording of this word this calendar month?
+async function votedThisMonthForWord(word_key){
+  if(!SB || !AUTH.user) return false;
+  try{
+    const {data:recs}=await SB.from('recordings').select('id').eq('word_key', word_key);
+    const ids=(recs||[]).map(r=>r.id); if(!ids.length) return false;
+    const {data:vs}=await SB.from('recording_votes').select('recording_id').eq('user_id', AUTH.user.id).in('recording_id', ids).gte('created_at', monthStartISO());
+    return !!(vs && vs.length);
+  }catch(e){ return false; }
+}
 
 // ═══ COMMUNITY AUDIO (a vetted community recording replaces the robot voice) ═══
 // Build word_key -> active recording URL. An official (admin-promoted) recording wins;
@@ -23,10 +38,12 @@ async function loadOfficialAudio(){
   const {data} = await SB.from('recordings').select('id,word_key,audio_path,is_official');
   if(data && data.length){
     let scoreMap={};
-    try{ const {data:sc}=await SB.from('recording_scores').select('recording_id,score'); (sc||[]).forEach(s=>{scoreMap[s.recording_id]=s.score||0;}); }catch(e){}
+    try{ const {data:sc}=await SB.from('recording_scores').select('recording_id,score,downs'); (sc||[]).forEach(s=>{scoreMap[s.recording_id]={score:s.score||0,downs:s.downs||0};}); }catch(e){}
     const best={};
     data.forEach(r=>{
-      const cand={off:!!r.is_official, score:scoreMap[r.id]||0, path:r.audio_path};
+      const sm=scoreMap[r.id]||{score:0,downs:0};
+      if(sm.downs>=DOWNVOTE_HIDE) return;   // heavily downvoted → never the voice
+      const cand={off:!!r.is_official, score:sm.score, path:r.audio_path};
       const cur=best[r.word_key];
       if(!cur || (cand.off&&!cur.off) || (cand.off===cur.off && cand.score>cur.score)) best[r.word_key]=cand;
     });
@@ -74,8 +91,11 @@ async function renderRecordingsList(){
   let recs = data||[];
   if(!recs.length){ list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">Nog geen opnames. Wees de eerste! 🎙️</div>'; return; }
   const scores = await fetchScores(recs.map(r=>r.id));
-  recs = recs.map(r=>({...r, score: scores[r.id]?.score || 0}));
+  recs = recs.map(r=>({...r, score: scores[r.id]?.score || 0, downs: scores[r.id]?.downs || 0}))
+             .filter(r=>r.downs < DOWNVOTE_HIDE);   // ≥10 downvotes → out of voting
+  if(!recs.length){ list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">Geen opnames om op te stemmen voor dit woord.</div>'; return; }
   recs.sort((a,b)=>b.score-a.score);
+  const votedThisMonth = AUTH.user ? await votedThisMonthForWord(key) : false;
   // Which recording is actually the active voice: an official one, else the top one once it
   // reaches VOICE_MIN_SCORE. Below that the robot voice stays and we show votes-to-go.
   const officialRec = recs.find(r=>r.is_official);
@@ -90,29 +110,33 @@ async function renderRecordingsList(){
     const {data:vs} = await SB.from('recording_votes').select('recording_id,value').eq('user_id', AUTH.user.id).in('recording_id', recs.map(r=>r.id));
     (vs||[]).forEach(v=>{ mine[v.recording_id]=v.value; });
   }
-  list.innerHTML = note + recs.map((r,i)=>{
+  const votedNote = votedThisMonth ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">✅ Je hebt deze maand al op dit woord gestemd — volgende maand mag je weer.</div>' : '';
+  list.innerHTML = note + votedNote + recs.map((r,i)=>{
     const url = SB.storage.from('pronunciations').getPublicUrl(r.audio_path).data.publicUrl;
     const best = (r.id===activeId) ? ' <span style="color:var(--gold);font-size:11px;">🔊 in gebruik</span>'
                : (i===0 && r.score>0) ? ' <span style="color:var(--green);font-size:11px;">★ beste</span>' : '';
     const official = r.is_official ? ' <span style="font-size:11px;">✅ officieel</span>' : '';
     const up=mine[r.id]===1, down=mine[r.id]===-1;
+    const can=!votedThisMonth;
+    const vb=(val,glyph,tip,onCol,onBg)=>`<button ${can?`onclick="vote('${r.id}',${val})"`:''} title="${tip}" style="border:1px solid var(--border);border-radius:8px;background:${(val===1?up:down)?onBg:'var(--card)'};color:${(val===1?up:down)?onCol:'var(--muted)'};padding:4px 9px;font-size:13px;cursor:${can?'pointer':'not-allowed'};opacity:${can||(val===1?up:down)?1:.45};">${glyph}</button>`;
     return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
       <button class="dict-btn" onclick="playRec('${url}')" title="Afspelen"><span class="emo">▶️</span></button>
       <div style="flex:1;font-size:13px;font-weight:500;">${r.display_name||'Anoniem'}${best}${official}</div>
-      <button onclick="vote('${r.id}',1)" title="Goed" style="border:1px solid var(--border);border-radius:8px;background:${up?'var(--green-l)':'var(--card)'};color:${up?'var(--green)':'var(--muted)'};padding:4px 9px;cursor:pointer;font-size:13px;">▲</button>
+      ${vb(1,'▲','Goed','var(--green)','var(--green-l)')}
       <span style="font-size:13px;font-weight:600;min-width:18px;text-align:center;">${r.score}</span>
-      <button onclick="vote('${r.id}',-1)" title="Niet goed" style="border:1px solid var(--border);border-radius:8px;background:${down?'rgba(220,50,50,.12)':'var(--card)'};color:${down?'var(--red)':'var(--muted)'};padding:4px 9px;cursor:pointer;font-size:13px;">▼</button>
+      ${vb(-1,'▼','Niet goed','var(--red)','rgba(220,50,50,.12)')}
     </div>`;
   }).join('');
 }
 
-// Cast or toggle a signed vote (1 up / -1 down) on a recording.
+// Cast a signed vote (1 up / -1 down). One vote per word per calendar month.
 async function vote(id, value){
   if(!AUTH.user){ alert('Log eerst in om te stemmen.'); authOpenModal(); return; }
-  const uid = AUTH.user.id;
-  const {data:ex} = await SB.from('recording_votes').select('value').eq('user_id', uid).eq('recording_id', id).maybeSingle();
-  if(ex && ex.value===value) await SB.from('recording_votes').delete().eq('user_id', uid).eq('recording_id', id); // tap same again = clear
-  else await SB.from('recording_votes').upsert({recording_id:id, user_id:uid, value});
+  const key = wordKey(CUR.langId, CUR.word);
+  if(await votedThisMonthForWord(key)){ alert('Je kunt deze maand maar één keer stemmen op dit woord. Volgende maand weer!'); return; }
+  const uid=AUTH.user.id;
+  await SB.from('recording_votes').delete().eq('user_id',uid).eq('recording_id',id);   // clear any old (last-month) vote
+  await SB.from('recording_votes').insert({recording_id:id, user_id:uid, value, created_at:new Date().toISOString()});
   await renderRecordingsList();
 }
 
@@ -257,19 +281,25 @@ async function renderVoteDeck(){
   showVoteCard();
 }
 
-// Fetch every recording the user didn't make (including ones they already voted on, so the
-// deck is the same across accounts); annotate each with the user's current vote.
+// Build the deck: other people's recordings, minus heavily-downvoted ones and minus words the
+// user already voted on this month (one vote per word per month), one card per word.
 async function loadVoteDeck(){
-  const {data}=await SB.from('recordings').select('id,word,lang_id,display_name,audio_path').neq('user_id',AUTH.user.id);
-  let recs=data||[];
-  let mine={};
-  if(recs.length){
-    const {data:vs}=await SB.from('recording_votes').select('recording_id,value').eq('user_id',AUTH.user.id).in('recording_id',recs.map(r=>r.id));
-    (vs||[]).forEach(v=>{ mine[v.recording_id]=v.value; });
+  const {data}=await SB.from('recordings').select('id,word,lang_id,word_key,display_name,audio_path').neq('user_id',AUTH.user.id);
+  const all=data||[];
+  const scores=await fetchScores(all.map(r=>r.id));
+  // words the user already voted on this month → skip them entirely
+  const idWord={}; all.forEach(r=>{ idWord[r.id]=r.word_key; });
+  let votedWords=new Set();
+  if(all.length){
+    const {data:vs}=await SB.from('recording_votes').select('recording_id').eq('user_id',AUTH.user.id).gte('created_at',monthStartISO());
+    (vs||[]).forEach(v=>{ const wk=idWord[v.recording_id]; if(wk)votedWords.add(wk); });
   }
-  const scores=await fetchScores(recs.map(r=>r.id));
-  recs=recs.map(r=>({...r,score:scores[r.id]?.score||0,myVote:mine[r.id]||0}));
+  let recs=all
+    .map(r=>({...r, score:scores[r.id]?.score||0, downs:scores[r.id]?.downs||0}))
+    .filter(r=>r.downs<DOWNVOTE_HIDE && !votedWords.has(r.word_key));
   recs.sort((a,b)=>a.score-b.score); // surface under-voted clips first
+  // one card per word (you only get one vote per word/month)
+  const seen=new Set(); recs=recs.filter(r=>{ if(seen.has(r.word_key))return false; seen.add(r.word_key); return true; });
   voteQueue=recs; voteIdx=0;
 }
 
@@ -307,8 +337,12 @@ async function swipeVote(action){
   const r=voteQueue[voteIdx];
   if(!r) return;
   if((action==='up'||action==='down') && AUTH.user){
-    await SB.from('recording_votes').upsert({recording_id:r.id,user_id:AUTH.user.id,value:action==='up'?1:-1});
-    refreshContribBadges();
+    const wk=r.word_key||(typeof wordKey==='function'?wordKey(r.lang_id,r.word):null);
+    if(!wk || !(await votedThisMonthForWord(wk))){   // skip if already voted this word this month
+      await SB.from('recording_votes').delete().eq('user_id',AUTH.user.id).eq('recording_id',r.id);
+      await SB.from('recording_votes').insert({recording_id:r.id,user_id:AUTH.user.id,value:action==='up'?1:-1,created_at:new Date().toISOString()});
+      refreshContribBadges();
+    }
   }
   voteIdx++;
   showVoteCard();
