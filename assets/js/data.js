@@ -35,6 +35,7 @@ const BADGES=[
 {id:'voice_100',icon:'👑',name:'Uitspraakheld',desc:'100 upvotes op je opnames'},
 {id:'ambassador',icon:'📣',name:'Ambassadeur',desc:'Nodig een vriend uit'},
 {id:'ambassador_5',icon:'🤩',name:'Superambassadeur',desc:'Nodig 5 vrienden uit'},
+{id:'odo_master',icon:'🗣️',name:'Odo-meester',desc:'10 gezegdes goed geraden'},
 {id:'week_gold',icon:'🥇',name:'Goud van de week',desc:'Eindig 1e op het weekklassement'},
 {id:'week_silver',icon:'🥈',name:'Zilver van de week',desc:'Eindig 2e op het weekklassement'},
 {id:'week_bronze',icon:'🥉',name:'Brons van de week',desc:'Eindig 3e op het weekklassement'},

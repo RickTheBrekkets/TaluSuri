@@ -476,9 +476,10 @@ const NAV_GROUPS={
     {v:'grammatica',icon:'✏️',label:'Grammatica'},
     {v:'crash',icon:'⚡',label:'Spoedcursus'}
   ]},
-  oefenen:{title:'Oefenen',sub:'Herhaal en zoek woorden op',items:[
+  oefenen:{title:'Oefenen',sub:'Herhaal, zoek woorden op en leer gezegdes',items:[
     {v:'mistakes',icon:'💪',label:'Blijf oefenen',badge:'more-mistakes-badge'},
-    {v:'woordenboek',icon:'📕',label:'Woordenboek'}
+    {v:'woordenboek',icon:'📕',label:'Woordenboek'},
+    {v:'gezegdes',icon:'🗣️',label:'Gezegdes'}
   ]},
   voortgang:{title:'Voortgang',sub:'Volg je groei en motivatie',items:[
     {v:'leaderboard',icon:'🏆',label:'Ranglijst'},
@@ -527,6 +528,7 @@ function showView(v){
   if(v==='grammatica')renderGrammar();
   if(v==='crash')renderCrash();
   if(v==='mistakes')renderMistakes();
+  if(v==='gezegdes')renderGezegdes();
   if(v==='profile'&&typeof renderProfile==='function')renderProfile();
   if(v==='admin'&&typeof renderAdmin==='function')renderAdmin();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -727,26 +729,33 @@ function skipQ(){window.speechSynthesis&&window.speechSynthesis.cancel();S.ex.cu
 // Render the end screen: score, XP, level-up and a culture fact.
 function renderComplete(){
   const ex=S.ex;const pct=Math.round((ex.score/ex.q.length)*100);
-  let leveledUp=false;let passedExam=false;
-  if(ex.type==='lesson'){
-    const key=S.lang.id+'-'+ex.idx;S.themeProgress[key]=Math.max(S.themeProgress[key]||0,pct);
-    leveledUp=addXP(ex.xp);
-    if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
-    unlockBadge('first_lesson');
-    if(pct===100)unlockBadge('perfect');
-  }else if(ex.type==='exam'){
-    leveledUp=addXP(Math.round(ex.xp*pct/100));
-    if(pct>=80){passedExam=true;unlockBadge('exam_pass');}
-  }else{ // practice: theme / crash — flat XP, streak
-    leveledUp=addXP(ex.xp);
-    if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
-    unlockBadge('first_lesson');
-    if(pct===100)unlockBadge('perfect');
-    if(ex.type==='theme'&&ex.cat){const k='t-'+S.lang.id+'-'+ex.cat;S.themeProgress[k]=Math.max(S.themeProgress[k]||0,pct);}
+  if(!ex.scored){   // apply scoring/XP once (renderComplete re-runs after the bonus question)
+    ex.scored=true;
+    let leveledUp=false,passedExam=false;
+    if(ex.type==='lesson'){
+      const key=S.lang.id+'-'+ex.idx;S.themeProgress[key]=Math.max(S.themeProgress[key]||0,pct);
+      leveledUp=addXP(ex.xp);
+      if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
+      unlockBadge('first_lesson');
+      if(pct===100)unlockBadge('perfect');
+    }else if(ex.type==='exam'){
+      leveledUp=addXP(Math.round(ex.xp*pct/100));
+      if(pct>=80){passedExam=true;unlockBadge('exam_pass');}
+    }else{ // practice: theme / crash — flat XP, streak
+      leveledUp=addXP(ex.xp);
+      if(pct>=60){S.streak=Math.min(7,S.streak+1);renderStats();}
+      unlockBadge('first_lesson');
+      if(pct===100)unlockBadge('perfect');
+      if(ex.type==='theme'&&ex.cat){const k='t-'+S.lang.id+'-'+ex.cat;S.themeProgress[k]=Math.max(S.themeProgress[k]||0,pct);}
+    }
+    ex.leveledUp=leveledUp; ex.passedExam=passedExam;
+    checkBadges();renderProgress();renderHomeLessons();renderAllLessons();
+    if(typeof renderCurriculum==='function')renderCurriculum();
+    saveState();
   }
-  checkBadges();renderProgress();renderHomeLessons();renderAllLessons();
-  if(typeof renderCurriculum==='function')renderCurriculum();
-  saveState();
+  // Flawless lesson → a bonus Surinaamse gezegde before the summary.
+  if(ex.type==='lesson'&&pct===100&&!ex.bonusDone&&typeof ODOS!=='undefined'&&ODOS.length>=4){renderOdoBonus();return;}
+  const leveledUp=ex.leveledUp,passedExam=ex.passedExam;
   const newBadges=BADGES.filter(b=>S.badges.includes(b.id));
   let badgeHtml='';
   // detect freshly relevant badge (simple: show first lesson / exam badge)
@@ -768,6 +777,52 @@ function renderComplete(){
   body+=`<div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div><button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button></div>`;
   document.getElementById('modal-body').innerHTML=body;
   const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;
+}
+// Bonus question after a flawless (100%) lesson: pick a Surinamese saying, choose its meaning.
+function renderOdoBonus(){
+  const ex=S.ex;
+  const odo=ODOS[Math.floor(Math.random()*ODOS.length)];
+  const opts=shuffle([odo.nl,...shuffle(ODOS.filter(o=>o.nl!==odo.nl)).slice(0,3).map(o=>o.nl)]);
+  ex.bonusOdo=odo; ex.bonusAnswered=false;
+  let body=`<div class="complete" style="padding-top:8px;">`
+    +`<div class="complete-emoji">🗣️</div>`
+    +`<div class="complete-title">Foutloos! Bonus-gezegde</div>`
+    +`<div class="complete-sub">Wat betekent dit Surinaamse gezegde?</div>`
+    +`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;font-family:'Fraunces',serif;font-weight:600;font-size:18px;line-height:1.4;margin-bottom:18px;">${odo.w}</div>`
+    +`<div class="q-opts" id="odo-opts"></div><div class="q-fb" id="odo-fb"></div></div>`;
+  document.getElementById('modal-body').innerHTML=body;
+  const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;
+  const wrap=document.getElementById('odo-opts');
+  opts.forEach(opt=>{const b=document.createElement('button');b.className='q-opt';b.textContent=opt;b.onclick=()=>answerOdoBonus(opt===odo.nl,b);wrap.appendChild(b);});
+}
+function answerOdoBonus(ok,btn){
+  const ex=S.ex; if(ex.bonusAnswered)return; ex.bonusAnswered=true;
+  document.querySelectorAll('#odo-opts .q-opt').forEach(b=>{if(b.textContent===ex.bonusOdo.nl)b.classList.add('correct');});
+  if(!ok&&btn)btn.classList.add('wrong');
+  const fb=document.getElementById('odo-fb');
+  if(ok){
+    if(typeof playCorrect==='function')playCorrect();
+    addXP(15);
+    S.odosCorrect=(S.odosCorrect||0)+1;
+    if(S.odosCorrect>=10)unlockBadge('odo_master');
+    saveState();
+    fb.className='q-fb good';fb.textContent='Goed geraden! +15 XP 🎉'+(S.odosCorrect===10?' — je verdient de Odo-meester-badge!':'');
+  }else{
+    fb.className='q-fb bad';fb.innerHTML='Niet erg — je les blijft 100%! Juist is: <strong>'+ex.bonusOdo.nl+'</strong>';
+  }
+  fb.style.display='block';
+  const cont=document.createElement('button');cont.className='complete-btn';cont.style.marginTop='16px';cont.innerHTML='Verder <span class="emo">→</span>';
+  cont.onclick=()=>{ex.bonusDone=true;renderComplete();};
+  document.querySelector('#modal-body .complete').appendChild(cont);
+}
+// List all Surinamese sayings (odo's) with their meaning + source, in the Oefenen section.
+function renderGezegdes(){
+  const list=document.getElementById('gezegdes-list'); if(!list||typeof ODOS==='undefined')return;
+  const done=S.odosCorrect||0;
+  const head=`<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Je hebt <strong>${done}</strong> ${done===1?'gezegde':'gezegdes'} goed geraden${done>=10?' — 🗣️ Odo-meester!':' ('+Math.max(0,10-done)+' tot de badge)'}.</div>`;
+  list.innerHTML=head+ODOS.map(o=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;line-height:1.4;">${o.w}</div><div style="font-size:13px;color:var(--muted);">${o.nl}</div></div>`).join('');
+  const src=document.getElementById('gezegdes-source');
+  if(src&&typeof ODOS_SOURCE!=='undefined')src.innerHTML='Bron: <a href="'+ODOS_SOURCE.url+'" target="_blank" rel="noopener" style="color:var(--green);">'+ODOS_SOURCE.name+'</a>';
 }
 // Close the exercise modal when its backdrop (not its content) is clicked.
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
