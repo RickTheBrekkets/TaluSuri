@@ -477,7 +477,7 @@ const NAV_GROUPS={
     {v:'crash',icon:'⚡',label:'Spoedcursus'}
   ]},
   oefenen:{title:'Oefenen',sub:'Herhaal en zoek woorden op',items:[
-    {v:'mistakes',icon:'🔁',label:'Mijn fouten',badge:'more-mistakes-badge'},
+    {v:'mistakes',icon:'💪',label:'Blijf oefenen',badge:'more-mistakes-badge'},
     {v:'woordenboek',icon:'📕',label:'Woordenboek'}
   ]},
   voortgang:{title:'Voortgang',sub:'Volg je groei en motivatie',items:[
@@ -678,7 +678,9 @@ function afterAnswer(correct){
   if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;
     if(typeof playCorrect==='function')playCorrect();
     const tw=S.ex.q[S.ex.cur].speak;   // mark the practised word as learned
-    if(tw){const key=S.lang.id+'|'+tw;if(!S.learnedWords.includes(key))S.learnedWords.push(key);}
+    if(tw){const key=S.lang.id+'|'+tw;if(!S.learnedWords.includes(key))S.learnedWords.push(key);
+      // In a mistake-practice session, a correct answer clears that word from the list.
+      if(S.ex.type==='mistakes'&&typeof removeMistake==='function')removeMistake(tw,S.lang.id);}
   }
   else{fb.className='q-fb bad';fb.textContent='Helaas, fout.';
     // record mistake — find the target word for this question
@@ -1071,7 +1073,7 @@ function practiceMistakes(){
   // build questions from mistakes using full word objects
   const words=m.map(x=>S.lang.words.find(w=>w.w===x.w)).filter(Boolean);
   if(!words.length){alert('Kon de woorden niet vinden.');return;}
-  S.ex={type:'mistakes',title:'Foutenherhaling '+S.lang.name,emoji:'🔁',xp:words.length*3,q:genLessonQuestions(words,Math.min(words.length,10)),cur:0,score:0,answered:false};
+  S.ex={type:'mistakes',title:'Oefenronde '+S.lang.name,emoji:'💪',xp:words.length*3,q:genLessonQuestions(words,Math.min(words.length,10)),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
 
