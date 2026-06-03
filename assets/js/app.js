@@ -657,6 +657,7 @@ function renderExercise(){
   }
   body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button>${q.kind==='listen'?'<button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>':''}`;
   document.getElementById('modal-body').innerHTML=body;
+  const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;   // full-page: start each question at the top
   if(q.kind==='mc'||q.kind==='listen'){
     const opts=document.getElementById('q-opts');
     q.o.forEach(opt=>{const b=document.createElement('button');b.className='q-opt';b.textContent=opt;b.onclick=()=>answerMC(opt,q.c,b);opts.appendChild(b);});
@@ -766,6 +767,7 @@ function renderComplete(){
   }
   body+=`<div class="complete-culture"><strong>Cultuurweetje — ${S.lang.name}</strong>${S.lang.culture}</div><button class="complete-btn" onclick="closeModal()">Terug naar overzicht</button></div>`;
   document.getElementById('modal-body').innerHTML=body;
+  const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;
 }
 // Close the exercise modal when its backdrop (not its content) is clicked.
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
