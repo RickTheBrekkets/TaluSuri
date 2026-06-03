@@ -9,8 +9,9 @@ function setAudioMode(mode,btn){audioMode=mode;document.querySelectorAll('.audio
 // word (in the current language), play that instead of the robot voice;
 // otherwise fall back to the browser Speech Synthesis API (slightly slowed).
 let _ttsAudio=null;
-function speak(text,langCode){
-  const key=(typeof wordKey==='function')?wordKey(S.lang.id,text):null;
+function speak(text,langCode,langId){
+  const lid=langId||S.lang.id;   // explicit langId so e.g. Sranan odo recordings play in any language
+  const key=(typeof wordKey==='function')?wordKey(lid,text):null;
   const official=key&&window.OFFICIAL_AUDIO?window.OFFICIAL_AUDIO[key]:null;
   if(official){
     if(window.speechSynthesis)window.speechSynthesis.cancel();
@@ -823,8 +824,19 @@ function answerOdoBonus(ok,btn){
 function renderGezegdes(){
   const list=document.getElementById('gezegdes-list'); if(!list||typeof ODOS==='undefined')return;
   const done=S.odosCorrect||0;
-  const head=`<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Je hebt <strong>${done}</strong> ${done===1?'gezegde':'gezegdes'} goed geraden${done>=10?' — 🗣️ Odo-meester!':' ('+Math.max(0,10-done)+' tot de badge)'}.</div>`;
-  list.innerHTML=head+ODOS.map(o=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;line-height:1.4;">${o.w}</div><div style="font-size:13px;color:var(--muted);">${o.nl}</div></div>`).join('');
+  const sl=((typeof LANGS!=='undefined'&&LANGS.find(l=>l.id==='sranan'))||{}).speechLang||'nl-NL';
+  const head=`<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Je hebt <strong>${done}</strong> ${done===1?'gezegde':'gezegdes'} goed geraden${done>=10?' — 🗣️ Odo-meester!':' ('+Math.max(0,10-done)+' tot de badge)'}. Spreek een gezegde in via het 🎙️.</div>`;
+  list.innerHTML=head+ODOS.map(o=>{
+    const esc=o.w.replace(/'/g,"\\'");
+    const gold=!!(window.OFFICIAL_AUDIO&&window.OFFICIAL_AUDIO['sranan|'+o.w]);
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;">
+      <div style="flex:1;min-width:0;"><div style="font-family:'Fraunces',serif;font-weight:600;font-size:15px;margin-bottom:4px;line-height:1.4;">${o.w}</div><div style="font-size:13px;color:var(--muted);">${o.nl}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="dict-btn ${gold?'speak-official':''}" onclick="speak('${esc}','${sl}','sranan')" title="${gold?'Community-opname':'Uitspreken'}"><span class="emo">🔊</span></button>
+        <button class="dict-btn mic-contrib" onclick="openRecordings('sranan','${esc}')" title="Uitspraken & opnemen"><span class="emo">🎙️</span></button>
+      </div>
+    </div>`;
+  }).join('');
   const src=document.getElementById('gezegdes-source');
   if(src&&typeof ODOS_SOURCE!=='undefined')src.innerHTML='Bron: <a href="'+ODOS_SOURCE.url+'" target="_blank" rel="noopener" style="color:var(--green);">'+ODOS_SOURCE.name+'</a>';
 }
