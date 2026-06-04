@@ -37,9 +37,13 @@ function refreshAudioUI(){try{if(typeof filterDict==='function')filterDict();if(
 let _sfxCtx=null;
 function sfxCtx(){
   if(!_sfxCtx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{_sfxCtx=new AC();}catch(e){return null;}}
-  if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+  if(_sfxCtx.state==='suspended'){try{_sfxCtx.resume();}catch(e){}}
   return _sfxCtx;
 }
+// Android/iOS Chrome keep a fresh AudioContext "suspended" until a user gesture unlocks it.
+// Create + resume it on the first interaction so the correct-answer cue is audible right away.
+function unlockSfx(){const c=sfxCtx();if(c&&c.state==='running'){['pointerdown','touchend','keydown','click'].forEach(ev=>document.removeEventListener(ev,unlockSfx));}}
+['pointerdown','touchend','keydown','click'].forEach(ev=>document.addEventListener(ev,unlockSfx,{passive:true}));
 // Short, upbeat "correct" cue with a Surinamese feel: two apinti-style drum taps (kawina
 // groove) resolving into a bright marimba two-note rise. Synthesized — no audio file needed.
 function playCorrect(){
@@ -57,9 +61,9 @@ function playCorrect(){
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
     o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+0.24);
   };
-  drum(t0,180,0.5); drum(t0+0.10,150,0.4);
-  note(t0+0.16,1046.5,0.34); // C6
-  note(t0+0.30,1318.5,0.34); // E6
+  drum(t0,180,0.6); drum(t0+0.10,150,0.5);
+  note(t0+0.16,1046.5,0.45); // C6
+  note(t0+0.30,1318.5,0.45); // E6
 }
 // A language is "low-resource" (under construction) when it has fewer than 100 words; the
 // spoedcursus is hidden for these and a call for native speakers/sources is shown.
