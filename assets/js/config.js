@@ -12,6 +12,10 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_xBE0dO5BkPrItDUfgSMNUw_tiwGiY5S';
 
 // App release info (shown in the footer and the closed-beta bar).
 window.APP_VERSION = '1.0 beta';
+// Changelog shown on the Help page. Newest first. One entry per release:
+//   { version: '1.1 beta', date: '2026-06-10', changes: ['…', '…'] }
+// A new entry is added each time the version is bumped.
+window.CHANGELOG = [];
 // Closed beta: max number of accounts. Enforced client-side (nice message) and
 // server-side by the trigger in supabase/beta_cap.sql. The cap follows a schedule —
 // keep this in sync with beta_cap.sql: 50 until 16 Jun 2026, 250 until Keti Koti

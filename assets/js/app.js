@@ -539,6 +539,7 @@ function showView(v){
   if(v==='crash')renderCrash();
   if(v==='mistakes')renderMistakes();
   if(v==='gezegdes')renderGezegdes();
+  if(v==='help')renderChangelog();
   if(v==='profile'&&typeof renderProfile==='function')renderProfile();
   if(v==='admin'&&typeof renderAdmin==='function')renderAdmin();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -848,6 +849,15 @@ function renderGezegdes(){
   }).join('');
   const src=document.getElementById('gezegdes-source');
   if(src&&typeof ODOS_SOURCE!=='undefined')src.innerHTML='Bron: <a href="'+ODOS_SOURCE.url+'" target="_blank" rel="noopener" style="color:var(--green);">'+ODOS_SOURCE.name+'</a>';
+}
+// Render the changelog (Help page) from window.CHANGELOG, newest first. Empty until a release.
+function renderChangelog(){
+  const el=document.getElementById('changelog-list'); if(!el)return;
+  const log=(typeof CHANGELOG!=='undefined'&&CHANGELOG)?CHANGELOG:[];
+  if(!log.length){el.innerHTML='<div style="font-size:13px;color:var(--muted);">Nog geen wijzigingen vermeld.</div>';return;}
+  el.innerHTML=log.map(e=>`<div style="border-left:3px solid var(--green);padding:0 0 12px 12px;margin-bottom:8px;">`
+    +`<div style="font-weight:600;font-size:14px;">versie ${e.version}${e.date?` <span style="font-size:11px;color:var(--muted);font-weight:400;">· ${e.date}</span>`:''}</div>`
+    +`<ul style="font-size:13px;color:var(--ink);line-height:1.6;padding-left:18px;margin:5px 0 0;">${(e.changes||[]).map(c=>`<li>${c}</li>`).join('')}</ul></div>`).join('');
 }
 // Close the exercise modal when its backdrop (not its content) is clicked.
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
