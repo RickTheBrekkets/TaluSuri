@@ -11,11 +11,16 @@ window.SUPABASE_URL = 'https://jhfhbonsdfxrebfpqusv.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_xBE0dO5BkPrItDUfgSMNUw_tiwGiY5S';
 
 // App release info (shown in the footer and the closed-beta bar).
-window.APP_VERSION = '1.0 beta';
+window.APP_VERSION = '1.1 beta';
 // Changelog shown on the Help page. Newest first. One entry per release:
 //   { version: '1.1 beta', date: '2026-06-10', changes: ['…', '…'] }
 // A new entry is added each time the version is bumped.
-window.CHANGELOG = [];
+window.CHANGELOG = [
+  { version: '1.1 beta', date: '2026-06-05', changes: [
+    'Typ-oefeningen vervangen door meerkeuze — Surinaamse spelling is lastig, dus je kiest nu altijd uit antwoorden.',
+    'Computerstem (TTS) verwijderd: woorden klinken alleen nog via échte community-opnames, want automatische uitspraak klopt zelden. Nog geen opname? Spreek hem zelf in via het 🎙️.'
+  ] }
+];
 // Closed beta: max number of accounts. Enforced client-side (nice message) and
 // server-side by the trigger in supabase/beta_cap.sql. The cap follows a schedule —
 // keep this in sync with beta_cap.sql: 50 until 16 Jun 2026, 250 until Keti Koti

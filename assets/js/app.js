@@ -9,20 +9,26 @@ function setAudioMode(mode,btn){audioMode=mode;document.querySelectorAll('.audio
 // word (in the current language), play that instead of the robot voice;
 // otherwise fall back to the browser Speech Synthesis API (slightly slowed).
 let _ttsAudio=null;
+// Play a word's pronunciation — ONLY a real community recording. Surinamese TTS is almost
+// always wrong, so there is no robot fallback: without a recording we nudge people to add one.
 function speak(text,langCode,langId){
   const lid=langId||S.lang.id;   // explicit langId so e.g. Sranan odo recordings play in any language
   const key=(typeof wordKey==='function')?wordKey(lid,text):null;
   const official=key&&window.OFFICIAL_AUDIO?window.OFFICIAL_AUDIO[key]:null;
   if(official){
-    if(window.speechSynthesis)window.speechSynthesis.cancel();
     if(_ttsAudio)_ttsAudio.pause();
     _ttsAudio=new Audio(official);_ttsAudio.play();
     return;
   }
-  if(!('speechSynthesis'in window)){alert('Je browser ondersteunt geen spraak. Probeer Chrome of Edge.');return;}
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang=langCode||'nl-NL';u.rate=0.85;
-  window.speechSynthesis.speak(u);
+  toast('🎙️ Nog geen opname voor dit woord — spreek ’m in via het microfoon-icoon!');
+}
+// Transient bottom toast.
+let _toastTimer=null;
+function toast(msg){
+  let el=document.getElementById('app-toast');
+  if(!el){el=document.createElement('div');el.id='app-toast';el.style.cssText='position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:13px;font-family:\'DM Sans\',sans-serif;z-index:400;max-width:88%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.22);opacity:0;transition:opacity .2s;pointer-events:none;';document.body.appendChild(el);}
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{el.style.opacity='0';},2600);
 }
 // True when a community/official recording exists for this word — speak() plays it
 // instead of the computer voice, and the speaker icon is shown in gold.
@@ -196,16 +202,16 @@ function pickDistractors(correct,pool,n,key){
 function genLessonQuestions(words,count){
   const sample=shuffle(words).slice(0,count);
   return sample.map((wd,i)=>{
-    const type=i%4; // cycle through 4 types
-    if(type===0){ // NL->target multiple choice
-      return{kind:'mc',q:`Hoe zeg je "${wd.nl}" in ${S.lang.name}?`,c:wd.w,o:pickDistractors(wd,words,3,'w'),speak:wd.w};
-    }else if(type===1){ // target->NL multiple choice
-      return{kind:'mc',q:`Wat betekent "${wd.w}"?`,c:wd.nl,o:pickDistractors(wd,words,3,'nl'),speak:wd.w};
-    }else if(type===2){ // type-in
-      return{kind:'type',q:`Typ de vertaling van "${wd.nl}" in ${S.lang.name}:`,c:wd.w,hint:wd.p,speak:wd.w};
-    }else{ // listen & choose (uses TTS)
+    const audio=(typeof hasOfficialAudio==='function')&&hasOfficialAudio(wd.w);
+    const t=i%3; // type-in is gone (Surinaamse spelling is lastig) — everything is multiple choice
+    if(t===2&&audio){ // listen & choose — ONLY with a real community recording (no robot voice)
       return{kind:'listen',q:`Luister en kies de juiste vertaling:`,c:wd.nl,o:pickDistractors(wd,words,3,'nl'),speak:wd.w,listenWord:wd.w};
     }
+    if(t===1){ // target -> NL multiple choice
+      return{kind:'mc',q:`Wat betekent "${wd.w}"?`,c:wd.nl,o:pickDistractors(wd,words,3,'nl'),speak:wd.w};
+    }
+    // t===0, or t===2 without audio → NL -> target multiple choice
+    return{kind:'mc',q:`Hoe zeg je "${wd.nl}" in ${S.lang.name}?`,c:wd.w,o:pickDistractors(wd,words,3,'w'),speak:wd.w};
   });
 }
 
@@ -644,12 +650,14 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 // When only the computer voice exists, a 🤖 hint nudges the community to record the real one.
 function exAudioRow(word,playLabel){
   const w=word.replace(/'/g,"\\'");
-  const official=hasOfficialAudio(word);
-  return `<div class="q-speak-row">`
-    +`<button class="speak-btn ${official?'speak-official':''}" onclick="speak('${w}','${S.lang.speechLang}')"><span class="emo">🔊</span> ${playLabel||(official?'Community-opname':'Hoor uitspraak')}</button>`
-    +`<button class="contrib-btn" onclick="openRecordings(S.lang.id,'${w}')" title="Markeer dit woord om de uitspraak te verbeteren"><span class="emo">🎙️</span> Verbeter uitspraak</button>`
-    +(official?'':`<span style="font-size:15px;align-self:center;cursor:help;" title="Dit is nog een computerstem — help met een echte opname">🤖</span>`)
-    +`</div>`;
+  if(hasOfficialAudio(word)){
+    return `<div class="q-speak-row">`
+      +`<button class="speak-btn speak-official" onclick="speak('${w}','${S.lang.speechLang}')"><span class="emo">🔊</span> ${playLabel||'Community-opname'}</button>`
+      +`<button class="contrib-btn" onclick="openRecordings(S.lang.id,'${w}')" title="Andere uitspraak opnemen"><span class="emo">🎙️</span> Andere opname</button>`
+      +`</div>`;
+  }
+  // No recording yet → no robot voice; invite the learner to contribute one.
+  return `<div class="q-speak-row"><button class="contrib-btn" onclick="openRecordings(S.lang.id,'${w}')"><span class="emo">🎙️</span> Spreek dit woord in</button></div>`;
 }
 function renderExercise(){
   const ex=S.ex;
