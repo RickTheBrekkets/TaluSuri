@@ -71,6 +71,31 @@ function playCorrect(){
   note(t0+0.16,1046.5,0.45); // C6
   note(t0+0.30,1318.5,0.45); // E6
 }
+
+// ═══ ENERGY ═══
+// Each answer drains energy (a wrong answer more); the bar refills to full each new day.
+const ENERGY_MAX=window.ENERGY_MAX||16;
+function energyDayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function regenEnergy(){const k=energyDayKey();if(S.energyDay!==k){S.energyDay=k;S.energy=ENERGY_MAX;saveState();}}
+function drainEnergy(wrong){
+  regenEnergy();
+  S.energy-=(wrong?(window.ENERGY_COST_WRONG||3):(window.ENERGY_COST_OK||1));
+  if(S.energy<0)S.energy=0;
+  saveState();renderEnergy();
+}
+// Block starting a new exercise when the bar is empty.
+function canStartExercise(){
+  regenEnergy();
+  if(S.energy<=0){renderEnergy();alert('⚡ Je energie is op!\nKom morgen terug — dan is je energie weer vol.');return false;}
+  return true;
+}
+function renderEnergy(){
+  regenEnergy();
+  const e=Math.max(0,S.energy), pct=Math.round(e/ENERGY_MAX*100);
+  const col=e<=(window.ENERGY_COST_WRONG||3)?'var(--red)':(e<=ENERGY_MAX*0.4?'var(--gold)':'var(--green)');
+  document.querySelectorAll('.energy-val').forEach(x=>{x.textContent=e+'/'+ENERGY_MAX;});
+  document.querySelectorAll('.energy-fill').forEach(x=>{x.style.width=pct+'%';x.style.background=col;});
+}
 // A language is "low-resource" (under construction) when it has fewer than 100 words; the
 // spoedcursus is hidden for these and a call for native speakers/sources is shown.
 function isLowResource(l){l=l||S.lang;return ((l.words&&l.words.length)||0)<100;}
@@ -271,6 +296,7 @@ function renderStats(){
   const bl=document.getElementById('badge-level');if(bl)bl.textContent=lvl;
   const bx=document.getElementById('badge-xp');if(bx)bx.textContent=S.xp;
   const bc=document.getElementById('badge-count');if(bc)bc.textContent=S.badges.length;
+  if(typeof renderEnergy==='function')renderEnergy();
 }
 // Add XP, refresh stats/badges, and return true if the user leveled up.
 function addXP(n){
@@ -565,12 +591,14 @@ function lessonWords(title){
 // Start a lesson: build its questions and open the exercise modal.
 function startLesson(idx){
   if(idx>=S.lang.lessons.length)return;
+  if(!canStartExercise())return;
   const les=S.lang.lessons[idx];
   S.ex={type:'lesson',idx,title:les.title,emoji:les.emoji,xp:les.xp,q:genLessonQuestions(lessonWords(les.title),6),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
 // Start a 10-question exam across all themes and open the modal.
 function startExam(){
+  if(!canStartExercise())return;
   S.ex={type:'exam',title:'Examen '+S.lang.name,emoji:'🎓',xp:50,q:genLessonQuestions(S.lang.words,10),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
@@ -634,10 +662,9 @@ function startTheme(cat){
   const m=THEME_META[cat];if(!m)return;
   const words=S.lang.words.filter(w=>w.cat===cat);
   if(words.length<4)return;
+  if(!canStartExercise())return;
   const n=Math.min(8,words.length);
-  const sents=themeSentences(S.lang.id,cat).slice(0,2);
-  const sentQ=sents.map(s=>({kind:'type',q:`Typ de vertaling van de zin: "${s.nl}"`,c:s.w,hint:s.p,speak:s.w}));
-  const q=genLessonQuestions(words,n).concat(sentQ);
+  const q=genLessonQuestions(words,n);
   S.ex={type:'theme',cat,title:'Thema: '+m.label,emoji:m.emoji,xp:Math.max(10,q.length),q,cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }
@@ -663,7 +690,9 @@ function renderExercise(){
   const ex=S.ex;
   if(ex.cur>=ex.q.length){renderComplete();return;}
   const q=ex.q[ex.cur];const pct=Math.round((ex.cur/ex.q.length)*100);
-  let body=`<div class="q-counter">${ex.emoji} ${ex.title} · Vraag ${ex.cur+1} van ${ex.q.length}</div><div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div><div class="q-q">${q.q}</div>`;
+  let body=`<div class="q-counter">${ex.emoji} ${ex.title} · Vraag ${ex.cur+1} van ${ex.q.length}</div><div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div>`
+    +`<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12px;color:var(--muted);"><span>⚡</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;"><div class="energy-fill" style="height:100%;background:var(--green);border-radius:3px;transition:width .3s;"></div></div><span class="energy-val"></span></div>`
+    +`<div class="q-q">${q.q}</div>`;
   // Audio helper for listen-type and others — includes a "verbeter uitspraak" mic so a
   // learner can flag a word for a real recording, especially when it's still a computer voice.
   if(q.kind==='listen'){
@@ -679,6 +708,7 @@ function renderExercise(){
   body+=`<div class="q-fb" id="q-fb"></div><div class="q-flag-row" id="q-flag-row"><button class="q-flag-btn" onclick="document.getElementById('q-flag-form').classList.toggle('open')"><span class="emo">🚩</span> Vraag flaggen</button></div><div class="q-flag-form" id="q-flag-form"><div style="font-size:11px;color:var(--red);font-weight:500;margin-bottom:5px;">🚩 Wat klopt er niet?</div><textarea placeholder="Toelichting..."></textarea><div class="flag-form-actions"><button class="flag-submit" onclick="submitQFlag()">Indienen</button><button class="flag-cancel" onclick="document.getElementById('q-flag-form').classList.remove('open')">Annuleren</button></div></div><button class="q-next" id="q-next" onclick="nextEx()">Volgende <span class="emo">→</span></button>${q.kind==='listen'?'<button class="q-skip" id="q-skip" onclick="skipQ()">Overslaan <span class="emo">⏭️</span></button>':''}`;
   document.getElementById('modal-body').innerHTML=body;
   const mv=document.getElementById('modal'); if(mv)mv.scrollTop=0;   // full-page: start each question at the top
+  if(typeof renderEnergy==='function')renderEnergy();
   if(q.kind==='mc'||q.kind==='listen'){
     const opts=document.getElementById('q-opts');
     q.o.forEach(opt=>{const b=document.createElement('button');b.className='q-opt';b.textContent=opt;b.onclick=()=>answerMC(opt,q.c,b);opts.appendChild(b);});
@@ -696,6 +726,7 @@ function showHint(){
 // Handle scoring/feedback after an answer; records wrong words as mistakes.
 function afterAnswer(correct){
   S.ex.answered=true;
+  if(typeof drainEnergy==='function')drainEnergy(!correct);   // each answer costs energy, wrong costs more
   const fb=document.getElementById('q-fb');
   if(correct){fb.className='q-fb good';fb.textContent='Uitstekend! Dat klopt.';S.ex.score++;
     if(typeof playCorrect==='function')playCorrect();
@@ -1139,6 +1170,7 @@ function startCrashTier(fromRank,toRank){
     ?crashTierWords(S.lang.id,fromRank,toRank)
     :S.lang.words.slice(fromRank,toRank);
   if(!words.length)return;
+  if(!canStartExercise())return;
   S.ex={type:'crash',title:'Spoedcursus '+S.lang.name,emoji:'⚡',xp:Math.max(10,words.length),q:genLessonQuestions(words,Math.min(words.length,8)),cur:0,score:0,answered:false};
   S.crashProgress=S.crashProgress||{};S.crashProgress[S.lang.id]=(S.crashProgress[S.lang.id]||0)+words.length;
   renderExercise();document.getElementById('modal').classList.add('open');
@@ -1173,6 +1205,7 @@ function practiceMistakes(){
   // build questions from mistakes using full word objects
   const words=m.map(x=>S.lang.words.find(w=>w.w===x.w)).filter(Boolean);
   if(!words.length){alert('Kon de woorden niet vinden.');return;}
+  if(!canStartExercise())return;
   S.ex={type:'mistakes',title:'Oefenronde '+S.lang.name,emoji:'💪',xp:words.length*3,q:genLessonQuestions(words,Math.min(words.length,10)),cur:0,score:0,answered:false};
   renderExercise();document.getElementById('modal').classList.add('open');
 }

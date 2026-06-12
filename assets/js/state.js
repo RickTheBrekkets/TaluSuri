@@ -9,7 +9,7 @@ function loadState(){
 }
 // Persist the durable parts of app state to localStorage.
 function saveState(){
-  try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded,crashProgress:S.crashProgress,weekXP:S.weekXP,monthXP:S.monthXP,weekKey:S.weekKey,monthKey:S.monthKey,learnedWords:S.learnedWords,nameChanged:S.nameChanged,odosCorrect:S.odosCorrect}));}catch(e){}
+  try{localStorage.setItem('talusuri_state',JSON.stringify({xp:S.xp,streak:S.streak,langId:S.lang.id,themeProgress:S.themeProgress,badges:S.badges,seenLangs:S.seenLangs,goal:S.goal,theme:S.theme,onboarded:S.onboarded,crashProgress:S.crashProgress,weekXP:S.weekXP,monthXP:S.monthXP,weekKey:S.weekKey,monthKey:S.monthKey,learnedWords:S.learnedWords,nameChanged:S.nameChanged,odosCorrect:S.odosCorrect,energy:S.energy,energyDay:S.energyDay}));}catch(e){}
   if(window.onStateSaved)window.onStateSaved(); // sync progress to Supabase profile when logged in (auth.js)
 }
 let saved=loadState();
@@ -35,6 +35,8 @@ let S={
   learnedWords:saved?.learnedWords||[], // "<langId>|<targetWord>" answered correctly at least once
   nameChanged:saved?.nameChanged||false, // true once the user has used their one display-name change
   odosCorrect:saved?.odosCorrect||0,    // number of bonus gezegdes (odo's) answered correctly
+  energy:(typeof saved?.energy==='number')?saved.energy:(window.ENERGY_MAX||16), // drains per answer, refills daily
+  energyDay:saved?.energyDay||null,     // day-key the energy belongs to (resets on a new day)
   lbTab:'week' // active leaderboard tab (session-only): 'week' | 'month' | 'all'
 };
 // Restore the last-used language by id (object reference must come from LANGS).

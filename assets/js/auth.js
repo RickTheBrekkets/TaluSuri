@@ -61,6 +61,7 @@ function resetProgressToGuest(){
   S.badges=[]; S.learnedWords=[];
   S.themeProgress={}; S.crashProgress={};
   S.seenLangs=[S.lang.id]; S.goal=null; S.nameChanged=false; S.odosCorrect=0;
+  S.energy=(window.ENERGY_MAX||16); S.energyDay=null;
   if(typeof rollPeriods==='function')rollPeriods();
   saveState();   // AUTH.user is already null here, so onStateSaved won't push 0 to the server
   try{
@@ -211,7 +212,8 @@ async function applyPendingReferral(){
 function progressSnapshot(){
   return {badges:S.badges, learnedWords:S.learnedWords, themeProgress:S.themeProgress,
           crashProgress:S.crashProgress, seenLangs:S.seenLangs, goal:S.goal, onboarded:S.onboarded,
-          theme:S.theme, nameChanged:S.nameChanged, odosCorrect:S.odosCorrect};
+          theme:S.theme, nameChanged:S.nameChanged, odosCorrect:S.odosCorrect,
+          energy:S.energy, energyDay:S.energyDay};
 }
 // Merge a remote progress blob into local state (union sets, keep the better of each value)
 // so logging in on a new device combines progress rather than overwriting it either way.
@@ -228,6 +230,8 @@ function applyRemoteProgress(rp){
   S.onboarded=S.onboarded||!!rp.onboarded;
   if(rp.nameChanged)S.nameChanged=true;   // once used on any device, the rename stays spent
   if(typeof rp.odosCorrect==='number')S.odosCorrect=Math.max(S.odosCorrect||0,rp.odosCorrect);
+  // Energy: same day → take the lower (more drained) so it can't be reset by switching device.
+  if(rp.energyDay&&rp.energyDay===S.energyDay&&typeof rp.energy==='number')S.energy=Math.min(S.energy,rp.energy);
   if(rp.theme&&rp.theme!==S.theme){S.theme=rp.theme;if(typeof applyTheme==='function')applyTheme();}  // adopt the device-saved theme
 }
 // Load the user's profile after login; prompt for a name if they don't have one yet,

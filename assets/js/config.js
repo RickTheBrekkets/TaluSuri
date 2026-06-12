@@ -10,6 +10,13 @@
 window.SUPABASE_URL = 'https://jhfhbonsdfxrebfpqusv.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_xBE0dO5BkPrItDUfgSMNUw_tiwGiY5S';
 
+// Energy system: each answer drains energy (more for a wrong one); refills daily.
+// Tuned so a full bar covers 2 exercises/day with 1 mistake each:
+//   2 × (5 correct × 1 + 1 wrong × 3) = 16.
+window.ENERGY_MAX = 16;
+window.ENERGY_COST_OK = 1;
+window.ENERGY_COST_WRONG = 3;
+
 // App release info (shown in the footer and the closed-beta bar).
 window.APP_VERSION = '1.1 beta';
 // Changelog shown on the Help page. Newest first. One entry per release:
